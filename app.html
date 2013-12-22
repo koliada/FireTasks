@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html manifest="manifest.appcache">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no"/>
+	<title>Fire Tasks</title>
+
+	<!-- Building blocks -->
+	<link rel="stylesheet" href="style/action_menu.css">
+	<link rel="stylesheet" href="style/buttons.css">
+	<link rel="stylesheet" href="style/confirm.css">
+	<link rel="stylesheet" href="style/edit_mode.css">
+	<link rel="stylesheet" href="style/headers.css">
+	<link rel="stylesheet" href="style/input_areas.css">
+	<link rel="stylesheet" href="style/status.css">
+	<link rel="stylesheet" href="style/switches.css">
+	<link rel="stylesheet" href="style_unstable/drawer.css">
+	<link rel="stylesheet" href="style_unstable/lists.css">
+	<link rel="stylesheet" href="style_unstable/progress_activity.css">
+	<!--<link rel="stylesheet" href="style_unstable/scrolling.css">-->
+	<!--<link rel="stylesheet" href="style_unstable/seekbars.css">-->
+	<!--<link rel="stylesheet" href="style_unstable/tabs.css">-->
+	<link rel="stylesheet" href="style_unstable/toolbars.css">
+
+	<!-- Icons -->
+	<link rel="stylesheet" href="icons/styles/action_icons.css">
+	<!--<link rel="stylesheet" href="icons/styles/media_icons.css">-->
+	<!--<link rel="stylesheet" href="icons/styles/comms_icons.css">-->
+	<!--<link rel="stylesheet" href="icons/styles/settings_icons.css">-->
+
+	<!-- Transitions -->
+	<link rel="stylesheet" href="transitions.css">
+
+	<!-- Util CSS: some extra tricks -->
+	<link rel="stylesheet" href="util.css">
+	<link rel="stylesheet" href="fonts.css">
+
+	<!-- Additional markup to make Building Blocks kind of cross browser -->
+	<link rel="stylesheet" href="cross_browser.css">
+
+	<link rel="stylesheet" type="text/css" href="css/from_main.css">
+
+	<!-- Finally mine -->
+	<link rel="stylesheet" type="text/css" href="css/base.css">
+
+</head>
+<body>
+<section id="index" data-position="current">
+	<!-- SIDEBAR -->
+	<section data-type="sidebar">
+		<header>
+			<menu type="toolbar">
+				<button id="btn-list-actions" class="icon icon-options">Add List</button>
+			</menu>
+			<h1>Lists</h1>
+			<progress class="pack-activity" value="0" max="100" id="progress_lists" style="display: none;"></progress>
+		</header>
+		<nav>
+			<ul id="lists"></ul>
+		</nav>
+		<div role="toolbar">
+			<ul>
+				<li><button id="btn-settings" class="action-icon settings">Settings</button></li>
+			</ul>
+			<ul>
+				<li><button id="btn-sync-lists" class="action-icon email-sync">Sync</button></li>
+			</ul>
+		</div>
+	</section>
+
+	<!-- MAIN LAYOUT -->
+	<section id="drawer" role="region">
+		<header class="fixed">
+			<a href="#"><span class="icon icon-menu">hide sidebar</span></a>
+			<a href="#drawer"><span class="icon icon-menu">show sidebar</span></a>
+
+			<menu type="toolbar">
+				<button id="btn-edit-tasks"><span class="icon icon-edit">Edit Tasks</span></button>
+				<button id="btn-new-task"><span class="icon icon-add">Add Task</span></button>
+			</menu>
+
+			<h1>Fire Tasks <em>beta</em></h1>
+
+			<progress class="pack-activity light" value="0" max="100" id="progress_tasks" style="display: none;"></progress>
+		</header>
+		<header>
+			<h2>Loadings tasks</h2>
+		</header>
+		<article class="content scrollable header">
+			<div data-type="list">
+				<ul id="tasks">
+					<!-- TODO: some refresh button maybe? -->
+				</ul>
+			</div>
+		</article>
+	</section>
+	<!-- end drawer -->
+</section>
+<!-- end index -->
+
+
+<!--···························· Settings ····························-->
+<section id="settings" data-position="back">
+	<section role="region">
+		<header class="fixed">
+			<a id="btn-settings-back" href="#drawer"><span class="icon icon-back">back</span></a>
+			<h1>Settings</h1>
+		</header>
+		<article class="content scrollable header">
+			<section data-type="list">
+
+				<header>General</header>
+
+				<ul>
+					<li>
+						<a href="#drawer">
+							<label class="pack-switch">
+								<input type="checkbox" id="settings-tree-view">
+								<span></span>
+							</label>
+							<p>Use tree view (experimental)</p>
+							<p>Display task list with indents</p>
+						</a>
+					</li>
+					<li>
+						<a href="#" id="settings-logout">
+							<p>Log Out</p>
+						</a>
+					</li>
+				</ul>
+
+				<header>About</header>
+
+				<ul>
+					<!--<li>
+						<a href="#" id="settings-install" onclick="App.install(true);">
+							<p>Install Fire Tasks</p>
+						</a>
+					</li>-->
+					<li>
+						<a href="#" id="settings-donate">
+							<p>Donate</p>
+						</a>
+					</li>
+					<li>
+						<a href="#" id="settings-about">
+							<p>About</p>
+						</a>
+					</li>
+				</ul>
+
+			</section>
+		</article>
+	</section>
+</section>
+
+
+<!-- DONATE -->
+<section id="donate" data-position="back">
+	<section role="region">
+		<header class="fixed">
+			<menu type="toolbar"><button id="btn-donate-back">done</button></menu>
+			<h1>Donate</h1>
+		</header>
+		<article class="content scrollable header">
+
+			<p>
+				You can donate with PayPal
+			</p>
+
+			<!--<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank" style="text-align: center;">
+				<input type="hidden" name="cmd" value="_s-xclick">
+				<input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----MIIHLwYJKoZIhvcNAQcEoIIHIDCCBxwCAQExggEwMIIBLAIBADCBlDCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb20CAQAwDQYJKoZIhvcNAQEBBQAEgYCuTSEXEDwArNGu/+s09IA7slh0IfyeZbFg5/Suj5gVKehvg60DcD9r3G4Igoc8ULzWXMwpEYhSoc9ATvBfjzOYlY/pQSK/CWKv3CjLJIjMB72D3yjLriOVeWwzvM3AJmgzogfbw+oDMLz2Xg8KKe2oO3YX9GILo+AMUZ/7HEXyBzELMAkGBSsOAwIaBQAwgawGCSqGSIb3DQEHATAUBggqhkiG9w0DBwQIUgS0lN8pjU+AgYhMzirAXFEnOmmikxivHVVbUn1S+8YA0Ij5APYSZ4gDF4DtwRU87scyyIpnQrd3lTBSo7/0zxUJOVEpcIfqLjrk48uoV+a9zSTzcmsOhIXwoeQnKrbT73FbLCeSNlM+ArbHDRzDh1dbEw+CGDgzigIiDT7XXz8CVfZxIeNgohQHmbucymykV0EPoIIDhzCCA4MwggLsoAMCAQICAQAwDQYJKoZIhvcNAQEFBQAwgY4xCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJDQTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEUMBIGA1UEChMLUGF5UGFsIEluYy4xEzARBgNVBAsUCmxpdmVfY2VydHMxETAPBgNVBAMUCGxpdmVfYXBpMRwwGgYJKoZIhvcNAQkBFg1yZUBwYXlwYWwuY29tMB4XDTA0MDIxMzEwMTMxNVoXDTM1MDIxMzEwMTMxNVowgY4xCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJDQTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEUMBIGA1UEChMLUGF5UGFsIEluYy4xEzARBgNVBAsUCmxpdmVfY2VydHMxETAPBgNVBAMUCGxpdmVfYXBpMRwwGgYJKoZIhvcNAQkBFg1yZUBwYXlwYWwuY29tMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDBR07d/ETMS1ycjtkpkvjXZe9k+6CieLuLsPumsJ7QC1odNz3sJiCbs2wC0nLE0uLGaEtXynIgRqIddYCHx88pb5HTXv4SZeuv0Rqq4+axW9PLAAATU8w04qqjaSXgbGLP3NmohqM6bV9kZZwZLR/klDaQGo1u9uDb9lr4Yn+rBQIDAQABo4HuMIHrMB0GA1UdDgQWBBSWn3y7xm8XvVk/UtcKG+wQ1mSUazCBuwYDVR0jBIGzMIGwgBSWn3y7xm8XvVk/UtcKG+wQ1mSUa6GBlKSBkTCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb22CAQAwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQUFAAOBgQCBXzpWmoBa5e9fo6ujionW1hUhPkOBakTr3YCDjbYfvJEiv/2P+IobhOGJr85+XHhN0v4gUkEDI8r2/rNk1m0GA8HKddvTjyGw/XqXa+LSTlDYkqI8OwR8GEYj4efEtcRpRYBxV8KxAW93YDWzFGvruKnnLbDAF6VR5w/cCMn5hzGCAZowggGWAgEBMIGUMIGOMQswCQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExFjAUBgNVBAcTDU1vdW50YWluIFZpZXcxFDASBgNVBAoTC1BheVBhbCBJbmMuMRMwEQYDVQQLFApsaXZlX2NlcnRzMREwDwYDVQQDFAhsaXZlX2FwaTEcMBoGCSqGSIb3DQEJARYNcmVAcGF5cGFsLmNvbQIBADAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTMxMjIyMTE1MTQ4WjAjBgkqhkiG9w0BCQQxFgQUCAgmLKgBFMSo25QD/krzcnVdnwswDQYJKoZIhvcNAQEBBQAEgYCZ01Ud+munVFfNbjzGrJ+SD7ROX8oWKDQKjT4FLpNRnB2dlm2R1qGrAB/77CWeEEPjRn4+Kb4Nf0V6PsiPtehO6A7juwiiymqWcfbVyQhfhoy2IOhGO/rRKhkKB6GoCGxWbsBzemu1r5N34tFr9feBcsq6vWNKbRypw+3q2J2xgg==-----END PKCS7-----">
+				<input style="max-width: 147px; margin-top: 2rem;" type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+				<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+			</form>-->
+
+		</article>
+	</section>
+</section>
+
+
+<!-- ABOUT -->
+<section id="about" data-position="back">
+	<section role="region">
+		<header class="fixed">
+			<menu type="toolbar"><button id="btn-about-back">done</button></menu>
+			<h1>About</h1>
+		</header>
+		<article class="content scrollable header" style="text-align: justify;">
+
+			<header style="text-align: center;">
+				<img src="images/logo.png" alt="Logo" />
+				<h1>Fire Tasks</h1>
+				<label>version <span class="app-version">0.2.2</span> (<time>2013-12-23</time>)</label>
+			</header>
+
+			<header><h2>About Fire Tasks</h2></header>
+			<p>Fire Tasks is a Google Tasks client for Firefox OS</p>
+
+			<header><h2>Created by</h2></header>
+			<p>Alexei Koliada
+				<br />
+				<a href="http://alex-koliada.com" target="_blank">alex-koliada.com</a>
+				<br />
+				<a href="http://twitter.com/alex_koliada" target="_blank">@alex_koliada</a>
+				<br />
+				<a href="mailto:alex.fiator@gmail.com?subject=Fire Tasks Request (from app)" target="_blank">alex.fiator@gmail.com</a>
+			</p>
+
+			<header><h2>Credits</h2></header>
+			<p>Technology and assets used in the making of Fire Tasks</p>
+			<ul>
+				<li>The <a href="http://buildingfirefoxos.com/" target="_blank">Firefox OS Building Blocks</a> are immensely helpful when you want to create an application that blends in with the stock system interface</li>
+				<li>The <a href="http://timc.idv.tw/wordcloud/" target="_blank">HTML5 Word Cloud</a> for sharing Google OAuth class</li>
+				<li>The <a href="https://github.com/flaki/checkinfox" target="_blank">Check-in Fox</a>, a FourSquare client for Firefox OS, for inspiration and sharing some code (like this About page)</li>
+				<li><a href="https://play.google.com/store/apps/details?id=ch.teamtasks.tasks" target="_blank">Tasks Android App</a> for inspiration and some great ideas</li>
+				<li>The <a href="https://github.com/dmitryf/elements" target="_blank">LESS Elements</a>, a set of useful mixins for <a href="http://lesscss.org/">LESS</a>, the CSS pre-processor</li>
+				<li>Fire Tasks logo by <a href="https://twitter.com/justguitarman" target="_blank">Andrey Prepiyalo</a></li>
+			</ul>
+
+			<header><h2>Privacy</h2></header>
+
+			<p>
+				Fire Tasks uses the <a href="https://developers.google.com/google-apps/tasks" target="_blank">Google Tasks API</a>.
+				To interact with the API, the user needs to be authenticated and request an "API KEY" for the app.
+				The app stores this API key in the device's local storage — no one could access your API key,
+				without firstly somehow accessing your device and/or your login and password.
+				Developers do not use, distribute or in other ways publish these or any other sensitive data of the authenticated user.
+			</p>
+
+			<p>
+				Developers do not log, track or in other ways monitor your activity on Google Tasks.
+			</p>
+
+			<p>
+				Anything you do while using Fire Tasks is absolutely up to you.
+				Fire Tasks is completely open-source,
+				so feel free to inspect source code if you meet any unusual behaviour and do not blame the developers.
+			</p>
+
+			<header><h2>Licence</h2></header>
+
+			<p style="font-family: monospace; text-align: justify;">
+			<small>
+				Copyright &copy; 2013, Alexei Koliada
+				<br />
+				All rights reserved.
+				<br />
+				<br />
+				Redistribution and use in source and binary forms, with or without modification, are
+				permitted provided that the following conditions are met:<br />
+				<br />
+				1. Redistributions of source code must retain the above copyright notice, this list of
+				conditions and the following disclaimer.
+				<br />
+				2. Redistributions in binary form must reproduce the above copyright notice, this list
+				of conditions and the following disclaimer in the documentation and/or other materials
+				provided with the distribution.
+				<br />
+				<br />
+				THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+				EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+				MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+				COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+				EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+				SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+				HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+				TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+				SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+			</small>
+			</p>
+	</article>
+</section>
+</section>
+
+
+<!-- LIST ACTIONS -->
+<section id="list-actions" data-position="back" class="fullscreen">
+	<form role="dialog" data-type="action">
+		<header>Task List</header>
+		<menu>
+			<button id="btn-new-list">Create task list</button>
+			<button id="btn-rename-list">Rename task list</button>
+			<button id="btn-delete-list">Delete task list</button>
+			<button>Cancel</button>
+		</menu>
+	</form>
+</section>
+
+
+<!-- LIST FORM -->
+<section id="list-form" data-position="back">
+	<section role="region">
+		<header class="fixed">
+			<a id="btn-list-form-back" href="#drawer"><span class="icon icon-back">back</span></a>
+			<menu type="toolbar">
+				<button id="btn-list-form-ok">Create</button>
+			</menu>
+			<h1>Create Task List</h1>
+		</header>
+		<article class="content scrollable header">
+
+			<header><h2>Set list name</h2></header>
+
+			<form>
+				<p>
+					<input type="text" name="list_name" placeholder="New List" autocomplete="off">
+					<button type="reset">Clear</button>
+				</p>
+			</form>
+
+		</article>
+	</section>
+</section>
+
+
+<!-- TASK FORM -->
+<section id="task-form" data-position="back">
+	<section role="region">
+		<header class="fixed">
+			<a id="btn-task-form-back" href="#"><span class="icon icon-back">back</span></a>
+			<menu type="toolbar">
+				<button id="btn-task-form-delete">Delete</button>
+				<button id="btn-task-form-ok">Error</button>
+			</menu>
+			<h1>Create Task</h1>
+		</header>
+		<article class="content scrollable header">
+
+			<form>
+				<p class="has-margin">
+					<input type="text" name="task_name" placeholder="New Task" autocomplete="off">
+					<button type="reset">Clear</button>
+				</p>
+				<a href="#">
+					<label class="pack-checkbox">
+						<input type="checkbox" name="task_completed">
+						<span></span>
+					</label>
+					<p>Completed</p>
+				</a>
+			</form>
+
+			<header><h2>Notes</h2></header>
+
+			<form>
+				<label>
+				<p>
+					<textarea name="task_notes"></textarea>
+				</p>
+				</label>
+			</form>
+
+			<header><h2>Due date</h2></header>
+
+			<form>
+				<ol>
+				<li>
+					<label>
+						<span class="button icon icon-dialog">
+							<input name="task_due_date" placeholder="Due date" type="date" class="hidden-input" disabled="disabled" />
+							<!-- TODO: clear button -->
+						<span class="datetime" id="start-date-locale"></span>
+						</span>
+					</label>
+				</li>
+				</ol>
+			</form>
+
+			<header><h2>Task list</h2></header>
+
+			<form>
+				<ol>
+				<li>
+					<label>
+						<span class="button icon icon-dialog">
+							<select name="task_list">
+								<option value="">Error loading task lists</option>
+							</select>
+						</span>
+					</label>
+				</li>
+				</ol>
+			</form>
+		</article>
+	</section>
+</section>
+
+
+<!-- CONFIRM -->
+<section id="confirm" data-position="back" class="fullscreen">
+	<form role="dialog" data-type="confirm">
+		<section>
+			<h1>Confirmation</h1>
+
+			<p>Text</p>
+		</section>
+		<menu>
+			<button id="btn-confirm-cancel">Cancel</button>
+			<button class="danger" id="btn-confirm-ok">Delete</button>
+		</menu>
+	</form>
+</section>
+
+
+<script type="text/javascript" defer src="js/status.js"></script>
+
+<script type="text/javascript" defer src="js/jquery-1.10.2.min.js"></script>
+<script src="js/google-oauth2.js"></script>
+<script type="text/javascript" defer src="js/auth.js"></script>
+<script type="text/javascript" defer src="js/lists.js"></script>
+<script type="text/javascript" defer src="js/settings.js"></script>
+<script type="text/javascript" defer src="js/storage.js"></script>
+<script type="text/javascript" defer src="js/tasks.js"></script>
+<script type="text/javascript" defer src="js/app.js"></script>
+
+<!--<script type="text/javascript">
+	function handleClientLoad() {
+		gapi.auth.init(function() {});
+		window.setTimeout(App.init(),1);
+	}
+</script>
+
+<script src="/js/client.js?onload=handleClientLoad"></script>-->
+
+</body>
+</html>
+

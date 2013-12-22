@@ -1,0 +1,268 @@
+@import "mixins.less";
+//@import url(./style_unstable/value_selector.css);
+
+#browser-wrapper  {
+	height: 100%;
+	width: 100%;
+}
+
+#browser {
+	width: 100%;
+	/* -5rem for the header */
+	/*height: calc(100% - 4rem);*/
+	height: 100%;
+}
+
+body {
+	section#index {
+		section[data-type="sidebar"] {
+			header {
+				menu[type="toolbar"] {
+					button {
+						cursor: pointer;
+
+						/*&:hover {
+							background-color: rgba(0, 0, 0, 0.25)!important;
+						}*/
+
+						span.icon.icon-add {
+							background-image: url(../css/style/headers/images/icons/add.png) !important;
+						}
+					}
+				}
+			}
+
+			nav {
+				//max-height: calc(~"100% - 9rem");
+
+				ul {
+					li {
+						a {
+							&.list-selected {
+								background-color: rgba(0,0,0, 0.85);
+							}
+						}
+					}
+				}
+			}
+
+			[role="toolbar"] {
+				//background: rgba(0, 0, 0, 0.5);
+			}
+		}
+
+		section#drawer {
+
+			header {
+				//position: relative;
+
+				h2 {
+					position: absolute;
+					margin-top: 5rem;
+					width: 100%;
+					margin-bottom: 0;
+					z-index: 5;
+					background-color: #e7e7e7;
+					color: #4D4D4D;
+					border: none;
+				}
+			}
+
+			article {
+
+				&.scrollable.header {
+					border-top-width: 8.4rem;
+					padding-bottom: 0;
+				}
+
+				div[data-type="list"] {
+					ul {
+						li {
+							height: auto;
+							border-bottom: none;
+
+							&.completed > a {
+								text-decoration: line-through;
+							}
+
+							a {
+								margin-left: 0;
+								margin-right: 0;
+								border-bottom: solid 0.1rem #e7e7e7;
+								min-height: 6rem;
+
+								label.pack-checkbox {
+									float: left;
+									height: 100%;
+									width: 3rem;
+									margin-right: 0.6rem;
+								}
+
+								div {
+									margin-left: 3.8rem;
+									height: 100%;
+
+									p {
+										&.item-notes {
+											font-size: 1.4rem;
+										}
+									}
+								}
+							}
+
+							ul {
+								margin-left: 2.2rem;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	section#task-form {
+		article {
+			header h2 {
+				margin-top: 1rem;
+			}
+
+			p.has-margin {
+				margin-top: 1.9rem;
+			}
+
+			a {
+				margin-left: 0;
+				text-decoration: none;
+				outline: none;
+
+				.pack-checkbox {
+					float: left;
+					width: 5rem;
+					height: 6rem;
+					margin-left: -1.4rem;
+				}
+
+				p {
+					white-space: nowrap;
+					overflow: hidden;
+					text-overflow: ellipsis;
+					border: none;
+					display: block;
+					font-size: 1.8rem;
+					line-height: 4rem;
+					color: #000;
+					padding: 1rem 0;
+					text-decoration: none;
+				}
+			}
+
+			#btn-task-form-delete {
+				display: none;
+			}
+		}
+	}
+
+	section#settings {
+		article {
+
+
+			label.pack-switch {
+				float: right;
+				height: 6rem;
+				width: 6rem;
+			}
+		}
+	}
+
+	section#about {
+		article {
+			header {
+				h1 {
+					margin: 0;
+				}
+				h2 {
+					margin-top: 1rem;
+				}
+			}
+
+			p {
+				font-size: 1.4rem;
+			}
+
+			ul {
+				li {
+					font-size: 1.4rem;
+					margin-left: 1.4rem;
+					list-style: disc;
+				}
+			}
+		}
+	}
+
+	/* Who and why forbids this? Fixing. */
+	button[type="reset"] {
+		pointer-events: inherit !important;
+	}
+
+	section[role="status"] {
+		z-index: 1000;
+	}
+
+	/* Experimental */
+	/* TODO: Need separator? */
+	section[data-type="sidebar"] > header:first-child .icon.icon-options {
+		background-image: url(../style/headers/images/icons/options.png);
+		background-size: inherit;
+	}
+
+	/* Select */
+	select {
+		width: 100% !important;
+		background: transparent;
+		border: none;
+		-webkit-appearance: none;
+		-moz-appearance: none;
+		appearance: none;
+		/* Hacks */
+		text-indent: 0.01px;
+		text-overflow: '';
+
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		//width: calc(100% + 1rem) !important;
+		padding: 0.8rem 1rem 0;
+		font-size: 1.7rem;
+		font-weight: 500;
+	}
+	select::-ms-expand {
+		display: none;
+	}
+
+	form, fieldset, input {
+		border: 0;
+		background-color: transparent;
+		padding: 0;
+		margin: 0;
+	}
+
+	input, textarea {
+		width: 100%;
+	}
+
+	input[type="date"] {
+		font-size: 1.7rem;
+		font-weight: 500;
+
+		&::selection, &::-moz-selection {
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			-khtml-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+		}
+	}
+}
