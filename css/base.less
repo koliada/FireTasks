@@ -77,9 +77,17 @@ body {
 
 				div[data-type="list"] {
 					ul {
+						position: relative; // needed for sortable
 						li {
 							height: auto;
+							width: 100%;
 							border-bottom: none;
+							margin-top: -1px;
+
+							&.ui-sortable-helper a {
+								border: none;
+								background-color: rgba(128, 128, 128, 0.13);
+							}
 
 							&.completed > a {
 								text-decoration: line-through;
@@ -89,23 +97,37 @@ body {
 								margin-left: 0;
 								margin-right: 0;
 								border-bottom: solid 0.1rem #e7e7e7;
+								border-top: solid .1rem #e7e7e7;
 								min-height: 6rem;
 
 								label.pack-checkbox {
 									float: left;
 									height: 100%;
 									width: 3rem;
-									margin-right: 0.6rem;
 								}
 
-								div {
-									margin-left: 3.8rem;
+								div.clickable {
+									margin-left: 4rem;
+									margin-right: 6rem;
 									height: 100%;
 
 									p {
 										&.item-notes {
 											font-size: 1.4rem;
 										}
+									}
+								}
+
+								label.task-handle {
+									position: absolute;
+									width: 4rem;
+									height: 6rem;
+									top: 0;
+									right: 0;
+
+									.action-icon {
+										vertical-align: middle;
+										display: inline-block;
 									}
 								}
 							}
@@ -211,6 +233,11 @@ body {
 	/* Experimental */
 	/* TODO: Need separator? */
 	section[data-type="sidebar"] > header:first-child .icon.icon-options {
+		background-image: url(../style/headers/images/icons/options.png);
+		background-size: inherit;
+	}
+
+	.menu.icon-options {
 		background-image: url(../style/headers/images/icons/options.png);
 		background-size: inherit;
 	}

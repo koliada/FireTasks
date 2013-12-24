@@ -28,7 +28,7 @@ var App = {
 		window.applicationCache.addEventListener('updateready', function(e) {
 			if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
 				// Browser downloaded a new app cache.
-				if (confirm('A new version of Fire Tasks is available. Load it now?')) {
+				if (confirm('A new version of Fire Tasks was installed. Apply update now?')) {
 					window.location.reload();
 				}
 			} else {
@@ -285,7 +285,7 @@ var App = {
 			/* TODO: make first input active */
 		});
 		/* Edit Task */
-		tasks_ul.on('click', 'a div', function(ev) {
+		tasks_ul.on('click', 'a div.clickable', function(ev) {
 
 			ev.preventDefault();
 

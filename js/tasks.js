@@ -45,6 +45,16 @@ var Tasks = {
 				});
 				ul.html(list_html);
 
+				/* Sortable */
+				$("#tasks").sortable({
+					items: ".task-item",
+					handle: ".task-handle",
+					axis: "y",
+					update: function(event, ui) {
+						Tasks._moveTask(ui.item[0]);
+					}
+				});
+
 			} else {
 				ul.html(
 					'<li>The list is empty</li>'
@@ -70,6 +80,8 @@ var Tasks = {
 		var due = ( typeof item.due === 'undefined' ) ? '' : '<span class="item-due">Due date: ' + item.due + '</span>';
 		/* TODO: due date */
 		var notes = ( typeof item.notes === 'undefined' ) ? '' : '<p class="item-notes">' /*+ due*/ + item.notes + '</p>';
+		/* TODO: reordering in Tree Mode */
+		var handle = ( Tasks.treeMode() ) ? '' : '<label class="task-handle"><div class="action-icon menu"></div></label>';
 
 		var html = '';
 
@@ -80,9 +92,9 @@ var Tasks = {
 					'<input type="checkbox" ' + checked + '>' +
 					'<span></span>' +
 				'</label>' +
-				'<div><p class="item-title">' + item.title + '</p>' +
+				'<div class="clickable"><p class="item-title">' + item.title + '</p>' +
 				notes +
-				'</div></a>' +
+				'</div>'+ handle +'</a>' +
 			'<ul>';
 
 		if( typeof item.children !== 'undefined' && item.children.length !== 0 ) {
@@ -305,6 +317,7 @@ var Tasks = {
 
 	deleteTask: function(list_id, id, callback) {
 
+		/* If there is a callback, do not show progress bar */
 		var silent = (typeof callback !== 'undefined');
 		if( ! silent ) $('#progress_tasks').show();
 
@@ -324,6 +337,38 @@ var Tasks = {
 					$('#tasks').find('li.task-item a[data-id="'+ id +'"]').parent('li').remove();
 				}
 			}
+
+		});
+	},
+
+	_moveTask: function(el) {
+		el = $(el);
+		var prev_id = el.prev().find('a').first().attr('data-id') || '';
+		var id = el.find('a').first().attr('data-id');
+
+		// TODO: remove
+		if( typeof Tasks.getTaskObject(id).parent !== 'undefined' ) {
+			alert('Sorry, but seems that this task has parent. Moving children tasks is currently unavailable :(\nSwitch to tree view to check that.');
+			$("#tasks").sortable('cancel');
+			return;
+		}
+
+		var list_id = Lists.getLastList().id;
+
+		var data = {
+			type: 'POST',
+			url: 'https://www.googleapis.com/tasks/v1/lists/'+ list_id +'/tasks/' + id + '/move'
+		};
+
+		if( prev_id !== '' ) {
+			data.query_params = 'previous=' + prev_id;
+		}
+
+		$('#progress_tasks').show();
+
+		Auth.makeRequest( data, function(res) {
+
+			$('#progress_tasks').hide();
 
 		});
 	}

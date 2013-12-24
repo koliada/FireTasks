@@ -19,17 +19,19 @@ Fire Tasks is in an early beta and does not have many useful features,
 but it is functional and probably could bring you relief if you love to use Google Tasks on other platforms,
 but you couldn't use it on your Firefox OS phone.
 
-Version 0.2 provides:
+Version 0.2.2 provides:
 
  - Authentication with the Google Tasks API
  - Retrieving task lists and tasks
  - Creating, renaming and deletion of task lists
  - Creation, modifying and deletion of tasks
- - Marking tasks as completed / uncompleted from list
+ - Marking tasks as completed/uncompleted from list
+ - Reordering tasks in plain view mode — only those which doesn't have parent tasks ([screenshot](https://raw.github.com/koliada/FireTasks/gh-pages/screenshots/firetasks-01-plain-view.png)).
  - Viewing and processing tasks as trees (unstable)
  - Firefox OS-native UI
 
-Further versions has reordering the tasks in priority, but bug fixes and overall improving is made all the time.
+Although you can now reorder your tasks, it is not available in tree view and works rather slowly on real device.
+So you should expect further improvements.
 
 
 Installing and using

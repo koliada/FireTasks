@@ -116,7 +116,8 @@ var Auth = {
 		Auth.getAccessToken( function(token) {
 
 			var fields = ( typeof data.fields === 'undefined' ) ? '' : '&fields=' + data.fields;
-			var url = data.url + '?access_token=' + Auth.token + fields;
+			var query_params = ( typeof data.query_params !== 'undefined' ) ? '?' + data.query_params + '&' : '?';
+			var url = data.url + query_params + 'access_token=' + Auth.token + fields;
 			var type = data.type;
 			pack = JSON.stringify(data.pack) || {};
 
