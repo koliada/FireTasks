@@ -19,7 +19,7 @@ Fire Tasks is in an early beta and does not have many useful features,
 but it is functional and probably could bring you relief if you love to use Google Tasks on other platforms,
 but you couldn't use it on your Firefox OS phone.
 
-Version 0.2.2 provides:
+Version 0.2.3 provides:
 
  - Authentication with the Google Tasks API
  - Retrieving task lists and tasks
