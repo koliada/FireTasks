@@ -347,8 +347,8 @@ var Tasks = {
 		var id = el.find('a').first().attr('data-id');
 
 		// TODO: remove
-		if( typeof Tasks.getTaskObject(id).parent !== 'undefined' ) {
-			alert('Sorry, but seems that this task has parent. Moving children tasks is currently unavailable :(\nSwitch to tree view to check that.');
+		if( typeof Tasks.getTaskObject(id).parent !== 'undefined' || typeof Tasks.getTaskObject(prev_id).parent !== 'undefined' ) {
+			alert('Sorry, moving children tasks or into nested list is currently unavailable :(\nSwitch to tree view to check which lists are nested.');
 			$("#tasks").sortable('cancel');
 			return;
 		}
