@@ -81,6 +81,7 @@ var Tasks = {
 		/* TODO: due date */
 		var notes = ( typeof item.notes === 'undefined' ) ? '' : '<p class="item-notes">' /*+ due*/ + item.notes + '</p>';
 		/* TODO: reordering in Tree Mode */
+		var tree_class = (Tasks.treeMode()) ? 'tree' : ''; // TODO: remove when
 		var handle = ( Tasks.treeMode() ) ? '' : '<label class="task-handle"><div class="action-icon menu"></div></label>';
 
 		var html = '';
@@ -92,7 +93,7 @@ var Tasks = {
 					'<input type="checkbox" ' + checked + '>' +
 					'<span></span>' +
 				'</label>' +
-				'<div class="clickable"><p class="item-title">' + item.title + '</p>' +
+				'<div class="clickable '+ tree_class +'"><p class="item-title">' + item.title + '</p>' +
 				notes +
 				'</div>'+ handle +'</a>' +
 			'<ul>';

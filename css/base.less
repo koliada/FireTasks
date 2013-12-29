@@ -76,8 +76,12 @@ body {
 				}
 
 				div[data-type="list"] {
+					height: 100%;
+
 					ul {
 						position: relative; // needed for sortable
+						height: 100%;
+
 						li {
 							height: auto;
 							width: 100%;
@@ -108,7 +112,10 @@ body {
 
 								div.clickable {
 									margin-left: 4rem;
-									margin-right: 6rem;
+									/* TODO: remove */
+									&:not(.tree) {
+										margin-right: 4rem;
+									}
 									height: 100%;
 
 									p {

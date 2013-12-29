@@ -28,7 +28,7 @@ var App = {
 		window.applicationCache.addEventListener('updateready', function(e) {
 			if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
 				// Browser downloaded a new app cache.
-				if (confirm('A new version of Fire Tasks was installed. Apply update now?')) {
+				if (confirm('A new version of Fire Tasks was downloaded. Apply update now?')) {
 					window.location.reload();
 				}
 			} else {
