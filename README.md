@@ -76,10 +76,10 @@ or send mail concerning Fire Tasks to alex.fiator@gmail.com with 'Fire Tasks' in
 Screenshots
 -----------
 <p align="center">
-<img src="https://raw.github.com/koliada/FireTasks/gh-pages/screenshots/firetasks-02-tree-view.png" alt="screenshot2" height="310">&nbsp;
+<img src="https://raw.github.com/koliada/FireTasks/gh-pages/screenshots/firetasks-02-tree-view.png" alt="screenshot1" height="310">&nbsp;
+<img src="https://raw.github.com/koliada/FireTasks/gh-pages/screenshots/firetasks-01-edit-mode.png" alt="screenshot2" height="310">&nbsp;
 <img src="https://raw.github.com/koliada/FireTasks/gh-pages/screenshots/firetasks-03-task-lists.png" alt="screenshot3" height="310">&nbsp;
 <img src="https://raw.github.com/koliada/FireTasks/gh-pages/screenshots/firetasks-04-list-actions.png" alt="screenshot4" height="310">&nbsp;
 <img src="https://raw.github.com/koliada/FireTasks/gh-pages/screenshots/firetasks-05-list-modifying.png" alt="screenshot5" height="310">&nbsp;
 <img src="https://raw.github.com/koliada/FireTasks/gh-pages/screenshots/firetasks-06-task-modifying.png" alt="screenshot6" height="310">&nbsp;
-<img src="https://raw.github.com/koliada/FireTasks/gh-pages/screenshots/firetasks-07-settings.png" alt="screenshot7" height="310">&nbsp;
 </p>
