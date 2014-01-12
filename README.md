@@ -19,19 +19,16 @@ Fire Tasks is in an early beta and does not have many useful features,
 but it is functional and probably could bring you relief if you love to use Google Tasks on other platforms,
 but you couldn't use it on your Firefox OS phone.
 
-Version 0.2.3 provides:
+Version 0.3 provides:
 
- - Authentication with the Google Tasks API
- - Retrieving task lists and tasks
- - Creating, renaming and deletion of task lists
- - Creation, modifying and deletion of tasks
- - Marking tasks as completed/uncompleted from list
- - Reordering tasks in plain view mode — only those which doesn't have parent tasks ([screenshot](https://raw.github.com/koliada/FireTasks/gh-pages/screenshots/firetasks-01-plain-view.png)).
- - Viewing and processing tasks as trees (unstable)
- - Firefox OS-native UI
-
-Although you can now reorder your tasks, it is not available in tree view and works rather slowly on real device.
-So you should expect further improvements.
+- Authentication with the Google Tasks API
+- Retrieving task lists and tasks
+- Creating, renaming and deletion of task lists
+- Creation, modifying and deletion of tasks
+- Marking tasks as completed/uncompleted from list
+- Reordering tasks by dragging
+- Package tasks processing (unstable): indenting, unindenting, moving to another list and mass deletion
+- Firefox OS-native UI
 
 
 Installing and using
@@ -51,12 +48,25 @@ Known issues
 
 I still have issues with Google OAuth, so sometimes cases of any type are expected.
 For example, you surely will not be able to open OAuth popup from the Firefox OS native browser.
-Also, it is important to remember that the tree view of the task list is currently unstable and is not recommended for usage
-(that's why it is set to 'OFF' by default). But you of course can use it by you own risk.
-The biggest issue here is updating the tasks. If you see any abnormal behaviour, press the 'refresh' button in the sidebar.
+Also, the great issue is processing tasks by packages in 'Edit Mode'.
+If you see any abnormal behaviour, press the 'refresh' button in the sidebar for complete reload or 'refresh list' to reload current list.
+
+Another issue is performance. There are two performance bottlenecks:
+
+1. Really strange dragging lags. You can observe that lag while rearranging icons on the desktop.
+So it is either Firefox OS's UI bug or simply device's low performance.
+2. When processing tasks in bunch, it is important to make requests one by one
+so that every item will surely know about current state of others and will move properly. That causes really long waiting time.
+This kind of issue is not so easy to resolve and a problem of asynchronous synchronization will be solved at once in all project somewhere in version 2.0.
+
+WARNING! Data loss is possible when using 'Edit Mode' for mass moving to another list.
+This is caused by 'Server rate expiration' error and cannot be fixed right now.
+It also may cause different collisions as there is no way to give a simple 'move to another list' command.
+Instead, we need to remove task from one list and put it to another. For higher success possibility, move tasks by one.<br />
+ATTENTION: tasks with children nodes are moved with those children for integrity.
 
 Fire Tasks was tested on ZTE Open with Firefox OS v1.1 and on Firefox OS v1.2 and v1.3 simulators.
-While on v1.1 everything works fine, there might be some problems on later versions, like glitching drawer (sidebar).
+While on v1.1 everything works fine, there might be some problems on later versions, like glitching sidebar.
 
 Report any issues here, on the [GitHub Issues](https://github.com/koliada/FireTasks/issues)
 section, send them to [@alex_koliada](https://twitter.com/alex_koliada) in English

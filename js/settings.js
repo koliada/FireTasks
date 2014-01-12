@@ -38,13 +38,13 @@ var Settings = {
 	applyChanges: function() {
 
 		/* Reload tasks if view type changed */
-		if(
+		/*if(
 			( Tasks.treeMode() && Settings.get('tree_view') === 'false' )
 				||
 				( ! Tasks.treeMode() && Settings.get('tree_view') === 'true' )
 			) {
 			utils.status.show('List view changed', 1000);
 			Tasks.getList();
-		}
+		}*/
 	}
 };

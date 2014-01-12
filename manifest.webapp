@@ -1,6 +1,6 @@
 {
-	"version": "0.2.3",
-	"size": "3382856",
+	"version": "0.3",
+	"size": "3634452",
 	"name": "Fire Tasks",
 	"description": "A Google Tasks Client",
 	"launch_path": "/FireTasks/app.html",
@@ -17,10 +17,6 @@
 	"developer": {
 		"name": "Alexei Koliada",
 		"url": "http://alex-koliada.com"
-	},
-	"permissions": {
-		"systemXHR": { "description": "Used to send data to Google Tasks API." },
-		"browser": { "description": "Enables authentication to Google via OAuth." }
 	},
 	"appcache_path": "/FireTasks/manifest.appcache",
 

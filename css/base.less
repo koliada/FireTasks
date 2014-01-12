@@ -1,6 +1,8 @@
 @import "mixins.less";
 //@import url(./style_unstable/value_selector.css);
 
+@color-light-blue: rgba(0,213,255,0.3);
+
 #browser-wrapper  {
 	height: 100%;
 	width: 100%;
@@ -45,10 +47,6 @@ body {
 					}
 				}
 			}
-
-			[role="toolbar"] {
-				//background: rgba(0, 0, 0, 0.5);
-			}
 		}
 
 		section#drawer {
@@ -66,6 +64,17 @@ body {
 					color: #4D4D4D;
 					border: none;
 				}
+
+				#btn-sync-tasks {
+					.action-icon.email-sync {
+						font-size: 0;
+
+						&:before {
+							top: 1rem;
+							left: 1rem;
+						}
+					}
+				}
 			}
 
 			article {
@@ -78,19 +87,41 @@ body {
 				div[data-type="list"] {
 					height: 100%;
 
-					ul {
+					ol {
 						position: relative; // needed for sortable
-						//height: 100%;
+						height: auto;
+
+						&.edit-mode {
+							a:hover:after, a:active:after {
+								background-color: transparent;
+							}
+						}
 
 						li {
 							height: auto;
 							width: 100%;
-							border-bottom: none;
-							margin-top: -1px;
+							border: none;
 
-							&.ui-sortable-helper a {
-								border: none;
-								background-color: rgba(128, 128, 128, 0.13);
+							a:after {
+								content: ' ';
+								position: absolute;
+								width: 100%;
+								border-bottom: solid .1rem #e7e7e7;
+								left: 0;
+								right: 0;
+							}
+
+							&.ui-sortable-helper {
+
+								& a:hover:after, & a:active:after {
+									background-color: transparent;
+								}
+								background-color: @color-light-blue;
+
+								-webkit-transition: left 0.2s linear, width 0.2s linear;
+								-moz-transition: left 0.2s linear, width 0.2s linear;
+								-o-transition: left 0.2s linear, width 0.2s linear;
+								transition: left 0.2s linear, width 0.2s linear;
 							}
 
 							&.completed > a {
@@ -100,27 +131,34 @@ body {
 							a {
 								margin-left: 0;
 								margin-right: 0;
-								border-bottom: solid 0.1rem #e7e7e7;
-								border-top: solid .1rem #e7e7e7;
 								min-height: 6rem;
+
+								&.selected {
+									background-color: @color-light-blue;
+								}
 
 								label.pack-checkbox {
 									float: left;
 									height: 100%;
 									width: 3rem;
+
+									&.danger {
+										display: none;
+									}
 								}
 
 								div.clickable {
 									margin-left: 4rem;
-									/* TODO: remove */
-									&:not(.tree) {
-										margin-right: 4rem;
-									}
+									margin-right: 4rem;
 									height: 100%;
 
 									p {
 										&.item-notes {
 											font-size: 1.4rem;
+										}
+
+										.item-children-num {
+											font-weight: bold;
 										}
 									}
 								}
@@ -139,12 +177,23 @@ body {
 								}
 							}
 
-							ul {
-								margin-left: 2.2rem;
+							&.dummy {
+								height: 4rem;
+							}
+
+							ol {
+								margin-left: 2rem;
 							}
 						}
 					}
 				}
+			}
+		}
+
+		#edit-mode {
+			[role="toolbar"] {
+				position: absolute;
+				pointer-events: all;
 			}
 		}
 	}

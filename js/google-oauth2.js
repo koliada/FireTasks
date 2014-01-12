@@ -121,7 +121,7 @@
 				'&login_hint=' + email;
 
 			if (!immediate && force_approval_prompt) {
-				console.log('force');
+//				console.log('force');
 				url += '&approval_prompt=force';
 //				url += '&approval_prompt=auto';
 			}

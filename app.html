@@ -38,6 +38,7 @@
 	<!-- Additional markup to make Building Blocks kind of cross browser -->
 	<link rel="stylesheet" href="cross_browser.css">
 
+	<!-- TODO: move -->
 	<link rel="stylesheet" type="text/css" href="css/from_main.css">
 
 	<!-- Finally mine -->
@@ -45,6 +46,8 @@
 
 </head>
 <body>
+
+<!-- INDEX -->
 <section id="index" data-position="current">
 	<!-- SIDEBAR -->
 	<section data-type="sidebar">
@@ -75,11 +78,12 @@
 			<a href="#drawer"><span class="icon icon-menu">show sidebar</span></a>
 
 			<menu type="toolbar">
+				<button id="btn-sync-tasks"><span class="action-icon email-sync">Sync Tasks</span></button>
 				<button id="btn-edit-tasks"><span class="icon icon-edit">Edit Tasks</span></button>
 				<button id="btn-new-task"><span class="icon icon-add">Add Task</span></button>
 			</menu>
 
-			<h1>Fire Tasks <em>beta</em></h1>
+			<h1>Fire Tasks<em style="font-size: 0.9rem;"> beta</em></h1>
 
 			<progress class="pack-activity light" value="0" max="100" id="progress_tasks" style="display: none;"></progress>
 		</header>
@@ -87,19 +91,41 @@
 			<h2>Loadings tasks</h2>
 		</header>
 		<article class="content scrollable header">
-			<div data-type="list">
-				<ul id="tasks">
+			<div data-type="list" id="tasks">
+				<ol>
 					<!-- TODO: some refresh button maybe? -->
-				</ul>
+				</ol>
 			</div>
 		</article>
 	</section>
-	<!-- end drawer -->
+
+	<!-- EDIT MODE -->
+	<section>
+		<form id="edit-mode" role="dialog" data-type="edit">
+			<section>
+				<header>
+					<menu type="toolbar">
+						<button id="btn-edit-mode-close">done</button>
+					</menu>
+					<h1><span class="selected_num">0</span> selected</h1>
+				</header>
+			</section>
+			<div role="toolbar">
+				<ul>
+					<li><button id="btn-unindent-tasks" data-action="unindent" class="action-icon back">Unindent</button></li>
+					<li><button id="btn-indent-tasks" data-action="indent" class="action-icon forward">Indent</button></li>
+					<li><button id="btn-move-tasks" class="action-icon move">Move</button></li>
+				</ul>
+				<ul>
+					<li><button id="btn-delete-tasks" class="action-icon delete">Delete</button></li>
+				</ul>
+			</div>
+		</form>
+	</section>
 </section>
-<!-- end index -->
 
 
-<!--···························· Settings ····························-->
+<!-- SETTINGS -->
 <section id="settings" data-position="back">
 	<section role="region">
 		<header class="fixed">
@@ -112,7 +138,7 @@
 				<header>General</header>
 
 				<ul>
-					<li>
+					<!--<li>
 						<a href="#drawer">
 							<label class="pack-switch">
 								<input type="checkbox" id="settings-tree-view">
@@ -121,7 +147,7 @@
 							<p>Use tree view (experimental)</p>
 							<p>Display task list with indents</p>
 						</a>
-					</li>
+					</li>-->
 					<li>
 						<a href="#" id="settings-logout">
 							<p>Log Out</p>
@@ -192,11 +218,11 @@
 			<header style="text-align: center;">
 				<img src="images/logo.png" alt="Logo" />
 				<h1>Fire Tasks</h1>
-				<label>version <span class="app-version">0.2.3</span> (<time>2013-12-25</time>)</label>
+				<label>version <span class="app-version">0.3</span> (<time>2014-01-12</time>)</label>
 			</header>
 
 			<header><h2>About Fire Tasks</h2></header>
-			<p>Fire Tasks is a Google Tasks client for Firefox OS</p>
+			<p>Fire Tasks is a Google Tasks client for Firefox OS. For details, please refer to <a href="https://github.com/koliada/FireTasks" target="_blank">GitHub page</a>.</p>
 
 			<header><h2>Created by</h2></header>
 			<p>Alexei Koliada
@@ -243,7 +269,7 @@
 
 			<p style="font-family: monospace; text-align: justify;">
 			<small>
-				Copyright &copy; 2013, Alexei Koliada
+				Copyright &copy; 2013-2014, Alexei Koliada
 				<br />
 				All rights reserved.
 				<br />
@@ -283,6 +309,17 @@
 			<button id="btn-new-list">Create task list</button>
 			<button id="btn-rename-list">Rename task list</button>
 			<button id="btn-delete-list">Delete task list</button>
+			<button>Cancel</button>
+		</menu>
+	</form>
+</section>
+
+
+<!-- MOVE TASKS DIALOG -->
+<section id="tasks-move-to" data-position="back" class="fullscreen">
+	<form role="dialog" data-type="action">
+		<header>Move to</header>
+		<menu>
 			<button>Cancel</button>
 		</menu>
 	</form>

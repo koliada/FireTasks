@@ -10,7 +10,7 @@ var Lists = {
 	getList: function() {
 
 		$('#progress_lists').show();
-		$('#progress_tasks').show();
+		App.toggleTasksProgress(true);
 
 		var data = {
 			type: 'GET',

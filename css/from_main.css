@@ -51,17 +51,17 @@ section[role="region"][data-position="right"] {
 	-webkit-animation: fadeOut 0.2s forwards;
 }
 
-[data-position="edit-mode"] {
+form[role="dialog"][data-type="edit"] {
 	position: absolute;
 	top: -5rem;
 	left: 0;
 	right: 0;
-	bottom: -7rem;
+	bottom: -4rem;
 	z-index: -1;
 	opacity: 0;
 	transition: all 0.3s ease;
 }
-[data-position="edit-mode"].edit {
+form[role="dialog"][data-type="edit"].edit {
 	position: absolute;
 	top: 0;
 	left: 0;

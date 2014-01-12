@@ -53,9 +53,6 @@ var Auth = {
 					refresh
 			}, handleAuthResult);*/
 
-			/*$('#progress_lists').hide();
-			$('#progress_tasks').hide();*/
-
 			if( typeof Storage.get('email') !== 'undefined' ) {
 				App.options.email = Storage.get('email');
 			}
@@ -149,10 +146,8 @@ var Auth = {
 					}
 
 					else {
-						/* TODO: why this happens on DELETE? */
-						if( type != 'DELETE' ) {
-							utils.status.show('An error occurred: ' + jqXHR.status + ' - ' + errorThrown);
-						}
+						//utils.status.show('An error occurred: ' + jqXHR.status + ' - ' + errorThrown);
+						utils.status.show('An error occurred: ' + jqXHR.status + ' - ' + jqXHR.responseJSON.error.errors[0].message);
 					}
 
 					//console.log(jqXHR, textStatus, errorThrown);
