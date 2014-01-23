@@ -47,6 +47,10 @@ body {
 					}
 				}
 			}
+
+			@media (min-width: 1280px) {
+				width: 20%;
+			}
 		}
 
 		section#drawer {
@@ -73,6 +77,12 @@ body {
 							top: 1rem;
 							left: 1rem;
 						}
+					}
+				}
+
+				a {
+					@media (min-width: 1280px) {
+						display: none;
 					}
 				}
 			}
@@ -188,12 +198,24 @@ body {
 					}
 				}
 			}
+
+			@media (min-width: 1280px) {
+				width: 80%;
+				-moz-transform: translateX(25%);
+				-webkit-transform: translateX(25%);
+			}
 		}
 
 		#edit-mode {
 			[role="toolbar"] {
 				position: absolute;
 				pointer-events: all;
+			}
+
+			@media (min-width: 1280px) {
+				width: 80%;
+				-moz-transform: translateX(25%);
+				-webkit-transform: translateX(25%);
 			}
 		}
 	}
@@ -274,6 +296,14 @@ body {
 					list-style: disc;
 				}
 			}
+		}
+	}
+
+	section[role="region"] {
+		@media (min-width: 1280px) {
+			width: 80%;
+			-moz-transform: translateX(25%);
+			-webkit-transform: translateX(25%);
 		}
 	}
 

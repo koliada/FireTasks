@@ -103,6 +103,10 @@ var App = {
 
 		/* == SIDEBAR == */ {
 
+			$('section[data-type="sidebar"]').click(function() {
+				App.editMode.disable();
+			});
+
 			/* Open Settings */
 			$('#btn-settings').click(function () {
 				Settings.initSettingsPage();
@@ -552,23 +556,27 @@ var App = {
 
 					/* Gathering and filtering IDs */
 					var IDs_to_move = [];
-					for( var i = 0; i < ids.length; i++ ) {
+                    var ids_length = ids.length; // caching for performance
+					for( var i = 0; i < ids_length; i++ ) {
 						IDs_to_move.push(ids[i]);
 						var children = Tasks.getChildrenIDs(ids[i]);
-						for( var c = 0; c < children.length; c++ ) {
+                        var children_length = children.length;
+						for( var c = 0; c < children_length; c++ ) {
 							IDs_to_move.push(children[c]);
 						}
 					}
 
 					var IDs_filtered = [];
-					for( var f = 0; f < IDs_to_move.length; f++ ) {
+                    var IDs_to_move_length = IDs_to_move.length;
+					for( var f = 0; f < IDs_to_move_length; f++ ) {
 						if( IDs_filtered.indexOf(IDs_to_move[f]) === -1 )
 							IDs_filtered.push(IDs_to_move[f]);
 					}
 
 					/* Getting objects for filtered IDs */
 					var IDs_objects = [];
-					for( var o = 0; o < IDs_filtered.length; o++ ) {
+                    var IDs_filtered_length = IDs_filtered.length;
+					for( var o = 0; o < IDs_filtered_length; o++ ) {
 						IDs_objects.push(Tasks.getTaskObject(IDs_filtered[o]));
 					}
 

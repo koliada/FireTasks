@@ -1,9 +1,7 @@
-Fire Tasks v0.3 installed.
+Fire Tasks v0.3.1 installed.
 
 What's new:
-- Tree view mode is now constant
-- Rearranging tasks in tree view
-- Mass processing tasks in 'Edit Mode': indenting, unindenting, moving to another list and mass deletion
-- 'Refresh List' button
+- All features which v0.3 had
+- Tablet UI (1280px and up of display width)
 
-ATTENTION: 'Edit Mode' is not as stable as we wish. For details, please refer to GitHub.
+ATTENTION: 'Edit Mode' still is not as stable as we wish. For details, please refer to GitHub.

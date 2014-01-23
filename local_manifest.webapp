@@ -1,5 +1,5 @@
 {
-	"version": "0.3",
+	"version": "0.3.1",
 	"name": "Fire Tasks",
 	"description": "A Google Tasks Client",
 	"launch_path": "/app.html",

@@ -14,7 +14,9 @@ var Storage = {
 	save: function( data ) {
 		if ( ! this.supportsHTML5storage() ) { return false; }
 		for( var param in data  ) {
-			localStorage[this.prefix + '.' + param] = data[param];
+            if(data.hasOwnProperty(param)) {
+			    localStorage[this.prefix + '.' + param] = data[param];
+            }
 		}
 		return true;
 	},
