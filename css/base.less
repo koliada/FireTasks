@@ -299,11 +299,19 @@ body {
 		}
 	}
 
-	section[role="region"] {
-		@media (min-width: 1280px) {
-			width: 80%;
-			-moz-transform: translateX(25%);
-			-webkit-transform: translateX(25%);
+	/* Tablet UI for full-width screens */
+	@media (min-width: 1280px) {
+
+		section:not(#settings):not(#about):not(#donate) {
+			section[role="region"] {
+				width: 80%;
+				-moz-transform: translateX(25%);
+				-webkit-transform: translateX(25%);
+			}
+		}
+
+		section#confirm, section#list-actions, section#list-form, section#task-form {
+			background-color: rgba(66, 66, 66, 0.8);
 		}
 	}
 
