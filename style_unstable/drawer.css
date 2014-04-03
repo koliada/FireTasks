@@ -10,8 +10,8 @@ section[role="region"] {
   z-index: 100;
 }
 
-section[role="region"]:target {
-  transform: translateX(80%);
+section#drawer:target {
+  /*transform: translateX(80%);*/
 }
 
 /* Hide anchor to change target */

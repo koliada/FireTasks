@@ -46,12 +46,12 @@
 				w.location.hash.replace(/^.*state=go2_([^&]+).*$/, '$1')
 			);
 		}
-		if (GO2 && w.location.href.indexOf('code') !== -1) {
+		/*if (GO2 && w.location.href.indexOf('code') !== -1) {
 			GO2._handleCode(
 				w.location.href.replace(/^.*code=([^&]+).*$/, '$1'),
 				w.location.href.replace(/^.*state=go2_([^&]+).*$/, '$1')
 			);
-		}
+		}*/
 		if (GO2 && w.location.search.indexOf('error=') !== -1) {
 			GO2._handleMessage(false);
 		}
@@ -72,7 +72,7 @@
 		immediate_frame,
 		state_id = Math.random().toString(32).substr(2),
 		popupWidth = 500,
-		popupHeight = 500;
+		popupHeight = 550;
 
 	var GO2 = {
 		// init
@@ -122,8 +122,8 @@
 
 			if (!immediate && force_approval_prompt) {
 //				console.log('force');
-				url += '&approval_prompt=force';
-//				url += '&approval_prompt=auto';
+				//url += '&approval_prompt=force';
+				url += '&approval_prompt=auto';
 			}
 
 			if (immediate) {
@@ -201,13 +201,13 @@
 			);
 		},
 		/* Koliada @ 2013-12-15 */
-		_handleCode: function(code, s_id) {
+		/*_handleCode: function(code, s_id) {
 			if (state_id !== s_id)
 				return;
 
 			if (GO2.onlogin)
 				GO2.onlogin(code);
-		},
+		},*/
 		// Remove pending immediate_frame
 		_removeImmediateFrame: function go2_removeImmediateFrame() {
 			if (!immediate_frame)

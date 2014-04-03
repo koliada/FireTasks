@@ -56,7 +56,7 @@
 				<button id="btn-list-actions" class="icon icon-options">Add List</button>
 			</menu>
 			<h1>Lists</h1>
-			<progress class="pack-activity" value="0" max="100" id="progress_lists" style="display: none;"></progress>
+			<progress class="pack-activity" value="0" max="100" id="progress-lists" style="display: none;"></progress>
 		</header>
 		<nav>
 			<ul id="lists"></ul>
@@ -74,27 +74,24 @@
 	<!-- MAIN LAYOUT -->
 	<section id="drawer" role="region">
 		<header class="fixed">
-			<a href="#"><span class="icon icon-menu">hide sidebar</span></a>
+			<a id="btn-close-sidebar" href="#"><span class="icon icon-menu">hide sidebar</span></a>
 			<a href="#drawer"><span class="icon icon-menu">show sidebar</span></a>
 
 			<menu type="toolbar">
-				<button id="btn-sync-tasks"><span class="action-icon email-sync">Sync Tasks</span></button>
 				<button id="btn-edit-tasks"><span class="icon icon-edit">Edit Tasks</span></button>
 				<button id="btn-new-task"><span class="icon icon-add">Add Task</span></button>
 			</menu>
 
 			<h1>Fire Tasks<em style="font-size: 0.9rem;"> beta</em></h1>
 
-			<progress class="pack-activity light" value="0" max="100" id="progress_tasks" style="display: none;"></progress>
+			<progress class="pack-activity light" value="0" max="100" id="progress-tasks" style="display: none;"></progress>
 		</header>
 		<header>
-			<h2>Loadings tasks</h2>
+			<h2>Initializing...</h2>
 		</header>
 		<article class="content scrollable header">
 			<div data-type="list" id="tasks">
-				<ol>
-					<!-- TODO: some refresh button maybe? -->
-				</ol>
+				<ol></ol>
 			</div>
 		</article>
 	</section>
@@ -105,19 +102,19 @@
 			<section>
 				<header>
 					<menu type="toolbar">
-						<button id="btn-edit-mode-close">done</button>
+						<button id="btn-edit-mode-close" class="prevent-default">done</button>
 					</menu>
 					<h1><span class="selected_num">0</span> selected</h1>
 				</header>
 			</section>
 			<div role="toolbar">
 				<ul>
-					<li><button id="btn-unindent-tasks" data-action="unindent" class="action-icon back">Unindent</button></li>
-					<li><button id="btn-indent-tasks" data-action="indent" class="action-icon forward">Indent</button></li>
-					<li><button id="btn-move-tasks" class="action-icon move">Move</button></li>
+					<li><button id="btn-unindent-tasks" data-action="unindent" class="action-icon back prevent-default">Unindent</button></li>
+					<li><button id="btn-indent-tasks" data-action="indent" class="action-icon forward prevent-default">Indent</button></li>
+					<li><button id="btn-move-tasks" class="action-icon move prevent-default">Move</button></li>
 				</ul>
 				<ul>
-					<li><button id="btn-delete-tasks" class="action-icon delete">Delete</button></li>
+					<li><button id="btn-delete-tasks" class="action-icon delete prevent-default">Delete</button></li>
 				</ul>
 			</div>
 		</form>
@@ -129,51 +126,101 @@
 <section id="settings" data-position="back">
 	<section role="region">
 		<header class="fixed">
-			<a id="btn-settings-back" href="#drawer"><span class="icon icon-back">back</span></a>
+			<a id="btn-settings-back" href="#" class="prevent-default"><span class="icon icon-back">back</span></a>
 			<h1>Settings</h1>
 		</header>
 		<article class="content scrollable header">
 			<section data-type="list">
 
-				<header>General</header>
+				<header>Accounts</header>
 
-				<ul>
-					<!--<li>
-						<a href="#drawer">
-							<label class="pack-switch">
-								<input type="checkbox" id="settings-tree-view">
-								<span></span>
-							</label>
-							<p>Use tree view (experimental)</p>
-							<p>Display task list with indents</p>
-						</a>
-					</li>-->
+				<ol>
 					<li>
-						<a href="#" id="settings-logout">
+						<a href="#" id="settings-logout" class="prevent-default">
 							<p>Log Out</p>
+							<p class="profile-email"></p>
 						</a>
 					</li>
-				</ul>
+				</ol>
+
+				<header>Synchronization</header>
+
+				<ol>
+					<li class="select">
+						<label for="settings-sync-interval">
+						<span>Sync interval</span>
+						<span>Refresh offline data when app is running</span>
+						<span class="button icon icon-dialog">
+							<select id="settings-sync-interval">
+								<option value="0">Never</option>
+								<!--<option value="30"> Every 30 seconds</option>-->
+								<option value="60">Once a minute</option>
+								<option value="300">Every 5 minutes</option>
+							</select>
+						</span>
+						</label>
+					</li>
+
+					<li>
+						<a href="#" class="prevent-default">
+							<label class="pack-switch">
+								<input type="checkbox" id="settings-sync-on-start">
+								<span></span>
+							</label>
+							<p>Sync on start</p>
+							<p>When FireTasks starts</p>
+						</a>
+					</li>
+
+					<li>
+						<a href="#" class="prevent-default">
+							<label class="pack-switch">
+								<input type="checkbox" id="settings-reload-tasks-on-list-open">
+								<span></span>
+							</label>
+							<p>Reload list's tasks</p>
+							<p>When list opens</p>
+						</a>
+					</li>
+				</ol>
 
 				<header>About</header>
 
-				<ul>
+				<ol>
 					<!--<li>
 						<a href="#" id="settings-install" onclick="App.install(true);">
 							<p>Install Fire Tasks</p>
 						</a>
 					</li>-->
 					<li>
-						<a href="#" id="settings-donate">
+						<a href="https://github.com/koliada/FireTasks.wiki.git" target="_blank">
+							<p>Help</p>
+							<p>Wiki on GitHub</p>
+						</a>
+					</li>
+					<li>
+						<a href="https://github.com/koliada/FireTasks/issues" target="_blank">
+							<p>Feedback</p>
+							<p>Issues on GitHub</p>
+						</a>
+					</li>
+					<li>
+						<a href="#" id="settings-donate" class="prevent-default">
 							<p>Donate</p>
 						</a>
 					</li>
 					<li>
-						<a href="#" id="settings-about">
+						<a href="https://marketplace.firefox.com/app/fire-tasks/" target="_blank">
+							<p>Please rate</p>
+							<p>Go to Marketplace</p>
+						</a>
+					</li>
+					<li>
+						<a href="#" id="settings-about" class="prevent-default">
 							<p>About</p>
 						</a>
 					</li>
-				</ul>
+				</ol>
 
 			</section>
 		</article>
@@ -185,7 +232,7 @@
 <section id="donate" data-position="back">
 	<section role="region">
 		<header class="fixed">
-			<menu type="toolbar"><button id="btn-donate-back">done</button></menu>
+			<menu type="toolbar"><button id="btn-donate-back" class="prevent-default">done</button></menu>
 			<h1>Donate</h1>
 		</header>
 		<article class="content scrollable header">
@@ -210,7 +257,7 @@
 <section id="about" data-position="back">
 	<section role="region">
 		<header class="fixed">
-			<menu type="toolbar"><button id="btn-about-back">done</button></menu>
+			<menu type="toolbar"><button id="btn-about-back" class="prevent-default">done</button></menu>
 			<h1>About</h1>
 		</header>
 		<article class="content scrollable header" style="text-align: justify;">
@@ -218,7 +265,7 @@
 			<header style="text-align: center;">
 				<img src="images/logo.png" alt="Logo" />
 				<h1>Fire Tasks</h1>
-				<label>version <span class="app-version">0.3.1</span> (<time>2014-01-23</time>)</label>
+				<label>version <span class="app-version">0.5</span> (<time>2014-04-04</time>)</label>
 			</header>
 
 			<header><h2>About Fire Tasks</h2></header>
@@ -238,6 +285,7 @@
 			<p>Technology and assets used in the making of Fire Tasks</p>
 			<ul>
 				<li>The <a href="http://buildingfirefoxos.com/" target="_blank">Firefox OS Building Blocks</a> are immensely helpful when you want to create an application that blends in with the stock system interface</li>
+				<li><a href="https://github.com/mozilla/localForage" target="_blank">localForage</a>, a Mozilla's library for simple access to asynchronous storage</li>
 				<li>The <a href="http://timc.idv.tw/wordcloud/" target="_blank">HTML5 Word Cloud</a> for sharing Google OAuth class</li>
 				<li>The <a href="https://github.com/flaki/checkinfox" target="_blank">Check-in Fox</a>, a FourSquare client for Firefox OS, for inspiration and sharing some code (like this About page)</li>
 				<li><a href="https://play.google.com/store/apps/details?id=ch.teamtasks.tasks" target="_blank">Tasks Android App</a> for inspiration and some great ideas</li>
@@ -306,10 +354,10 @@
 	<form role="dialog" data-type="action">
 		<header>Task List</header>
 		<menu>
-			<button id="btn-new-list">Create task list</button>
-			<button id="btn-rename-list">Rename task list</button>
-			<button id="btn-delete-list">Delete task list</button>
-			<button>Cancel</button>
+			<button id="btn-new-list" class="prevent-default">Create task list</button>
+			<button id="btn-rename-list" class="prevent-default">Rename task list</button>
+			<button id="btn-delete-list" class="prevent-default">Delete task list</button>
+			<button class="prevent-default">Cancel</button>
 		</menu>
 	</form>
 </section>
@@ -320,7 +368,7 @@
 	<form role="dialog" data-type="action">
 		<header>Move to</header>
 		<menu>
-			<button>Cancel</button>
+			<button class="prevent-default">Cancel</button>
 		</menu>
 	</form>
 </section>
@@ -330,7 +378,7 @@
 <section id="list-form" data-position="back">
 	<section role="region">
 		<header class="fixed">
-			<a id="btn-list-form-back" href="#drawer"><span class="icon icon-back">back</span></a>
+			<a id="btn-list-form-back" href="#" class="prevent-default"><span class="icon icon-back">back</span></a>
 			<menu type="toolbar">
 				<button id="btn-list-form-ok">Create</button>
 			</menu>
@@ -356,7 +404,7 @@
 <section id="task-form" data-position="back">
 	<section role="region">
 		<header class="fixed">
-			<a id="btn-task-form-back" href="#"><span class="icon icon-back">back</span></a>
+			<a id="btn-task-form-back" href="#" class="prevent-default"><span class="icon icon-back">back</span></a>
 			<menu type="toolbar">
 				<button id="btn-task-form-delete">Delete</button>
 				<button id="btn-task-form-ok">Error</button>
@@ -367,12 +415,12 @@
 
 			<form>
 				<p class="has-margin">
-					<input type="text" name="task_name" placeholder="New Task" autocomplete="off">
+					<input type="text" name="title" placeholder="New Task" autocomplete="off">
 					<button type="reset">Clear</button>
 				</p>
-				<a href="#">
+				<a href="#" class="prevent-default">
 					<label class="pack-checkbox">
-						<input type="checkbox" name="task_completed">
+						<input type="checkbox" name="completed">
 						<span></span>
 					</label>
 					<p>Completed</p>
@@ -383,9 +431,7 @@
 
 			<form>
 				<label>
-				<p>
-					<textarea name="task_notes"></textarea>
-				</p>
+					<textarea name="notes"></textarea>
 				</label>
 			</form>
 
@@ -396,7 +442,7 @@
 				<li>
 					<label>
 						<span class="button icon icon-dialog">
-							<input name="task_due_date" placeholder="Due date" type="date" class="hidden-input" disabled="disabled" />
+							<input name="due" placeholder="Due date" type="date" class="hidden-input" disabled="disabled" />
 							<!-- TODO: clear button -->
 						<span class="datetime" id="start-date-locale"></span>
 						</span>
@@ -412,7 +458,7 @@
 				<li>
 					<label>
 						<span class="button icon icon-dialog">
-							<select name="task_list">
+							<select name="listId">
 								<option value="">Error loading task lists</option>
 							</select>
 						</span>
@@ -425,6 +471,19 @@
 </section>
 
 
+<section id="setup" data-position="back">
+	<form role="dialog" data-type="confirm">
+		<section>
+			<h1>Work offline</h1>
+			<p>Fire Tasks needs your tasks to be downloaded and stored on your device. Press Start to begin.</p>
+			<span class="description"></span><span role="status"><span>0</span>%</span>
+			<progress value="0" max="100"></progress>
+		</section>
+		<menu><button id="btn-start-import" class="full prevent-default">Start</button></menu>
+	</form>
+</section>
+
+
 <!-- CONFIRM -->
 <section id="confirm" data-position="back" class="fullscreen">
 	<form role="dialog" data-type="confirm">
@@ -434,24 +493,30 @@
 			<p>Text</p>
 		</section>
 		<menu>
-			<button id="btn-confirm-cancel">Cancel</button>
-			<button class="danger" id="btn-confirm-ok">Delete</button>
+			<button id="btn-confirm-cancel" class="prevent-default">Cancel</button>
+			<button class="danger prevent-default" id="btn-confirm-ok">Delete</button>
 		</menu>
 	</form>
 </section>
 
 
-<script type="text/javascript" defer src="js/status.js"></script>
+<script type="text/javascript" src="js/status.js"></script>
 
-<script type="text/javascript" defer src="js/jquery-1.10.2.min.js"></script>
-<script type="text/javascript" defer src="js/jquery-ui-1.10.3.custom.min.js"></script>
-<script type="text/javascript" defer src="js/jquery.ui.touch-punch.js"></script>
-<script src="js/google-oauth2.js"></script>
+<script type="text/javascript" src="js/lib/jquery-2.1.0.min.js"></script>
+<script type="text/javascript" src="js/lib/jquery-ui-1.10.3.custom.min.js"></script>
+<script type="text/javascript" src="js/lib/jquery.ui.touch-punch.js"></script>
+<script type="text/javascript" src="js/lib/google-oauth2.js"></script>
+<script type="text/javascript" src="js/lib/localforage.min.js"></script>
+
+<script type="text/javascript" defer src="js/lib/event-processor.js"></script>
+<script type="text/javascript" defer src="js/lib/sync.js"></script>
 <script type="text/javascript" defer src="js/auth.js"></script>
-<script type="text/javascript" defer src="js/lists.js"></script>
 <script type="text/javascript" defer src="js/settings.js"></script>
-<script type="text/javascript" defer src="js/storage.js"></script>
-<script type="text/javascript" defer src="js/tasks.js"></script>
+<script type="text/javascript" defer src="js/list.js"></script>
+<script type="text/javascript" defer src="js/list.view.js"></script>
+<script type="text/javascript" defer src="js/task.js"></script>
+<script type="text/javascript" defer src="js/task.view.js"></script>
+<script type="text/javascript" defer src="js/edit-mode.js"></script>
 <script type="text/javascript" defer src="js/app.js"></script>
 
 <!--<script type="text/javascript">

@@ -9,19 +9,19 @@
 		var supportHIDPI = false;
 		var isFFOS = ("mozApps" in navigator && navigator.userAgent.search("Mobile") != -1);
 
-		if ( isFFOS ) {
-			var manifestUrl = 'http://koliada.github.io/FireTasks/manifest.webapp';
+		if (isFFOS) {
+			var manifestUrl = 'http://dev.alex-koliada.com/FireTasks/manifest.webapp';
 			var req = navigator.mozApps.install(manifestUrl);
-			req.onsuccess = function() {
+			req.onsuccess = function () {
 				//alert(this.result.origin);
 				//alert('Fire Tasks installed. Check your home screen!');
 			};
-			req.onerror = function() {
+			req.onerror = function () {
 				alert('Installation failed: ' + this.error.name);
 			};
 
 		} else {
-			window.location.href = "app.html"
+			window.location.href = "app.html#"
 		}
 	</script>
 

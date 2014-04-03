@@ -15,9 +15,18 @@
 	height: 100%;
 }
 
+li, a, span, button, div {
+	outline: none;
+	-moz-tap-highlight-color: transparent;
+	-moz-user-select: none;
+	-moz-user-focus: ignore;
+}
+
 body {
 	section#index {
 		section[data-type="sidebar"] {
+			/* Avoids appearing of scroll bar over tasks list */
+			z-index: 90;
 			header {
 				menu[type="toolbar"] {
 					button {
@@ -36,6 +45,10 @@ body {
 
 			nav {
 				//max-height: calc(~"100% - 9rem");
+				/* Attempt to fix Chrome scroll bar visibility */
+				&::-webkit-scrollbar {
+					width: 0;
+				}
 
 				ul {
 					li {
@@ -92,6 +105,13 @@ body {
 				&.scrollable.header {
 					border-top-width: 8.4rem;
 					padding-bottom: 0;
+
+					/* Fix for Chrome's scrollbars */
+					overflow-x: hidden;
+					overflow-y: auto;
+					/*&::-webkit-scrollbar {
+						width: 0;
+					}*/
 				}
 
 				div[data-type="list"] {
@@ -220,8 +240,18 @@ body {
 		}
 	}
 
+	section#list-form {
+		article {
+			overflow-x: hidden;
+			overflow-y: auto;
+		}
+	}
+
 	section#task-form {
 		article {
+			overflow-x: hidden;
+			overflow-y: auto;
+
 			header h2 {
 				margin-top: 1rem;
 			}
@@ -264,18 +294,57 @@ body {
 
 	section#settings {
 		article {
-
+			overflow-x: hidden;
+			overflow-y: auto;
 
 			label.pack-switch {
 				float: right;
 				height: 6rem;
 				width: 6rem;
 			}
+
+			ol {
+				li {
+					&.select, label {
+						height: 10rem;
+
+
+
+						span:not(.button) {
+							&:first-of-type {
+								font-size: 1.8rem;
+								line-height: 2.2rem;
+								color: #000;
+								padding: 1rem 0 0;
+							}
+
+							margin: 0 1.5rem;
+							white-space: nowrap;
+							overflow: hidden;
+							text-overflow: ellipsis;
+							border: none;
+							display: block;
+							color: #5b5b5b;
+							font-size: 1.5rem;
+							line-height: 2rem;
+							font-weight: normal;
+						}
+
+						span.button.icon.icon-dialog {
+							width: calc(~'100% - 3rem');
+							margin: 0 1.5rem;
+						}
+					}
+				}
+			}
 		}
 	}
 
 	section#about {
 		article {
+			overflow-x: hidden;
+			overflow-y: auto;
+
 			header {
 				h1 {
 					margin: 0;
@@ -296,6 +365,37 @@ body {
 					list-style: disc;
 				}
 			}
+		}
+	}
+
+	section#confirm {
+		ul.unrecoverable-error-dialog {
+			li {
+				list-style-type: disc;
+				a {
+					color: rgb(248, 80, 80);
+					font-weight: bold;
+				}
+			}
+		}
+
+		span.claim {
+			font-size: inherit;
+			color: inherit;
+			display: inline;
+			text-decoration: underline;
+		}
+	}
+
+	section#setup {
+		span[role="status"] {
+			float: right;
+		}
+		span.description {
+			font-size: 1.8rem;
+		}
+		progress {
+			float: left;
 		}
 	}
 
@@ -385,5 +485,9 @@ body {
 			-ms-user-select: none;
 			user-select: none;
 		}
+	}
+
+	a {
+		cursor: pointer;
 	}
 }
