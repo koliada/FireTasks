@@ -30,6 +30,12 @@ window.App = (function($) {
 	function setListeners() {
 
 		EV.listen('options-saved', onOptionsSaved);
+		EV.listen('lists-loaded', function() {
+			if (!(localStorage.getItem('instructionalOverlayShown') === 'true')) {
+				App.showInstructionalOverlay();
+				localStorage.setItem('instructionalOverlayShown', true);
+			}
+		});
 
 		$(document).on('click', '.prevent-default', function (ev) {
 			ev.preventDefault();
@@ -72,6 +78,7 @@ window.App = (function($) {
 			if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
 
 				localStorage.setItem('whatsNewShown', false);
+				localStorage.setItem('instructionalOverlayShown', false);
 
 				// Browser downloaded a new app cache.
 				if (confirm('A new version of Fire Tasks was downloaded. Apply update now?')) {
@@ -91,9 +98,6 @@ window.App = (function($) {
 		if (!(whatsNewShown === 'true')) {
 			$.get('WHATSNEW', function (whatsNew) {
 				alert(whatsNew);
-				if (App.version === '0.5.1') {
-					App.showInstructionalOverlay();
-				}
 				localStorage.setItem('whatsNewShown', true);
 			});
 		}
