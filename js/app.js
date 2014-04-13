@@ -91,6 +91,9 @@ window.App = (function($) {
 		if (!(whatsNewShown === 'true')) {
 			$.get('WHATSNEW', function (whatsNew) {
 				alert(whatsNew);
+				if (App.version === '0.5.1') {
+					App.showInstructionalOverlay();
+				}
 				localStorage.setItem('whatsNewShown', true);
 			});
 		}
