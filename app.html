@@ -53,7 +53,7 @@
 	<section data-type="sidebar">
 		<header>
 			<menu type="toolbar">
-				<button id="btn-list-actions" class="icon icon-options">Add List</button>
+				<button id="btn-new-list" class="icon icon-add">Create List</button>
 			</menu>
 			<h1>Lists</h1>
 			<progress class="pack-activity" value="0" max="100" id="progress-lists" style="display: none;"></progress>
@@ -121,7 +121,6 @@
 	</section>
 </section>
 
-
 <!-- SETTINGS -->
 <section id="settings" data-position="back">
 	<section role="region">
@@ -184,6 +183,31 @@
 					</li>
 				</ol>
 
+				<header>Device interaction</header>
+
+				<ol>
+					<li>
+						<a href="#" class="prevent-default">
+							<label class="pack-switch">
+								<input type="checkbox" id="settings-vibrate-on-long-press">
+								<span></span>
+							</label>
+							<p>Vibrate on long press</p>
+						</a>
+					</li>
+
+					<!--<li>
+						<a href="#" class="prevent-default">
+							<label class="pack-switch">
+								<input type="checkbox" id="settings-sidebar-animation">
+								<span></span>
+							</label>
+							<p>Sidebar animation</p>
+							<p>Turn off for better performance</p>
+						</a>
+					</li>-->
+				</ol>
+
 				<header>About</header>
 
 				<ol>
@@ -193,7 +217,7 @@
 						</a>
 					</li>-->
 					<li>
-						<a href="https://github.com/koliada/FireTasks.wiki.git" target="_blank">
+						<a href="https://github.com/koliada/FireTasks/wiki" target="_blank">
 							<p>Help</p>
 							<p>Wiki on GitHub</p>
 						</a>
@@ -227,7 +251,6 @@
 	</section>
 </section>
 
-
 <!-- DONATE -->
 <section id="donate" data-position="back">
 	<section role="region">
@@ -252,7 +275,6 @@
 	</section>
 </section>
 
-
 <!-- ABOUT -->
 <section id="about" data-position="back">
 	<section role="region">
@@ -265,7 +287,7 @@
 			<header style="text-align: center;">
 				<img src="images/logo.png" alt="Logo" />
 				<h1>Fire Tasks</h1>
-				<label>version <span class="app-version">0.5</span> (<time>2014-04-04</time>)</label>
+				<label>version <span class="app-version">0.5.1</span> (<time>2014-04-13</time>)</label>
 			</header>
 
 			<header><h2>About Fire Tasks</h2></header>
@@ -354,14 +376,12 @@
 	<form role="dialog" data-type="action">
 		<header>Task List</header>
 		<menu>
-			<button id="btn-new-list" class="prevent-default">Create task list</button>
 			<button id="btn-rename-list" class="prevent-default">Rename task list</button>
 			<button id="btn-delete-list" class="prevent-default">Delete task list</button>
 			<button class="prevent-default">Cancel</button>
 		</menu>
 	</form>
 </section>
-
 
 <!-- MOVE TASKS DIALOG -->
 <section id="tasks-move-to" data-position="back" class="fullscreen">
@@ -372,7 +392,6 @@
 		</menu>
 	</form>
 </section>
-
 
 <!-- LIST FORM -->
 <section id="list-form" data-position="back">
@@ -398,7 +417,6 @@
 		</article>
 	</section>
 </section>
-
 
 <!-- TASK FORM -->
 <section id="task-form" data-position="back">
@@ -470,7 +488,7 @@
 	</section>
 </section>
 
-
+<!-- SETUP -->
 <section id="setup" data-position="back">
 	<form role="dialog" data-type="confirm">
 		<section>
@@ -482,7 +500,6 @@
 		<menu><button id="btn-start-import" class="full prevent-default">Start</button></menu>
 	</form>
 </section>
-
 
 <!-- CONFIRM -->
 <section id="confirm" data-position="back" class="fullscreen">
@@ -499,6 +516,11 @@
 	</form>
 </section>
 
+<!-- INSTRUCTIONAL OVERLAY -->
+<section id="instructional-overlay" data-position="back">
+	<canvas width="320" height="480">Browser doesn't support canvas. Tap anywhere to start using Fire Tasks!</canvas>
+</section>
+
 
 <script type="text/javascript" src="js/status.js"></script>
 
@@ -510,6 +532,7 @@
 
 <script type="text/javascript" defer src="js/lib/event-processor.js"></script>
 <script type="text/javascript" defer src="js/lib/sync.js"></script>
+<script type="text/javascript" defer src="js/lib/longpress.js"></script>
 <script type="text/javascript" defer src="js/auth.js"></script>
 <script type="text/javascript" defer src="js/settings.js"></script>
 <script type="text/javascript" defer src="js/list.js"></script>

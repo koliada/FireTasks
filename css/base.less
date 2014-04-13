@@ -18,11 +18,12 @@
 li, a, span, button, div {
 	outline: none;
 	-moz-tap-highlight-color: transparent;
-	-moz-user-select: none;
 	-moz-user-focus: ignore;
 }
 
 body {
+	.user-select(none);
+
 	section#index {
 		section[data-type="sidebar"] {
 			/* Avoids appearing of scroll bar over tasks list */
@@ -36,8 +37,12 @@ body {
 							background-color: rgba(0, 0, 0, 0.25)!important;
 						}*/
 
-						span.icon.icon-add {
-							background-image: url(../css/style/headers/images/icons/add.png) !important;
+						&.icon.icon-add {
+							background-size: inherit;
+							background: url(../style/headers/images/icons/add.png) 80% 50% no-repeat;
+							margin: 0;
+							padding: 0;
+							width: 8rem;
 						}
 					}
 				}
@@ -56,6 +61,11 @@ body {
 							&.list-selected {
 								background-color: rgba(0,0,0, 0.85);
 							}
+
+							&.longpress-ready {
+								background-color: rgb(7, 131, 82);
+								.transition(background-color, 0.2s);
+							}
 						}
 					}
 				}
@@ -67,6 +77,12 @@ body {
 		}
 
 		section#drawer {
+
+			//.transition-none();
+
+			/*&.animate {
+				.transition(all, 0.25s, ease);
+			}*/
 
 			header {
 				//position: relative;
@@ -109,9 +125,6 @@ body {
 					/* Fix for Chrome's scrollbars */
 					overflow-x: hidden;
 					overflow-y: auto;
-					/*&::-webkit-scrollbar {
-						width: 0;
-					}*/
 				}
 
 				div[data-type="list"] {
@@ -399,6 +412,16 @@ body {
 		}
 	}
 
+	section#instructional-overlay {
+		cursor: pointer;
+		background: rgba(51, 51, 51, 0.8) url(../style/action_menu/images/ui/pattern.png) repeat left top;
+	}
+
+	section#list-actions-mask.fade-in {
+		z-index: 119;
+		background: transparent;
+	}
+
 	/* Tablet UI for full-width screens */
 	@media (min-width: 1280px) {
 
@@ -424,6 +447,7 @@ body {
 		z-index: 1000;
 	}
 
+	/* TODO: Deprecated */
 	/* Experimental */
 	/* TODO: Need separator? */
 	section[data-type="sidebar"] > header:first-child .icon.icon-options {
@@ -476,15 +500,6 @@ body {
 	input[type="date"] {
 		font-size: 1.7rem;
 		font-weight: 500;
-
-		&::selection, &::-moz-selection {
-			-webkit-touch-callout: none;
-			-webkit-user-select: none;
-			-khtml-user-select: none;
-			-moz-user-select: none;
-			-ms-user-select: none;
-			user-select: none;
-		}
 	}
 
 	a {

@@ -47,7 +47,7 @@ var Auth = {
 					GO2.login(false, false);
 					App.stopAutoFetch();
 				}
-			}, 2000);	// should be enough
+			}, 5000);	// should be enough
 		}
 
 		GO2.onlogin = function(accessToken) {
@@ -253,7 +253,7 @@ var Auth = {
 
 			}).fail(function( jqXHR, textStatus, errorThrown ) {
 
-				var data = jqXHR.responseJSON;
+				var data = jqXHR.responseJSON || {};
 
 				if (typeof data.error !== 'undefined' && data.error == 'invalid_token') {
 					utils.status.show('Invalid token');

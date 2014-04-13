@@ -28,7 +28,7 @@ window.List = function () {
 	 */
 	function setListeners() {
 		EV.listen('list-selected', updateLastActive);
-		EV.listen('list-renamed', updateLastActive);
+		EV.listen('list-renamed', Task.loadData);
 		EV.listen('list-removed', remove);
 		EV.listen('list-not-found', remove);
 	}
@@ -102,14 +102,18 @@ window.List = function () {
 	 * @param {String} listId
 	 */
 	function remove(listId) {
-		localStorage.removeItem('lastListId');
-		lastActive = null;
-		getPrevious(listId, function (previousList) {
-			List.storage.remove(listId, function () {
-				Task.setDelayedFetch();
-				Task.loadData(previousList);
-			})
-		});
+		if (List.view.getActionChooserList().id === List.getLastActive().id) {
+			localStorage.removeItem('lastListId');
+			lastActive = null;
+			getPrevious(listId, function (previousList) {
+				List.storage.remove(listId, function () {
+					Task.setDelayedFetch();
+					Task.loadData(previousList);
+				});
+			});
+		} else {
+			List.storage.remove(listId);
+		}
 	}
 
 	function onDataLoaded(items) {
@@ -376,7 +380,7 @@ window.List = function () {
 			/**
 			 * Removes list resource from local data
 			 * @param {String} listId
-			 * @param callback
+			 * @param [callback]
 			 */
 			remove: function (listId, callback) {
 				List.storage.get(null, function (items) {
@@ -431,26 +435,20 @@ window.List = function () {
 
 		/**
 		 * Handles list renaming
-		 * Active list is used
+		 * @param {String} listId
 		 * @param {String} value
 		 */
-		renameList: function (value) {
-
-			var list = List.getLastActive();
-
-			if (list.title == value.trim()) {
-				return;
-			}
+		renameList: function (listId, value) {
 
 			var data = {
 				type: 'PATCH',
-				url: 'https://www.googleapis.com/tasks/v1/users/@me/lists/' + list.id,
+				url: 'https://www.googleapis.com/tasks/v1/users/@me/lists/' + listId,
 				pack: {
 					title: value
 				},
 				entity: {
 					type: App.getEntityTypes().LIST,
-					id: list.id
+					id: listId
 				}
 			};
 
@@ -459,14 +457,13 @@ window.List = function () {
 				data: data
 			})[0].start();
 
-			List.storage.update(list.id, data.pack, function (list) {
+			List.storage.update(listId, data.pack, function (list) {
 				EV.fire('list-renamed', list);
 			});
 		},
 
 		/**
 		 * Handles list deletion
-		 * Active list is used
 		 * @param {String} listId
 		 */
 		deleteList: function (listId) {

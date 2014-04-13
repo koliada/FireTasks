@@ -11,7 +11,8 @@ window.App = (function($) {
 
 	'use strict';
 
-	var actions = {
+	var version = '0.5.1',
+		actions = {
 			'MAIN_QUEUE': 'mainQueue'
 		},
 		entityTypes = {
@@ -27,6 +28,8 @@ window.App = (function($) {
 	 * Sets global listeners
 	 */
 	function setListeners() {
+
+		EV.listen('options-saved', onOptionsSaved);
 
 		$(document).on('click', '.prevent-default', function (ev) {
 			ev.preventDefault();
@@ -168,7 +171,8 @@ window.App = (function($) {
 		if (window.chrome) {
 			var text = "Fire tasks beta",
 				fontFamily = "font-family: Arial", fontSize = "font-size: 10px; padding: 26px 0; line-height: 60px",
-				imageUrl = window.location.origin + "/images/icons/icon-64.png",
+				url = window.location.href.replace('app.html', '').replace('#', '').replace('?', ''),
+				imageUrl = url + "/images/icons/icon-64.png",
 				backgroundImage = "background-image: url('" + imageUrl + "')",
 				color = "color: transparent",
 				css = [ fontFamily, fontSize, backgroundImage, color ].join("; ");
@@ -187,31 +191,24 @@ window.App = (function($) {
 				Sync.pause(actions.MAIN_QUEUE);
 				List.pauseSync();
 				var blob = new Blob([JSON.stringify(syncErrors)], {type: 'text/plain'}),
-					blobURL = window.URL.createObjectURL(blob);
-//					link = document.createElement('a');
-//				link.id = 'download-dump';
-//				//link.setAttribute('style', 'display: none;');
-//				link.setAttribute('download', 'dump.txt');
-//				link.setAttribute('href', blobURL);
-//				link.innerHTML = 'Download Dump';
-//				document.body.appendChild(link);
-				var data = {
-					h1: 'Error occurred',
-					p: 'An unrecoverable synchronization error has occurred. <span class="claim">Please</span> download debug data and contact developer.<br />\
-						No sensitive data included.<br />\
-						<ul class="unrecoverable-error-dialog">\
-							<li><a href="' + blobURL + '" download="firetasks-dump.txt">Download dump</a></li>\
-							<li><a href="mailto:alex.fiator@gmail.com?subject=Fire Tasks Bug Report&body=<Please add some details>" target="_blank">Compose Email</a></li>\
-						</ul>',
-					cancel: 'Cancel',
-					ok: 'Restart Fire Tasks',
-					recommend: true,
-					hideCancel: true,
-					action: function () {
-						location.reload();
-					}
-				};
-				App.confirm(data);
+					blobURL = window.URL.createObjectURL(blob),
+					confirmData = {
+						h1: 'Error occurred',
+						p: 'An unrecoverable synchronization error has occurred. <span class="claim">Please</span> download debug data and contact developer.<br />\
+							No sensitive data included.<br />\
+							<ul class="unrecoverable-error-dialog">\
+								<li><a href="' + blobURL + '" download="firetasks-dump.txt">Download dump</a></li>\
+								<li><a href="mailto:alex.fiator@gmail.com?subject=Fire Tasks Bug Report&body=<Please add some details>" target="_blank">Compose Email</a></li>\
+							</ul>',
+						cancel: 'Cancel',
+						ok: 'Restart Fire Tasks',
+						recommend: true,
+						hideCancel: true,
+						action: function () {
+							location.reload();
+						}
+					};
+				App.confirm(confirmData);
 				return false;
 			}
 			syncErrors = [];
@@ -224,8 +221,77 @@ window.App = (function($) {
 		syncErrors.push(eventDetails);
 	}
 
+	function showInstructionalOverlay() {
+		var overlayEl = $('#instructional-overlay')[0],
+			ctx = overlayEl.querySelector('canvas').getContext('2d');
+
+		function getListXY() {
+			var el = List.view.getListEl()[0];
+			return {
+				x: el.offsetLeft,
+				y: el.offsetTop
+			}
+		}
+
+		function hideOverlay() {
+			overlayEl.classList.remove('fade-in');
+			overlayEl.classList.add('fade-out');
+		}
+
+		function showOverlay() {
+			App.toggleSidebar(true);
+			overlayEl.classList.remove('fade-out');
+			overlayEl.classList.add('fade-in');
+		}
+
+		function drawCanvas() {
+			var listXY = getListXY(),
+				radius = 8,
+				circleX = listXY.x + radius + 120,
+				circleY = listXY.y + radius + 14,
+				line1Length = 80,
+				line1 = {
+					x: circleX + line1Length,
+					y: circleY
+				},
+				line2Height = 36,
+				line2 = {
+					x: line1.x,
+					y: line1.y + line2Height
+				},
+				text1Height = 20,
+				text1 = {
+					x: line2.x - 180,
+					y: line2.y + text1Height + 6
+				};
+			ctx.beginPath();
+			ctx.arc(circleX, circleY, radius, 0, Math.PI * 2);
+			ctx.lineTo(line1.x, line1.y);
+			ctx.lineTo(line2.x, line2.y);
+			ctx.lineWidth = 2;
+			ctx.strokeStyle = '#FFF';
+			ctx.lineJoin = 'round';
+			ctx.font = text1Height + 'px FiraSans';
+			ctx.fillStyle = "#FFF";
+			ctx.fillText("Tap & hold to get list actions", text1.x, text1.y);
+			ctx.stroke();
+		}
+
+		overlayEl.addEventListener('click', hideOverlay);
+
+		drawCanvas();
+		showOverlay();
+	}
+
+	function onOptionsSaved() {
+		App.setAutoFetch();
+		App.setSidebarAnimation();
+	}
+
 
 	return {
+
+		version: version,
 
 		getEntityTypes: function () {
 			return entityTypes;
@@ -265,7 +331,8 @@ window.App = (function($) {
 		},
 
 		init: function () {
-			location.hash = '';
+			App.toggleSidebar();
+			App.setSidebarAnimation();
 
 			showLogo();
 			updateVersion();
@@ -353,19 +420,20 @@ window.App = (function($) {
 			function onFinish(lists) {
 				List.storage.set(lists, function () {
 					lblDescription.html('Successful!');
-					location.hash = 'drawer';
+					App.toggleSidebar(true);
 					btnStart.html('Go to app').prop('disabled', false).off().on('click', function () {
+						List.loadData();
 						setupForm.removeClass().addClass('fade-out');
+						showInstructionalOverlay();
 						lblDescription.html(lblDescriptionOldValue);
 						progress.val(0);
 						status.html('0');
 						btnStart.html(btnStartOldValue);
-						List.loadData();
 					});
 				});
 			}
 
-			location.hash = '';
+			App.toggleSidebar();
 
 			List.preventOnLoadRefresh();
 			App.stopAutoFetch();
@@ -485,10 +553,38 @@ window.App = (function($) {
 			input.change();	// to fire onchange listeners
 		},
 
+		isFFOS: ("mozApps" in navigator && navigator.userAgent.search("Mobile") != -1),
+
 		showInDevelopmentTooltip: function (timeout) {
 			timeout = timeout || 1000;
 			utils.status.show('This feature is in development', timeout);
-		}
+		},
+
+		/**
+		 * Toggles sidebar
+		 * @param [v] True to open
+		 */
+		toggleSidebar: function (v) {
+			if (v && location.hash.indexOf('drawer') === -1) {
+				location.hash = 'drawer';
+			} else if (!v) {
+				location.hash = '';
+			}
+		},
+
+		/**
+		 * Sets sidebar animation
+		 * Uses {@link Settings}
+		 */
+		setSidebarAnimation: function () {
+			/*if (Settings.get('sidebarAnimation')) {
+				document.getElementById('drawer').classList.add('animate');
+			} else {
+				document.getElementById('drawer').classList.remove('animate');
+			}*/
+		},
+
+		showInstructionalOverlay: showInstructionalOverlay
 	};
 
 }(jQuery));

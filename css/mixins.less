@@ -22,6 +22,14 @@
 	transition: @prop @time @ease;
 }
 
+.transition-none() {
+	-webkit-transition: none;
+	-moz-transition: none;
+	-o-transition: none;
+	transition: none;
+	transition-property: none;
+}
+
 .drop-shadow(@x-axis: 0, @y-axis: 1px, @blur: 2px, @alpha: 0.1) {
 	-webkit-box-shadow: @x-axis @y-axis @blur rgba(0, 0, 0, @alpha);
 	-moz-box-shadow: @x-axis @y-axis @blur rgba(0, 0, 0, @alpha);
@@ -38,4 +46,13 @@
 	-webkit-box-shadow: inset @horizontal @vertical @blur rgba(0, 0, 0, @alpha);
 	-moz-box-shadow: inset @horizontal @vertical @blur rgba(0, 0, 0, @alpha);
 	box-shadow: inset @horizontal @vertical @blur rgba(0, 0, 0, @alpha);
+}
+
+.user-select(@argument: none) {
+	-webkit-touch-callout: @argument;
+	-webkit-user-select: @argument;
+	-khtml-user-select: @argument;
+	-moz-user-select: @argument;
+	-ms-user-select: @argument;
+	user-select: @argument;
 }

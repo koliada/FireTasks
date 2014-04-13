@@ -21,7 +21,6 @@ if (window.List) window.List.view = (function($) {
 		dom = {
 			progressBar: $('#progress-lists'),
 			btnSync: $('#btn-sync-lists'),
-			btnActions: $('#btn-list-actions'),
 			actionChooser: $('#list-actions'),
 			btnNewList: $('#btn-new-list'),
 			btnRenameList: $('#btn-rename-list'),
@@ -30,11 +29,12 @@ if (window.List) window.List.view = (function($) {
 			form: $('#list-form'),
 			btnBack: $('#btn-list-form-back'),
 			btnOk: $('#btn-list-form-ok')
-		};
+		},
+		actionChooserList = {};
 
 
 	function setListeners() {
-		EV.listen('list-selected', selectList);
+		EV.listen('list-selected', selectNode);
 		EV.listen('lists-loaded', renderList);
 		EV.listen('list-renamed', updateNode);
 		EV.listen('list-removed', removeNode);
@@ -42,35 +42,18 @@ if (window.List) window.List.view = (function($) {
 
 		/* Buttons */
 		dom.btnSync.on('click', onSyncClick);
-		dom.list.on('click', 'li.list-item a', openList);
-		dom.btnNewList.on('click', onNewList); // will become separate button
+		dom.btnNewList.on('click', onNewList);
 
 		/* Action chooser */
-		dom.btnActions.on('click', showActionChooser);
-		dom.actionChooser.find('button').on('click', hideActionChooser);
-		dom.btnRenameList.on('click', onRenameList);
-		dom.btnDeleteList.on('click', onDeleteList);
+		// TODO: event delegation
+		var buttons = dom.actionChooser[0].querySelectorAll('button');
+		for (var i = 0; i < buttons.length; i++) {
+			buttons[i].addEventListener('click', onButtonClicked);
+		}
 
 		/* List form */
 		dom.btnBack.on('click', hideForm);
 		dom.btnOk.on('click', onFormSubmit);
-
-		// TODO: experimental: long press
-//		$('#lists').on('mousedown', 'li.list-item a', function() {
-//			//this.dataset.mouseDownStart = +new Date();
-//			App.longPressInterval = setInterval(function() {
-//				clearInterval(App.longPressInterval);
-//				$('#list-actions').removeClass().addClass('fade-in');
-//			}, 400);
-//		}).on('mouseup', 'li.list-item a', function() {
-//			clearInterval(App.longPressInterval);
-//			/*var now = +new Date(),
-//			 than = this.dataset.mouseDownStart;
-//
-//			 now - than >= 400 && (function(el) {
-//			 $('#list-actions').removeClass().addClass('fade-in');
-//			 }(this));*/
-//		});
 	}
 
 	/**
@@ -94,7 +77,8 @@ if (window.List) window.List.view = (function($) {
 	 */
 	function onRenameList() {
 		var data = {
-			name: List.getLastActive().title
+			id: actionChooserList.id,
+			name: actionChooserList.title
 		};
 		renderForm('UPDATE', data);
 	}
@@ -103,7 +87,7 @@ if (window.List) window.List.view = (function($) {
 	 * Prepares confirm dialog for list deletion
 	 */
 	function onDeleteList() {
-		var list = List.getLastActive();
+		var list = actionChooserList;
 		if (list.title === 'Uncategorized') {
 			utils.status.show('You cannot delete default list', 1500);
 			return;
@@ -138,7 +122,7 @@ if (window.List) window.List.view = (function($) {
 		}
 
 		dom.form.find('h1').html(data.h1);
-		dom.form.find('#btn-list-form-ok').html(data.ok);
+		dom.form.find('#btn-list-form-ok').html(data.ok)[0].dataset.id = data.id;
 		dom.form.find('input[name="list_name"]').val(data.name);
 
 		showForm();
@@ -169,17 +153,18 @@ if (window.List) window.List.view = (function($) {
 	function onFormSubmit() {
 		var action = $(this).text(),
 			input = dom.form.find('input[name="list_name"]'),
-			value = input.val();
+			title = input.val(),
+			id = this.dataset.id;
 
 		hideForm();
 
 		/* Skip if no list name was entered */
-		if (value.trim() != '') {
+		if (title.trim() != '') {
 			if (action === labels.LBL_CREATE) {
-				List.createList(value);
+				List.createList(title);
 			}
-			if (action === labels.LBL_UPDATE) {
-				List.renameList(value);
+			if (action === labels.LBL_UPDATE && actionChooserList.title != title) {
+				List.renameList(id, title);
 			}
 		}
 	}
@@ -187,11 +172,23 @@ if (window.List) window.List.view = (function($) {
 	/**
 	 * Creates HTML for given item
 	 * @param {Object} list
-	 * @returns {string}
+	 * @returns {Element}
 	 */
-	function getNodeHtml(list) {
-		var selected = (list.selected) ? 'class="list-selected"' : '';
-		return '<li class="list-item"><a ' + selected + ' data-id="' + list.id + '" href="#">' + list.title + '</a></li>'
+	function createNode(list) {
+		var a = document.createElement('a'),
+			li = document.createElement('li');
+		a.dataset.id = list.id;
+		a.classList.add('prevent-default');
+		a.setAttribute('draggable', 'false');
+		a.setAttribute('oncontextmenu', 'return(false);');
+		a.innerHTML = list.title;
+		if (list.selected) {
+			a.classList.add('list-selected');
+		}
+		Longpress.bindLongPressHandler(a, 400, showActionChooser, openList/*, bindActionChooserButtonsClick, unbindActionChooserButtonsClick*/);
+		li.classList.add('list-item');
+		li.appendChild(a);
+		return li;
 	}
 
 	/**
@@ -200,16 +197,17 @@ if (window.List) window.List.view = (function($) {
 	 */
 	function renderList(items) {
 
-		dom.list.html('');
+		var domList = dom.list[0];
+		domList.innerHTML = '';
 
-		var listItems = '';
-		$.each(items, function (index, list) {
-			listItems += getNodeHtml(list);
+		items.forEach(function(list) {
+			domList.appendChild(createNode(list)); // rename
 		});
 
-		listItems += '<br /><br/><br /><br />';
+		for (var i = 0; i < 4; i++) {
+			domList.appendChild(document.createElement('br'));
+		}
 
-		dom.list.append(listItems);
 		List.view.toggleProgress(false);
 		EV.fire('lists-rendered');
 	}
@@ -243,7 +241,7 @@ if (window.List) window.List.view = (function($) {
 			}
 
 			var oldNode = dom.list.find('a[data-id="' + list.id + '"]').parent('li')[0],
-				newNode = $(getNodeHtml(list))[0],
+				newNode = createNode(list),
 				previousNode = getPreviousAlphabetically($(newNode).find('a').text());
 
 			oldNode.parentNode.replaceChild(newNode, oldNode);
@@ -274,7 +272,7 @@ if (window.List) window.List.view = (function($) {
 	 * Selects node in DOM
 	 * @param list List resource to be selected
 	 */
-	function selectList(list) {
+	function selectNode(list) {
 		var domItem = $('section[data-type="sidebar"] a[data-id="' + list.id + '"]');
 		$('section[data-type="sidebar"] .list-selected').removeClass('list-selected');
 		domItem.addClass('list-selected');
@@ -284,30 +282,53 @@ if (window.List) window.List.view = (function($) {
 	 * Handles 'opening' a selected list
 	 * Closes sidebar and loads list's tasks
 	 */
-	function openList() {
-		var id = this.dataset.id;
+	function openList(ev) {
+		var id = ev.target.dataset.id;
 		List.storage.get(id, function (list) {
 			if (list) {
-				location.hash = '';
 				Task.setDelayedFetch();
 				Task.loadData(list);
+				App.toggleSidebar();
 			}
 		});
 	}
 
 	/**
 	 * Shows available list actions
+	 * @param ev
 	 */
-	function showActionChooser() {
-		dom.actionChooser.removeClass().addClass('fade-in');
+	function showActionChooser(ev) {
+		var el = ev.target;
+		List.storage.get(el.dataset.id, function (list) {
+			actionChooserList = list;
+			dom.actionChooser.find('header')[0].innerHTML = list.title;
+			dom.btnDeleteList[0].disabled = list.title === 'Uncategorized';
+			dom.actionChooser.removeClass().addClass('fade-in');
+		});
 	}
 
 	/**
 	 * Hides action chooser opened with {@link showActionChooser}
 	 */
 	function hideActionChooser() {
-		/* TODO: check if there are any lists loaded (case: canceled authentication) */
 		dom.actionChooser.removeClass().addClass('fade-out');
+	}
+
+	/**
+	 * Handles action chooser buttons clicks
+	 * @param ev
+	 */
+	function onButtonClicked(ev) {
+		switch (ev.target.id) {
+			case dom.btnRenameList[0].id:
+				onRenameList(ev);
+				break;
+			case dom.btnDeleteList[0].id:
+				onDeleteList();
+				break;
+		}
+		ev.preventDefault();
+		hideActionChooser();
 	}
 
 	setListeners();
@@ -330,6 +351,18 @@ if (window.List) window.List.view = (function($) {
 				dom.progressBar.hide();
 				App.setAutoFetch();
 			}
+		},
+
+		getActionChooserList: function () {
+			return actionChooserList;
+		},
+
+		/**
+		 * Returns lists list DOM element
+		 * @returns {Element}
+		 */
+		getListEl: function () {
+			return dom.list;
 		}
 	};
 

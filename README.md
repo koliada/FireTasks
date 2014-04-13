@@ -18,7 +18,7 @@ Features
 Although Fire Tasks is in an early beta and does not have many useful features,
 it is functional and surely can bring you relief if you tend to use Google Tasks on other platforms.
 
-Version 0.5 provides:
+Version 0.5.1 provides:
 
 - Authentication with the Google Tasks API
 - Retrieving task lists and tasks
@@ -61,7 +61,7 @@ Also, one day you can see a 'Daily Limit Exceeded' message.
 This is an unrecoverable situation and server will continue to process requests next day only.
 I'm working on it.
 
-Fire Tasks was tested on US ZTE Open with Firefox OS v1.1 and on the Firefox OS v1.2 and v1.3 simulators.
+Fire Tasks was tested on US ZTE Open with Firefox OS v1.1 and v1.3, and on the Firefox OS v1.1 - v1.5 simulators.
 
 Report any issues here, on the [GitHub Issues](https://github.com/koliada/FireTasks/issues)
 section, send them to [@alex_koliada](https://twitter.com/alex_koliada) in English
@@ -71,6 +71,12 @@ or send mail concerning Fire Tasks to alex.fiator@gmail.com with 'Fire Tasks' in
 Changelog
 ----------
 <pre>
+v.0.5.1
+- List actions on tap&hold; vibrate on long press (can be disabled in settings)
+- Minor sorting update
+- Refactoring continues
+- Many fixes and improvements
+
 v.0.5
 - Huge refactoring continued
 - Offline storage implemented, immediate UI responsiveness
@@ -83,7 +89,7 @@ v.0.4 (internal)
 v.0.3.1
 - Tablet UI
 
-# v.0.3
+v.0.3
 - Constant tree view mode
 - Rearranging tasks in tree view
 - Mass processing tasks in 'Edit Mode'
@@ -113,6 +119,7 @@ Screenshots
 <img src="https://raw.github.com/koliada/FireTasks/gh-pages/screenshots/firetasks-04-list-actions.png" alt="screenshot4" height="250">&nbsp;
 <img src="https://raw.github.com/koliada/FireTasks/gh-pages/screenshots/firetasks-05-task-list.png" alt="screenshot5" height="250">&nbsp;
 <img src="https://raw.github.com/koliada/FireTasks/gh-pages/screenshots/firetasks-06-edit-mode.png" alt="screenshot6" height="250">&nbsp;
-<img src="https://raw.github.com/koliada/FireTasks/gh-pages/screenshots/firetasks-07-task-form.png" alt="screenshot6" height="250">&nbsp;
-<img src="https://raw.github.com/koliada/FireTasks/gh-pages/screenshots/firetasks-08-settings.png" alt="screenshot6" height="250">&nbsp;
+<img src="https://raw.github.com/koliada/FireTasks/gh-pages/screenshots/firetasks-07-task-form.png" alt="screenshot7" height="250">&nbsp;
+<img src="https://raw.github.com/koliada/FireTasks/gh-pages/screenshots/firetasks-08-settings.png" alt="screenshot8" height="250">&nbsp;
+<img src="https://raw.github.com/koliada/FireTasks/gh-pages/screenshots/firetasks-09-tablet-ui.png" alt="screenshot9" height="250">&nbsp;
 </p>

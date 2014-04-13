@@ -81,7 +81,7 @@ Task.view = (function ($) {
 
 		html +=
 			'<li class="' + completed + 'task-item">\
-				<a href="#" data-id="' + task.id + '">\
+				<a href="#" data-id="' + task.id + '" draggable="false">\
 				<label class="pack-checkbox danger">\
 					<input type="checkbox">\
 					<span></span>\
@@ -150,6 +150,7 @@ Task.view = (function ($) {
 			handle: ".task-handle",
 			axis: "y",
 			placeholder: "sortable-placeholder",
+			scrollSensitivity: 70,
 			update: function (event, ui) {
 				onTaskSort(ui.item[0]);
 				App.setAutoFetch();
@@ -366,7 +367,7 @@ Task.view = (function ($) {
 	 * Is used when there's no tasks in list
 	 */
 	function renderEmptyList() {
-		dom.list.html('<li><a><p style="text-align: center;">This list is empty</p></a></li>');
+		dom.list.html('<li><a draggable="false"><p style="text-align: center;">This list is empty</p></a></li>');
 		EV.fire('tasks-rendered');
 		Task.view.toggleProgress(false);
 	}
@@ -384,9 +385,7 @@ Task.view = (function ($) {
 	 * Fires when anything in the area of main drawer is clicked
 	 */
 	function onDrawerClick() {
-		if (location.hash != '') {
-			location.hash = '';
-		}
+		App.toggleSidebar();
 	}
 
 	/**

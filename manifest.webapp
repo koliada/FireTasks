@@ -1,6 +1,6 @@
 {
-	"version": "0.5",
-	"size": "3642902",
+	"version": "0.5.1",
+	"size": "3386195",
 	"name": "Fire Tasks",
 	"description": "A Google Tasks Client",
 	"launch_path": "/FireTasks/app.html#",

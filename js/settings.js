@@ -24,7 +24,9 @@ window.Settings = (function ($) {
 				email: $('#settings-logout').find('.profile-email'),
 				syncInterval: $('#settings-sync-interval'),
 				syncOnStart: $('#settings-sync-on-start'),
-				reloadTasksOnListOpen: $('#settings-reload-tasks-on-list-open')
+				reloadTasksOnListOpen: $('#settings-reload-tasks-on-list-open'),
+				vibrateOnLongPress: $('#settings-vibrate-on-long-press'),
+				sidebarAnimation: $('#settings-sidebar-animation')
 			}
 		},
 		types = {
@@ -62,6 +64,18 @@ window.Settings = (function ($) {
 				type: types.bool,
 				elType: elTypes.checkbox,
 				default: false
+			},
+			vibrateOnLongPress: {
+				el: dom.fields.vibrateOnLongPress,
+				type: types.bool,
+				elType: elTypes.checkbox,
+				default: true
+			},
+			sidebarAnimation: {
+				el: dom.fields.sidebarAnimation,
+				type: types.bool,
+				elType: elTypes.checkbox,
+				default: true
 			}
 		};
 
@@ -196,7 +210,7 @@ window.Settings = (function ($) {
 			}
 		}
 		Logger.info('All options saved');
-		App.setAutoFetch();
+		EV.fire('options-saved');
 	}
 
 	/**
