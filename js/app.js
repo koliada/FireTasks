@@ -11,7 +11,7 @@ window.App = (function($) {
 
 	'use strict';
 
-	var version = '0.5.1',
+	var version = '0.5.2',
 		actions = {
 			'MAIN_QUEUE': 'mainQueue'
 		},
@@ -75,7 +75,9 @@ window.App = (function($) {
 		 * @reference http://www.html5rocks.com/en/tutorials/appcache/beginner/
 		 */
 		window.applicationCache.addEventListener('updateready', function (e) {
-			if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
+			if (window.applicationCache.status == window.applicationCache.UPDATEREADY ||
+				window.applicationCache.status == window.applicationCache.IDLE ||
+				window.applicationCache.status == window.applicationCache.UNCACHED) {
 
 				localStorage.setItem('whatsNewShown', false);
 				localStorage.setItem('instructionalOverlayShown', false);
@@ -88,6 +90,10 @@ window.App = (function($) {
 				// Manifest didn't changed. Nothing new to server.
 			}
 		}, false);
+
+		window.applicationCache.addEventListener('error', function () {
+			utils.status.show('A cache error occurred');
+		});
 	}
 
 	/**
@@ -589,6 +595,14 @@ window.App = (function($) {
 			} else {
 				document.getElementById('drawer').classList.remove('animate');
 			}*/
+		},
+
+		/**
+		 * Parses version number to integer number
+		 * @returns {Number}
+		 */
+		getVersionInteger: function () {
+			return parseInt(App.version.replace(/\./g, ''));
 		},
 
 		showInstructionalOverlay: showInstructionalOverlay

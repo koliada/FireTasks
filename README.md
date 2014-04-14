@@ -18,7 +18,7 @@ Features
 Although Fire Tasks is in an early beta and does not have many useful features,
 it is functional and surely can bring you relief if you tend to use Google Tasks on other platforms.
 
-Version 0.5.1 provides:
+Version 0.5.2 provides:
 
 - Authentication with the Google Tasks API
 - Retrieving task lists and tasks
@@ -45,8 +45,11 @@ Known issues
 ------------
 
 I still have issues with Google OAuth, so sometimes issues of any kind may occur.
-If you observe any abnormal behaviour, press the 'refresh' button in the sidebar to force re-sync local data.
+If you observe any abnormal behaviour, press the 'refresh' button in the sidebar to force re-sync local data (reloads lists and active list tasks).
 If it doesn't help, restart the app.
+
+If you suspect that app was not completely updated to the newest version, go to Settings and hit 'Force update'
+(seems like this operation won't work on Firefox OS due to security policy).
 
 Another issue is performance. There are two performance bottlenecks:
 
@@ -71,6 +74,11 @@ or send mail concerning Fire Tasks to alex.fiator@gmail.com with 'Fire Tasks' in
 Changelog
 ----------
 <pre>
+v.0.5.2
+- Same features that 0.5.1 provides
+- Better version updating
+- Setting for force update
+
 v.0.5.1
 - List actions on tap&hold; vibrate on long press (can be disabled in settings)
 - Minor sorting update

@@ -22,6 +22,7 @@ window.Settings = (function ($) {
 			fields: {
 				logout: $('#settings-logout'),
 				email: $('#settings-logout').find('.profile-email'),
+				clearCache: $('#settings-clear-cache'),
 				syncInterval: $('#settings-sync-interval'),
 				syncOnStart: $('#settings-sync-on-start'),
 				reloadTasksOnListOpen: $('#settings-reload-tasks-on-list-open'),
@@ -141,6 +142,7 @@ window.Settings = (function ($) {
 		dom.btnOpen.on('click', showLayout);
 		dom.btnClose.on('click', hideLayout);
 		dom.fields.logout.on('click', onLogout);
+		dom.fields.clearCache.on('click', onClearCache);
 	}
 
 	/**
@@ -239,7 +241,6 @@ window.Settings = (function ($) {
 	 */
 	function onLogout(ev) {
 		ev.preventDefault();
-
 		var data = {
 			h1: 'Log Out',
 			p: 'Revoke access given to a Fire Tasks?',
@@ -249,7 +250,36 @@ window.Settings = (function ($) {
 				Auth.revokeToken();
 			}
 		};
+		App.confirm(data);
+	}
 
+	/**
+	 * Tries to reload application cache
+	 * @param ev
+	 */
+	function onClearCache(ev) {
+		ev.preventDefault();
+		function onNoUpdate() {
+			utils.status.show('No new version available');
+		}
+
+		window.applicationCache.addEventListener('noupdate', onNoUpdate);
+		var data = {
+			h1: 'Force update',
+			p: 'Clear cache and try to download latest version?',
+			cancel: 'Cancel',
+			ok: 'Confirm',
+			action: function () {
+				try {
+					window.applicationCache.update();
+					setTimeout(function () {
+						window.applicationCache.removeEventListener('noupdate', onNoUpdate);
+					}, 1000);
+				} catch (e) {
+					utils.status.show('An error occurred');
+				}
+			}
+		};
 		App.confirm(data);
 	}
 

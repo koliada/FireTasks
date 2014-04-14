@@ -5,6 +5,7 @@ Features
 - Task list sharing
 - Multiple accounts
 - Theme switching (light/dark)
+- Force update (currently not working on Firefox OS)
 
 
 Bugs
