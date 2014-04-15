@@ -11,6 +11,8 @@ A Google Tasks client for Firefox OS
 As there is no native Firefox OS Google Tasks client except their ugly online app, I made this one.
 Fire Tasks provides basic capabilities to work with your tasks and is aimed to bring Google Tasks into Firefox OS's ecosystem.
 
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/koliada/firetasks/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
 
 Features
 --------
