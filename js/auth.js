@@ -231,7 +231,6 @@ var Auth = {
 					callback_success(false, jqXHR, textStatus, errorThrown);
 				}
 			});
-
 		});
 	},
 

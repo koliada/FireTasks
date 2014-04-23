@@ -20,7 +20,7 @@ Features
 Although Fire Tasks is in an early beta and does not have many useful features,
 it is functional and surely can bring you relief if you tend to use Google Tasks on other platforms.
 
-Version 0.5.2 provides:
+Version 0.5.3 provides:
 
 - Authentication with the Google Tasks API
 - Retrieving task lists and tasks
@@ -76,6 +76,11 @@ or send mail concerning Fire Tasks to alex.fiator@gmail.com with 'Fire Tasks' in
 Changelog
 ----------
 <pre>
+v.0.5.3
+- Same features that 0.5.1 provides
+- Source files minified
+- Analytics code added
+
 v.0.5.2
 - Same features that 0.5.1 provides
 - Better version updating

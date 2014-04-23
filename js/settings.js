@@ -43,40 +43,40 @@ window.Settings = (function ($) {
 		},
 		options = {
 			email: {
-				el: dom.fields.email,
-				type: types.string,
-				elType: elTypes.container,
-				default: ''
+				'el': dom.fields.email,
+				'type': types.string,
+				'elType': elTypes.container,
+				'default': ''
 			},
 			syncInterval: {
-				el: dom.fields.syncInterval,
-				type: types.integer,
-				elType: elTypes.select,
-				default: 0
+				'el': dom.fields.syncInterval,
+				'type': types.integer,
+				'elType': elTypes.select,
+				'default': 0
 			},
 			syncOnStart: {
-				el: dom.fields.syncOnStart,
-				type: types.bool,
-				elType: elTypes.checkbox,
-				default: false
+				'el': dom.fields.syncOnStart,
+				'type': types.bool,
+				'elType': elTypes.checkbox,
+				'default': false
 			},
 			reloadTasksOnListOpen: {
-				el: dom.fields.reloadTasksOnListOpen,
-				type: types.bool,
-				elType: elTypes.checkbox,
-				default: false
+				'el': dom.fields.reloadTasksOnListOpen,
+				'type': types.bool,
+				'elType': elTypes.checkbox,
+				'default': false
 			},
 			vibrateOnLongPress: {
-				el: dom.fields.vibrateOnLongPress,
-				type: types.bool,
-				elType: elTypes.checkbox,
-				default: true
+				'el': dom.fields.vibrateOnLongPress,
+				'type': types.bool,
+				'elType': elTypes.checkbox,
+				'default': true
 			},
 			sidebarAnimation: {
-				el: dom.fields.sidebarAnimation,
-				type: types.bool,
-				elType: elTypes.checkbox,
-				default: true
+				'el': dom.fields.sidebarAnimation,
+				'type': types.bool,
+				'elType': elTypes.checkbox,
+				'default': true
 			}
 		};
 
@@ -154,7 +154,7 @@ window.Settings = (function ($) {
 			if (options.hasOwnProperty(option)) {
 				value = Settings.get(option);
 				if (value === null || typeof value === 'undefined') {
-					Settings.set(option, options[option].default);
+					Settings.set(option, options[option]['default']);
 				}
 			}
 		}
@@ -303,13 +303,13 @@ window.Settings = (function ($) {
 				return null;
 			}
 			switch (options[key].type) {
-				case types.integer:
+				case types['integer']:
 					return parseInt(value);
-				case types.float:
+				case types['float']:
 					return parseFloat(value);
-				case types.bool:
+				case types['bool']:
 					return (value === 'true');
-				case types.string:
+				case types['string']:
 					return value;
 			}
 		},
