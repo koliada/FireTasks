@@ -92,6 +92,8 @@
  *
  * Also, action-independent Sync.onError is available:
  *        Sync.onError( [object] eventDetails ) Fires on any error occurred
+ *
+ * In case of errors it could be useful to call Sync.clearStorage() so that failed tasks won't be queued again
  */
 
 ;
@@ -127,7 +129,6 @@
 
 	/**
 	 * Handles events
-	 *
 	 * @param eventType {String}
 	 * @param eventDetails {Object}
 	 */
@@ -155,7 +156,6 @@
 
 	/**
 	 * Provides object-to-array conversion for methods which expect arrays
-	 *
 	 * @param {*} obj
 	 * @returns {Array}
 	 */
@@ -170,7 +170,6 @@
 
 	/**
 	 * Reads and writes Queue data within localStorage
-	 *
 	 * @param {Object} [data] Data to be written to Storage; Skip to get data
 	 * @returns {*}
 	 */
@@ -190,9 +189,16 @@
 
 
 	/**
+	 * Clears Queue stored within localStorage
+	 */
+	function clearStorage() {
+		localStorage.removeItem(STORAGE_VAR);
+	}
+
+
+	/**
 	 * Gets stored Queue and pushes it to the current Queue
 	 * Excludes recently added Tasks
-	 *
 	 * @returns {undefined}
 	 */
 	function getStoredTasks() {
@@ -218,7 +224,6 @@
 
 	/**
 	 * Returns unique id based on timestamp
-	 *
 	 * @returns {number}
 	 */
 	function getUniqueId() {
@@ -241,7 +246,6 @@
 
 		/**
 		 * Returns Action by name or all Actions if no <actionName> passed
-		 *
 		 * @param {String} actionName
 		 * @returns {Object|undefined}
 		 */
@@ -271,7 +275,6 @@
 
 		/**
 		 * Sets Action <actionName> with <actionData>
-		 *
 		 * @param {String} actionName
 		 * @param {Function} actionHandler
 		 * @returns {Function}
@@ -321,7 +324,6 @@
 
 	/**
 	 * Overrides default Storage key name
-	 *
 	 * @param {String} name
 	 * @returns {boolean}
 	 */
@@ -336,7 +338,6 @@
 
 	/**
 	 * Sets logging level
-	 *
 	 * @param {String} level ALL|WARNING|ERROR
 	 */
 	sync.setLogLevel = function (level) {
@@ -355,7 +356,6 @@
 
 	/**
 	 * Adds, gets or removes actions
-	 *
 	 * @param {String} [actionName] Name of the Action to be retrieved; Skip to retrieve all actions from Actions Storage
 	 * @param {Function} [actionHandler] Handler to be assigned to Action <actionName>; 'null' to remove Action <actionName> from Actions Storage
 	 * @returns {*}
@@ -377,7 +377,6 @@
 
 	/**
 	 * Sets default handler for Actions in Actions Storage
-	 *
 	 * @param {Function} func
 	 * @returns {Boolean}
 	 */
@@ -392,7 +391,6 @@
 
 	/**
 	 * Adds task to Tasks Queue
-	 *
 	 * @param {Object|Array|String} param Object or array of objects to add to Tasks Queue; ID of the Task to get; Skip to get all
 	 *    {
 	 * 		{String}   actionName: <Name of the corresponding Action>,
@@ -468,7 +466,6 @@
 
 	/**
 	 * Starts synchronization
-	 *
 	 * @param {String} actionName
 	 * @returns {undefined}
 	 */
@@ -572,7 +569,6 @@
 
 	/**
 	 * Pauses running Queue of the Action <actionName>
-	 *
 	 * @param {String} actionName
 	 * @returns {undefined}
 	 */
@@ -598,7 +594,6 @@
 
 	/**
 	 * Resumes paused Queue of the Action <actionName>
-	 *
 	 * @param {String} actionName
 	 * @returns {undefined}
 	 */
@@ -631,4 +626,10 @@
 			});
 		}
 	};
+
+	/**
+	 * Alias for internal clearing of the stored Queue
+	 * @type {clearStorage}
+	 */
+	sync.clearStorage = clearStorage;
 }));

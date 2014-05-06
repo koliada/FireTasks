@@ -11,7 +11,7 @@ window.App = (function($) {
 
 	'use strict';
 
-	var version = '0.5.3',
+	var version = '0.5.4',
 		actions = {
 			'MAIN_QUEUE': 'mainQueue'
 		},
@@ -202,6 +202,7 @@ window.App = (function($) {
 				clearInterval(syncErrorsListenerInterval);
 				unrecoverableErrorOccurred = true;
 				Sync.pause(actions.MAIN_QUEUE);
+				Sync.clearStorage();
 				List.pauseSync();
 				var blob = new Blob([JSON.stringify(syncErrors)], {type: 'text/plain'}),
 					blobURL = window.URL.createObjectURL(blob),

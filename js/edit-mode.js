@@ -214,6 +214,7 @@ window.EditMode = (function ($) {
 			return;
 		}
 
+		setButtonsDisabled(true);
 		EditMode.preventDisabling(true);
 		iterate(ids);
 
@@ -256,6 +257,7 @@ window.EditMode = (function ($) {
 				} else {
 					App.startSyncQueue();
 					EditMode.preventDisabling(false);
+					setButtonsDisabled(false);
 				}
 			}
 		}
@@ -313,6 +315,24 @@ window.EditMode = (function ($) {
 	 */
 	function showNoTasksSelectedMessage() {
 		utils.status.show('No tasks were selected', 1000);
+	}
+
+	/**
+	 * Disables or enables Edit Mode's buttons
+	 * @param {Boolean} disable
+	 */
+	function setButtonsDisabled(disable) {
+		if (disable) {
+			dom.btnIndent[0].disabled = true;
+			dom.btnUnindent[0].disabled = true;
+			dom.btnMove[0].disabled = true;
+			dom.btnDelete[0].disabled = true;
+		} else {
+			dom.btnIndent[0].disabled = false;
+			dom.btnUnindent[0].disabled = false;
+			dom.btnMove[0].disabled = false;
+			dom.btnDelete[0].disabled = false;
+		}
 	}
 
 
