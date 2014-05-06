@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# version 0.5.4.2014.0506.1
+# version 0.5.4.2014.0506.2
 
 CACHE:
 app.html
@@ -42,25 +42,24 @@ fonts/FiraSans/FiraSans-Regular.woff
 icons/styles/action_icons.css
 icons/styles/action_icons.png
 
-js/lib/event-processor.js
-js/lib/google-oauth2.js
-js/lib/jquery.ui.touch-punch.js
+js/lib/event-processor.min.js
+js/lib/google-oauth2.min.js
+js/lib/jquery.ui.touch-punch.min.js
 js/lib/jquery-2.1.0.min.js
 js/lib/jquery-ui-1.10.3.custom.min.js
 js/lib/localforage.min.js
-js/lib/longpress.js
-js/lib/sync.js
+js/lib/longpress.min.js
+js/lib/sync.min.js
 
-js/action_menu.js
-js/app.js
-js/auth.js
-js/edit-mode.js
-js/list.js
-js/list.view.js
-js/settings.js
-js/status.js
-js/task.js
-js/task.view.js
+js/app.min.js
+js/auth.min.js
+js/edit-mode.min.js
+js/list.min.js
+js/list.view.min.js
+js/settings.min.js
+js/status.min.js
+js/task.min.js
+js/task.view.min.js
 
 
 # generated
