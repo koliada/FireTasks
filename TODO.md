@@ -19,10 +19,10 @@ Improvements
 ------------
 - A setting for disabling sidebar animation (to increase performance)
 - Push notifications / background synchronizing
-- Stretching task to display full contents
+- <s>Stretching task to display full contents</s>
 - Better drag&drop
 - Localization
 - Long press on task list
-- Automatically scroll lists to top on activate
+- Automatically scroll lists and forms to top on activate
 - Better authentication and requests processing
 - Make first input active on forms activation
