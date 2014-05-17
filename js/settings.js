@@ -58,13 +58,13 @@ window.Settings = (function ($) {
 				'el': dom.fields.syncOnStart,
 				'type': types.bool,
 				'elType': elTypes.checkbox,
-				'default': false
+				'default': true
 			},
 			reloadTasksOnListOpen: {
 				'el': dom.fields.reloadTasksOnListOpen,
 				'type': types.bool,
 				'elType': elTypes.checkbox,
-				'default': false
+				'default': true
 			},
 			vibrateOnLongPress: {
 				'el': dom.fields.vibrateOnLongPress,

@@ -11,7 +11,7 @@ window.App = (function($) {
 
 	'use strict';
 
-	var version = '0.5.4',
+	var version = '0.5.5',
 		actions = {
 			'MAIN_QUEUE': 'mainQueue'
 		},

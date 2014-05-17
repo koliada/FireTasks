@@ -152,7 +152,7 @@ window.List = function () {
 		}
 		onStartRefreshTimeout = setTimeout(function () {
 			List.getList();
-		}, 1000);
+		}, 2000);
 	}
 
 

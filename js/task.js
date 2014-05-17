@@ -532,7 +532,7 @@ window.Task = (function ($) {
 			tasksRefreshTimeout = setTimeout(function () {
 				App.setAutoFetch();
 				Task.getList(list);
-			}, 1000);
+			}, 1500);
 		},
 
 		/**
