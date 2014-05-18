@@ -59,7 +59,7 @@ window.Longpress = (function() {
 
 				longPressTimeout = setTimeout(function () {
 					if (Settings.get('vibrateOnLongPress')) {
-						window.navigator.vibrate(100);
+						window.navigator.vibrate(80);
 					}
 					target.classList.add('longpress-ready');
 				}, delay);

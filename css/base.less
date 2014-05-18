@@ -480,8 +480,11 @@ body {
 	}
 
 	/* Select */
+	span.button.icon.icon-dialog {
+		overflow: hidden;
+	}
 	select {
-		width: 100% !important;
+		width: calc(~"100% - -1.8rem") !important; // workaround for compressor removes the spaces if using '+' operator
 		background: transparent;
 		border: none;
 		-webkit-appearance: none;
@@ -489,15 +492,14 @@ body {
 		appearance: none;
 		/* Hacks */
 		text-indent: 0.01px;
-		text-overflow: '';
+		text-overflow: ellipsis;
 
-		position: absolute;
 		top: 0;
-		right: 0;
-		bottom: 0;
 		left: 0;
-		//width: calc(100% + 1rem) !important;
-		padding: 0.8rem 1rem 0;
+		padding: 1rem 0 0 1rem;
+		position: absolute;
+		height: 100%;
+		line-height: 1.8rem;
 		font-size: 1.7rem;
 		font-weight: 500;
 	}

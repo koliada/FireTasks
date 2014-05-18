@@ -12,7 +12,7 @@ Bugs
 ----
 - Long press event sometimes calls click event too
 - Chrome cancel button displaying issues (dialogs)
-- Dropdowns displaying issues (hide arrows)
+- <s>Dropdowns displaying issues (hide arrows)</s>
 - Offline work: restoring task queue from storage
 
 Improvements
