@@ -90,7 +90,7 @@ Task.view = (function ($) {
 					<input type="checkbox" ' + checked + '>\
 					<span></span>\
 				</label>\
-				<div class="clickable"><p class="item-title">' + task.title + '</p>' +
+				<div class="clickable"><p class="item-title"><span>' + task.title + '</span></p>' +
 			notes +
 			'</div>' + handle + '</a>\
 			<ol>';

@@ -198,16 +198,14 @@ body {
 								div.clickable {
 									padding-left: 4rem;
 									padding-right: 4rem;
-									height: 4rem;
-									padding-bottom: 0.2rem;
 									min-height: 5.8rem;
-									display: table;
 									width: calc(~'100% - 8rem');
 
 									p {
 										white-space: normal;
 										&.item-notes {
 											font-size: 1.4rem;
+											white-space: nowrap;
 										}
 
 										.item-children-num {
@@ -215,10 +213,15 @@ body {
 										}
 
 										&:only-child {
-											line-height: 2.2rem;
-											padding-bottom: 0.6rem;
-											display: table-cell;
-											vertical-align: middle;
+											display: table;
+											height: 5.6rem;
+											padding: 0 0 0.4rem 0;
+											span {
+												line-height: 2.2rem;
+												padding-top: 0.6rem;
+												display: table-cell;
+												vertical-align: middle;
+											}
 										}
 									}
 								}
@@ -500,6 +503,8 @@ body {
 		position: absolute;
 		height: 100%;
 		line-height: 1.8rem;
+		//width: calc(100% + 1rem) !important;
+		//padding: 0.8rem 1rem 0;
 		font-size: 1.7rem;
 		font-weight: 500;
 	}
