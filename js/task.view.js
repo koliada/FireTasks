@@ -24,7 +24,7 @@ Task.view = (function ($) {
 			list: $('#tasks').find('ol').first(),
 			form: $('#task-form'),
 			progressBar: $('#progress-tasks'),
-			btnEditMode: $('#btn-edit-tasks'),
+			btnActions: $('#btn-tasks-actions'),
 			btnNewTask: $('#btn-new-task'),
 			btnBack: $('#btn-task-form-back'),
 			btnOk: $('#btn-task-form-ok'),
@@ -48,7 +48,9 @@ Task.view = (function ($) {
 		/* List actions and buttons */
 		dom.drawer.on('click', onDrawerClick);
 		dom.list.on('change', '.pack-checkbox:not(.danger) input[type="checkbox"]', onToggleCompleted);
-		dom.list.on('click', 'a div.clickable', onEditTask);
+		dom.btnActions.on('click', function() {
+			App.showInDevelopmentTooltip();
+		});
 		dom.btnNewTask.on('click', onNewTask);
 		dom.btnDelete.on('click', onDeleteTask);
 
@@ -65,45 +67,50 @@ Task.view = (function ($) {
 	}
 
 	/**
-	 * Builds HTML for given task resource
+	 * Builds element for given task resource
 	 * @param {Object} task
-	 * @returns {String}
+	 * @returns {Element}
 	 */
-	function getNodeHtml(task) {
+	function createNode(task) {
 
-		var completed = (task.status === 'completed') ? 'completed ' : '',
-			checked = (task.status === 'completed') ? 'checked' : '',
-			due = (typeof task.due === 'undefined') ? '' : '<span class="item-due">Due date: ' + task.due + '</span>', /* TODO: due date */
-			notes = (!task.notes || task.notes == '') ? '' : '<p class="item-notes">' /*+ due*/ + task.notes + '</p>',
-			handle = '<label class="task-handle"><div class="action-icon menu"></div></label>';
+		var li = document.createElement('li'),
+			a = document.createElement('a'),
+			labelCheckbox = document.createElement('label'),
+			labelCheckboxDanger = document.createElement('label'),
+			divClickable = document.createElement('div'),
+			labelHandle = document.createElement('label'),
+			olInner = document.createElement('ol');
 
-		var html = '';
-
-		html +=
-			'<li class="' + completed + 'task-item">\
-				<a href="#" data-id="' + task.id + '" draggable="false">\
-				<label class="pack-checkbox danger">\
-					<input type="checkbox">\
-					<span></span>\
-				</label>\
-				<label class="pack-checkbox">\
-					<input type="checkbox" ' + checked + '>\
-					<span></span>\
-				</label>\
-				<div class="clickable"><p class="item-title"><span>' + task.title + '</span></p>' +
-			notes +
-			'</div>' + handle + '</a>\
-			<ol>';
-
+		li.classList.add('task-item');
+		if (task.status === 'completed') {
+			li.classList.add('completed');
+		}
+		//a.href = '#';
+		a.dataset.id = task.id;
+		a.setAttribute('draggable', 'false');
+		labelCheckboxDanger.className = 'pack-checkbox danger';
+		labelCheckboxDanger.innerHTML = '<input type="checkbox"><span></span>';
+		labelCheckbox.className = 'pack-checkbox';
+		labelCheckbox.innerHTML = '<input type="checkbox" ' + ((task.status === 'completed') ? 'checked' : '') + '><span></span>';
+		divClickable.classList.add('clickable');
+		divClickable.innerHTML = '<p class="item-title"><span>' + task.title + '</span></p>' +
+			((!task.notes || task.notes == '') ? '' : '<p class="item-notes">' + task.notes + '</p>');
+		Longpress.bindLongPressHandler(divClickable, 400, onLongPress, onEditTask, EditMode.isEnabled);
+		labelHandle.classList.add('task-handle');
+		labelHandle.innerHTML = '<div class="action-icon menu"></div>';
 		if (typeof task.children !== 'undefined' && task.children.length !== 0) {
-			$.each(task.children, function (index, child) {
-				html += getNodeHtml(child);
+			task.children.forEach(function(child) {
+				olInner.appendChild(createNode(child));
 			});
 		}
+		a.appendChild(labelCheckboxDanger);
+		a.appendChild(labelCheckbox);
+		a.appendChild(divClickable);
+		a.appendChild(labelHandle);
+		li.appendChild(a);
+		li.appendChild(olInner);
 
-		html += '</ol></li>';
-
-		return html;
+		return li;
 	}
 
 	/**
@@ -307,7 +314,7 @@ Task.view = (function ($) {
 	function updateNode(task) {
 		try {
 			var oldNode = dom.list.find('a[data-id="' + task.id + '"]').parent('li')[0],
-				newNode = $(getNodeHtml(task))[0];
+				newNode = createNode(task);
 			oldNode.parentNode.replaceChild(newNode, oldNode);
 		} catch (e) {
 		}
@@ -350,13 +357,17 @@ Task.view = (function ($) {
 			return;
 		}
 
-		dom.list.html('');
-		var listItems = '';
-		$.each(items, function (index, item) {
-			listItems += getNodeHtml(item);
+		var domList = dom.list[0];
+		domList.innerHTML = '';
+
+		items.forEach(function(task) {
+			domList.appendChild(createNode(task));
 		});
-		listItems += '<br />';
-		dom.list.append(listItems);
+
+		for (var i = 0; i < 2; i++) {
+			domList.appendChild(document.createElement('br'));
+		}
+
 		Task.view.toggleProgress(false);
 		bindSortable();
 		EV.fire('tasks-rendered');
@@ -456,12 +467,14 @@ Task.view = (function ($) {
 
 	/**
 	 * Prepares task editing form
+	 * @param {Event} ev
 	 */
-	function onEditTask() {
+	function onEditTask(ev) {
 
 		/* Edit mode doesn't need task editing */
-		var editMode = $(this).siblings('.danger').first(),
-			taskId = $(this).parent('a')[0].dataset.id;
+		var el = ev.currentTarget,
+			editMode = $(el).siblings('.danger').first(),
+			taskId = $(el).parent('a')[0].dataset.id;
 		if (editMode.is(':visible')) {
 			App.switchCheckbox(editMode.find('input[type="checkbox"]'));
 			return;
@@ -484,6 +497,14 @@ Task.view = (function ($) {
 				console.error(e);
 			}
 		}
+	}
+
+	function onLongPress(ev) {
+		var el = ev.currentTarget;
+		Task.storage.get(null, el.parentElement.dataset.id, function(task) {
+			EditMode.enable();
+			EditMode.selectNode(task.id, true);
+		});
 	}
 
 	/**
@@ -564,7 +585,7 @@ Task.view = (function ($) {
 		 * @param {Boolean} show
 		 */
 		toggleProgress: function (show) {
-			dom.btnEditMode.prop('disabled', show);
+			dom.btnActions.prop('disabled', show);
 			if (show) {
 				dom.progressBar.show();
 			} else {

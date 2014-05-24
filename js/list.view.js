@@ -170,7 +170,7 @@ if (window.List) window.List.view = (function($) {
 	}
 
 	/**
-	 * Creates HTML for given item
+	 * Creates element for given item
 	 * @param {Object} list
 	 * @returns {Element}
 	 */
@@ -185,7 +185,7 @@ if (window.List) window.List.view = (function($) {
 		if (list.selected) {
 			a.classList.add('list-selected');
 		}
-		Longpress.bindLongPressHandler(a, 400, showActionChooser, openList/*, bindActionChooserButtonsClick, unbindActionChooserButtonsClick*/);
+		Longpress.bindLongPressHandler(a, 400, showActionChooser, openList);
 		li.classList.add('list-item');
 		li.appendChild(a);
 		return li;
@@ -201,7 +201,7 @@ if (window.List) window.List.view = (function($) {
 		domList.innerHTML = '';
 
 		items.forEach(function(list) {
-			domList.appendChild(createNode(list)); // rename
+			domList.appendChild(createNode(list));
 		});
 
 		for (var i = 0; i < 4; i++) {
@@ -298,7 +298,7 @@ if (window.List) window.List.view = (function($) {
 	 * @param ev
 	 */
 	function showActionChooser(ev) {
-		var el = ev.target;
+		var el = ev.currentTarget;
 		List.storage.get(el.dataset.id, function (list) {
 			actionChooserList = list;
 			dom.actionChooser.find('header')[0].innerHTML = list.title;

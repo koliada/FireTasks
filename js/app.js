@@ -11,7 +11,7 @@ window.App = (function($) {
 
 	'use strict';
 
-	var version = '0.5.5',
+	var version = '0.5.6',
 		actions = {
 			'MAIN_QUEUE': 'mainQueue'
 		},
@@ -237,19 +237,29 @@ window.App = (function($) {
 
 	function showInstructionalOverlay() {
 		var overlayEl = $('#instructional-overlay')[0],
-			ctx = overlayEl.querySelector('canvas').getContext('2d');
+			canvasEl = overlayEl.querySelector('canvas'),
+			ctx = canvasEl.getContext('2d'),
+			tasksActionsCls = 'show-tasks-actions',
+			types = {
+				list: 'LIST',
+				task: 'TASK'
+			};
 
-		function getListXY() {
-			var el = List.view.getListEl()[0];
+		function findPos(type) {
+			var el = (type === types.list) ? List.view.getListEl()[0] : Task.view.getListEl()[0];
+			var rect = el.getBoundingClientRect();
 			return {
-				x: el.offsetLeft,
-				y: el.offsetTop
-			}
+				x: rect.left,
+				y: rect.top
+			};
 		}
 
 		function hideOverlay() {
+			App.toggleSidebar(true);
 			overlayEl.classList.remove('fade-in');
+			canvasEl.classList.remove(tasksActionsCls);
 			overlayEl.classList.add('fade-out');
+			overlayEl.removeEventListener('click', hideOverlay);
 		}
 
 		function showOverlay() {
@@ -258,11 +268,11 @@ window.App = (function($) {
 			overlayEl.classList.add('fade-in');
 		}
 
-		function drawCanvas() {
-			var listXY = getListXY(),
+		function drawCanvas(type) {
+			var targetXY = findPos(type),
 				radius = 8,
-				circleX = listXY.x + radius + 120,
-				circleY = listXY.y + radius + 14,
+				circleX = targetXY.x + radius + ((type === types.list) ? 120 : 160),
+				circleY = targetXY.y + radius + ((type === types.list) ? 14 : 22),
 				line1Length = 80,
 				line1 = {
 					x: circleX + line1Length,
@@ -277,7 +287,8 @@ window.App = (function($) {
 				text1 = {
 					x: line2.x - 180,
 					y: line2.y + text1Height + 6
-				};
+				},
+				label = (type === types.list) ? "Tap & hold to get list actions" : "Tap & hold to enter Edit Mode";
 			ctx.beginPath();
 			ctx.arc(circleX, circleY, radius, 0, Math.PI * 2);
 			ctx.lineTo(line1.x, line1.y);
@@ -287,13 +298,25 @@ window.App = (function($) {
 			ctx.lineJoin = 'round';
 			ctx.font = text1Height + 'px FiraSans';
 			ctx.fillStyle = "#FFF";
-			ctx.fillText("Tap & hold to get list actions", text1.x, text1.y);
+			ctx.fillText(label, text1.x, text1.y);
 			ctx.stroke();
 		}
 
-		overlayEl.addEventListener('click', hideOverlay);
+		function invokePhoneLayout() {
+			drawCanvas(types.task);
+			App.toggleSidebar(false);
+			canvasEl.classList.add(tasksActionsCls);
+			overlayEl.addEventListener('click', hideOverlay);
+			overlayEl.removeEventListener('click', invokePhoneLayout);
+		}
 
-		drawCanvas();
+		if (App.getBodySize().width >= 1280) {
+			overlayEl.addEventListener('click', hideOverlay);
+		} else {
+			overlayEl.addEventListener('click', invokePhoneLayout);
+		}
+
+		drawCanvas(types.list);
 		showOverlay();
 	}
 
@@ -606,7 +629,14 @@ window.App = (function($) {
 			return parseInt(App.version.replace(/\./g, ''));
 		},
 
-		showInstructionalOverlay: showInstructionalOverlay
+		showInstructionalOverlay: showInstructionalOverlay,
+
+		getBodySize: function () {
+			return {
+				width: window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth || 0,
+				height: window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || 0
+			};
+		}
 	};
 
 }(jQuery));

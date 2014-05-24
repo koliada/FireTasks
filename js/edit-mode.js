@@ -6,8 +6,8 @@
 
 /**
  * Edit Mode
- * Handles operations made in so call 'Edit Mode'
- * Also handles representation operations
+ * Handles operations made in so called 'Edit Mode'
+ * Also handles layout
  */
 window.EditMode = (function ($) {
 
@@ -16,7 +16,6 @@ window.EditMode = (function ($) {
 	var dom = {
 			el: $('#edit-mode'),
 			list: Task.view.getListEl(),
-			btnEnable: $('#btn-edit-tasks'),
 			btnDisable: $('#btn-edit-mode-close'),
 			btnDelete: $('#btn-delete-tasks'),
 			btnMove: $('#btn-move-tasks'),
@@ -30,7 +29,6 @@ window.EditMode = (function ($) {
 
 	function setListeners() {
 		/* Activation */
-		dom.btnEnable.on('click', EditMode.enable);
 		dom.btnDisable.on('click', EditMode.disable);
 
 		/* Checking in Edit Mode */
@@ -45,10 +43,16 @@ window.EditMode = (function ($) {
 
 	/**
 	 * Handles tasks selecting
+	 * @param {Element} [el]
 	 */
-	function onCheck() {
+	function onCheck(el) {
+		el = el.currentTarget || el;
 		var checked = Task.view.getCheckedItems();
-		toggleSelected($(this).parents('a').first());
+		if (checked.length === 0) {
+			EditMode.disable();
+			return;
+		}
+		toggleSelected($(el).parents('a').first());
 		updateCheckedCounter(checked.length);
 	}
 
@@ -57,11 +61,7 @@ window.EditMode = (function ($) {
 	 * @param {jQuery} a Node
 	 */
 	function toggleSelected(a) {
-		if (!a.hasClass(CLASS_SELECTED)) {
-			a.addClass(CLASS_SELECTED);
-		} else {
-			a.removeClass(CLASS_SELECTED);
-		}
+		a[0].classList.toggle(CLASS_SELECTED);
 	}
 
 	/**
@@ -286,15 +286,12 @@ window.EditMode = (function ($) {
 	 */
 	function toggleListView(p) {
 		if (p) {
-			// TODO: use JS
-			dom.list.append('<li class="dummy"></li>');	// needed for scrolling to the last task of the list
 			// TODO: animation (ex. sliding)
 			dom.list.find('.danger').show();
 			dom.list.find('.pack-checkbox:not(.danger)').hide();
 			dom.list.addClass('edit-mode');
 		} else {
 			dom.list.find('.danger').hide().find('input[type="checkbox"]').prop('checked', false);
-			dom.list.find('.dummy').remove();
 			dom.list.find('.pack-checkbox:not(.danger)').show();
 			dom.list.find('.' + CLASS_SELECTED).removeClass(CLASS_SELECTED);
 			Task.view.getCheckedItems(); // TODO: replace with normal setter/emptier
@@ -360,12 +357,22 @@ window.EditMode = (function ($) {
 			hideOverlay();
 		},
 
+		isEnabled: function () {
+			return enabled;
+		},
+
 		/**
 		 * Prevents Edit Mode of being disabled
 		 * @param {Boolean} v
 		 */
 		preventDisabling: function (v) {
 			preventDisabling = v;
+		},
+
+		selectNode: function (taskId, checked) {
+			var el = dom.list[0].querySelector('a[data-id="'+ taskId +'"]').querySelector('.pack-checkbox.danger input[type="checkbox"]');
+			el.checked = Boolean(checked);
+			onCheck(el);
 		}
 	}
 

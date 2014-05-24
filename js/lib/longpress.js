@@ -11,6 +11,7 @@ window.Longpress = (function() {
 
 	var longPressTimeout = null,
 		longPressStarted = false,
+		longPressPrevented = false,
 		defaultDelay = 400,
 		allowedMoveDistance = 5,
 		startTime,
@@ -23,12 +24,14 @@ window.Longpress = (function() {
 		 * @param {Number} [delay]
 		 * @param {Function} [onLongPress] callback to be called on long press; function(event, targetElement)
 		 * @param {Function} [onClick] callback to be called on click; function(event, targetElement)
+		 * @param {Function} [preventConditionCallback] callback to be called to check whether londpress should be suppressed
 		 */
-		bindLongPressHandler: function (target, delay, onLongPress, onClick) {
+		bindLongPressHandler: function (target, delay, onLongPress, onClick, preventConditionCallback) {
 
 			var startPosition = {};
 
 			delay = parseInt(delay) || defaultDelay;
+			preventConditionCallback = (typeof preventConditionCallback === 'function') ? preventConditionCallback : function() {return false;};
 
 			target.addEventListener('touchstart', onStart, false);
 			target.addEventListener('mousedown', onStart, false);
@@ -57,6 +60,13 @@ window.Longpress = (function() {
 					target.addEventListener('mouseup', onEnd, false);
 				}
 
+				if (preventConditionCallback()) {
+					longPressPrevented = true;
+					return;
+				} else {
+					longPressPrevented = false;
+				}
+
 				longPressTimeout = setTimeout(function () {
 					if (Settings.get('vibrateOnLongPress')) {
 						window.navigator.vibrate(80);
@@ -67,11 +77,13 @@ window.Longpress = (function() {
 
 			function onEnd(ev) {
 
-				if (!longPressStarted) {
+				if (longPressPrevented) {
+					duration = delay - 1; // force click event
+				} else if (!longPressStarted) {
 					return;
+				} else {
+					duration = new Date().getTime() - startTime;
 				}
-
-				duration = new Date().getTime() - startTime;
 
 				if (duration >= delay) {
 					onLongPress && onLongPress(ev);

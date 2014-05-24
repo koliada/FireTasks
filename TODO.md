@@ -22,7 +22,8 @@ Improvements
 - <s>Stretching task to display full contents</s>
 - Better drag&drop
 - Localization
-- Long press on task list
+- <s>Long press on task list</s>
 - Automatically scroll lists and forms to top on activate
 - Better authentication and requests processing
 - Make first input active on forms activation
+- Actualize screenshots when tasks actions are implemented

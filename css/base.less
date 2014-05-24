@@ -49,7 +49,6 @@ body {
 			}
 
 			nav {
-				//max-height: calc(~"100% - 9rem");
 				/* Attempt to fix Chrome scroll bar visibility */
 				&::-webkit-scrollbar {
 					width: 0;
@@ -77,20 +76,12 @@ body {
 		}
 
 		section#drawer {
-
-			//.transition-none();
-
-			/*&.animate {
-				.transition(all, 0.25s, ease);
-			}*/
-
 			header {
-				//position: relative;
 
 				h2 {
 					position: absolute;
 					margin-top: 5rem;
-					width: 100%;
+					width: calc(~'100% - 6rem');
 					margin-bottom: 0;
 					z-index: 5;
 					background-color: #e7e7e7;
@@ -135,8 +126,12 @@ body {
 						height: auto;
 
 						&.edit-mode {
-							a:hover:after, a:active:after {
-								background-color: transparent;
+							/*div.clickable {
+								padding-right: 0;
+								width: calc(~'100% - 4.4rem');
+							}*/
+							label.task-handle {
+								.transform(translateX(4rem));
 							}
 						}
 
@@ -176,6 +171,15 @@ body {
 								margin-right: 0;
 								min-height: 6rem;
 								height: auto;
+								overflow: hidden;
+
+								&:hover:after, &:active:after {
+									background-color: transparent;
+								}
+
+								&:active {
+									background-color: rgba(0,213,255,0.3);
+								}
 
 								&.selected {
 									background-color: @color-light-blue;
@@ -187,7 +191,7 @@ body {
 									top: 0;
 									bottom: 0;
 									float: left;
-									height: 3rem;
+									height: 6rem;
 									width: 3rem;
 
 									&.danger {
@@ -200,6 +204,11 @@ body {
 									padding-right: 4rem;
 									min-height: 5.8rem;
 									width: calc(~'100% - 8rem');
+									.transition(background-color, 0.2s);
+									/*-webkit-transition: background-color 0.2s ease-out, width 0.2s ease-out;
+									-moz-transition: background-color 0.2s ease-out, width 0.2s ease-out;
+									-o-transition: background-color 0.2s ease-out, width 0.2s ease-out;
+									transition: background-color 0.2s ease-out, width 0.2s ease-out;*/
 
 									p {
 										white-space: normal;
@@ -224,6 +233,10 @@ body {
 											}
 										}
 									}
+
+									&.longpress-ready {
+										background-color: rgb(7, 131, 82);
+									}
 								}
 
 								label.task-handle {
@@ -234,10 +247,17 @@ body {
 									right: 0;
 									bottom: 0;
 									margin: auto;
+									.transition(all, 0.2s);
 
 									.action-icon {
 										vertical-align: middle;
 										display: inline-block;
+
+										&:before {
+											width: 2.8rem;
+											height: 3.2rem;
+											border-left: 1px solid #dcdcdc;
+										}
 									}
 								}
 							}
@@ -437,6 +457,12 @@ body {
 	section#instructional-overlay {
 		cursor: pointer;
 		background: rgba(51, 51, 51, 0.8) url(../style/action_menu/images/ui/pattern.png) repeat left top;
+		overflow: hidden;
+
+		canvas.show-tasks-actions {
+			.transition(all, 0.25s, ease);
+			.transform(translateX(-50%));
+		}
 	}
 
 	section#list-actions-mask.fade-in {

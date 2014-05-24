@@ -18,7 +18,7 @@ Features
 Although Fire Tasks is in an early beta and does not have many useful features,
 it is functional and surely can bring you relief if you tend to use Google Tasks on other platforms.
 
-Version 0.5.5 provides:
+Version 0.5.6 provides:
 
 - Authentication with the Google Tasks API
 - Retrieving task lists and tasks
@@ -80,58 +80,61 @@ Either you can write code or help translate Fire Tasks to your language, feel fr
 Changelog
 ----------
 <pre>
-v.0.5.5
+Version 0.5.6
+- Tap & hold on task to enter Edit Mode
+
+Version 0.5.5
 - Task content is now completely visible
 - Sync on launch and list opening now enabled by default
 
-v.0.5.4
+Version 0.5.4
 - Same features that 0.5.1 provides
 - Critical bugs fixed (infinite loop on sync error; sync error on quick indent/unindent buttons clicking)
 
-v.0.5.3
+Version 0.5.3
 - Same features that 0.5.1 provides
 - Source files minified
 - Analytics code added
 
-v.0.5.2
+Version 0.5.2
 - Same features that 0.5.1 provides
 - Better version updating
 - Setting for force update
 
-v.0.5.1
+Version 0.5.1
 - List actions on tap&hold; vibrate on long press (can be disabled in settings)
 - Minor sorting update
 - Refactoring continues
 - Many fixes and improvements
 
-v.0.5
+Version 0.5
 - Huge refactoring continued
 - Offline storage implemented, immediate UI responsiveness
 - Great amount of fixes and improvements
 
-v.0.4 (internal)
+Version 0.4 (internal)
 - Huge refactoring started
 - Storing tasks locally for more fluid UI
 
-v.0.3.1
+Version 0.3.1
 - Tablet UI
 
-v.0.3
+Version 0.3
 - Constant tree view mode
 - Rearranging tasks in tree view
 - Mass processing tasks in 'Edit Mode'
 - 'Refresh List' button
 
-v.0.2.3
+Version 0.2.3
 - Reordering tasks in plain view mode
 
-v.0.2.2
+Version 0.2.2
 - Automatic updates
 
-v.0.2
+Version 0.2
 - Tree view (unstable)
 
-v.0.1
+Version 0.1
 - First public version
 - Actually I don't exactly remember what features were here
 </pre>

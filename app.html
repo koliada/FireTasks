@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html manifest="manifest.appcache">
+<html>
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no"/>
@@ -78,7 +78,7 @@
 			<a href="#drawer"><span class="icon icon-menu">show sidebar</span></a>
 
 			<menu type="toolbar">
-				<button id="btn-edit-tasks"><span class="icon icon-edit">Edit Tasks</span></button>
+				<button id="btn-tasks-actions"><span class="icon icon-options">Tasks Actions</span></button>
 				<button id="btn-new-task"><span class="icon icon-add">Add Task</span></button>
 			</menu>
 
@@ -293,7 +293,7 @@
 			<header style="text-align: center;">
 				<img src="images/logo.png" alt="Logo" />
 				<h1>Fire Tasks</h1>
-				<label>version <span class="app-version">0.5.5</span> (<time>2014-05-18</time>)</label>
+				<label>Version <span class="app-version">0.5.6</span> (<time>2014-05-24</time>)</label>
 			</header>
 
 			<header><h2>About Fire Tasks</h2></header>
@@ -524,7 +524,7 @@
 
 <!-- INSTRUCTIONAL OVERLAY -->
 <section id="instructional-overlay" data-position="back">
-	<canvas width="320" height="480">Browser doesn't support canvas. Tap anywhere to start using Fire Tasks!</canvas>
+	<canvas width="640" height="480">Browser doesn't support canvas. Tap anywhere to start using Fire Tasks!</canvas>
 </section>
 
 
@@ -547,6 +547,27 @@
 <script type="text/javascript" defer src="js/task.view.min.js"></script>
 <script type="text/javascript" defer src="js/edit-mode.min.js"></script>
 <script type="text/javascript" defer src="js/app.min.js"></script>
+
+<!-- DEBUG -->
+<!--<script type="text/javascript" src="js/status.js"></script>
+
+<script type="text/javascript" src="js/lib/jquery-2.1.0.min.js"></script>
+<script type="text/javascript" src="js/lib/jquery-ui-1.10.3.custom.min.js"></script>
+<script type="text/javascript" src="js/lib/jquery.ui.touch-punch.js"></script>
+<script type="text/javascript" src="js/lib/localforage.min.js"></script>
+
+<script type="text/javascript" defer src="js/lib/google-oauth2.js"></script>
+<script type="text/javascript" defer src="js/lib/event-processor.js"></script>
+<script type="text/javascript" defer src="js/lib/sync.js"></script>
+<script type="text/javascript" defer src="js/lib/longpress.js"></script>
+<script type="text/javascript" defer src="js/auth.js"></script>
+<script type="text/javascript" defer src="js/settings.js"></script>
+<script type="text/javascript" defer src="js/list.js"></script>
+<script type="text/javascript" defer src="js/list.view.js"></script>
+<script type="text/javascript" defer src="js/task.js"></script>
+<script type="text/javascript" defer src="js/task.view.js"></script>
+<script type="text/javascript" defer src="js/edit-mode.js"></script>
+<script type="text/javascript" defer src="js/app.js"></script>-->
 
 </body>
 </html>
