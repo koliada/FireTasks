@@ -7,11 +7,13 @@
 /**
  * Main application object
  */
-window.App = (function($) {
+window.FT = (function($) {
 
 	'use strict';
 
 	var version = '0.5.6',
+		manifestUrl = 'http://koliada.github.io/FireTasks/manifest.webapp',
+		//manifestUrl = 'http://dev.alex-koliada.com/FireTasks/manifest.webapp',
 		actions = {
 			'MAIN_QUEUE': 'mainQueue'
 		},
@@ -19,6 +21,8 @@ window.App = (function($) {
 			LIST: 'list',
 			TASK: 'task'
 		},
+		syncCalled = false,
+		isOnline = true,
 		refreshInterval = null,
 		syncErrors = [],
 		unrecoverableErrorOccurred;
@@ -30,14 +34,51 @@ window.App = (function($) {
 	function setListeners() {
 
 		EV.listen('options-saved', onOptionsSaved);
-		EV.listen('lists-loaded', function() {
+		EV.listen('lists-loaded', function () {
 			if (!(localStorage.getItem('instructionalOverlayShown') === 'true')) {
-				App.showInstructionalOverlay();
+				FT.showInstructionalOverlay();
 				localStorage.setItem('instructionalOverlayShown', true);
 			}
 		});
+		EV.listen('tasks-loaded', function () {
+			// On-Start Synchronization
+			if (!Settings.get('syncOnStart')) {
+				Logger.info("onStart refresh won't start because of the setting");
+				return;
+			}
+			if (!FT.isOnline()) {
+				Logger.info("onStart refresh won't start immediately because internet connection is offline. Waiting for connection restore");
+				EV.listen('connection-online', function() {
+					callSync();
+				});
+				return;
+			}
+			if (!syncCalled) {
+				callSync();
+			}
+
+			function callSync() {
+				syncCalled = true;
+				FT.loadAll();
+			}
+		});
+
+		window.addEventListener('online', function (e) {
+			Logger.info('Connection is ONLINE');
+			updateConnectionStatus(true);
+			EV.fire('connection-online');
+		}, false);
+		window.addEventListener('offline', function (e) {
+			Logger.info('Connection is OFFLINE');
+			updateConnectionStatus(false);
+			EV.fire('connection-offline');
+		}, false);
 
 		$(document).on('click', '.prevent-default', function (ev) {
+			ev.preventDefault();
+		});
+
+		$('form').on('submit', function (ev) {
 			ev.preventDefault();
 		});
 
@@ -50,7 +91,7 @@ window.App = (function($) {
 		/* Full-width Checkbox Switching */
 		$('section[data-type="list"], form').find('a').click(function () {
 			var input = $(this).find('input[type="checkbox"]');
-			App.switchCheckbox(input);
+			FT.switchCheckbox(input);
 		});
 
 		/* For tablet UI - disables edit mode when sidebar touched */
@@ -67,9 +108,18 @@ window.App = (function($) {
 	}
 
 	/**
-	 * Handles new version notification and applying
+	 * Updates connection status
+	 * @param [online] True to indicate that application is online
 	 */
-	function updateVersion() {
+	function updateConnectionStatus(online) {
+		isOnline = online || window.navigator.onLine;
+	}
+
+	/**
+	 * Handles new version checking and applying
+	 * @param {Function} [callback]
+	 */
+	function updateVersion(callback) {
 
 		/**
 		 * @reference http://www.html5rocks.com/en/tutorials/appcache/beginner/
@@ -94,6 +144,38 @@ window.App = (function($) {
 		window.applicationCache.addEventListener('error', function () {
 			utils.status.show('A cache error occurred');
 		});
+
+		/*if (navigator.mozApps) {
+			var req = navigator.mozApps.getInstalled();
+			req.onsuccess = function () {
+				var ver = req.result[0].manifest.version;
+				$.ajax({
+					url: FT.getManifestUrl(),
+					responseType: 'json',
+					cache: false
+				}).done(function (manifest) {
+					if (FT.getVersionInteger(ver) < FT.getVersionInteger(manifest.version)) {
+						if (confirm('A new version of Fire Tasks was found. Install now?')) {
+							FT.install();
+						}
+						callback && callback(true);
+					} else {
+						onNoUpdate();
+					}
+				}).fail(onError);
+			};
+			req.onerror = onError;
+		}
+
+		function onNoUpdate() {
+			utils.status.show('No new version available');callback &&
+			callback && callback(false);
+		}
+
+		function onError() {
+			utils.status.show('An error occurred');
+			callback && callback(false);
+		}*/
 	}
 
 	/**
@@ -105,14 +187,14 @@ window.App = (function($) {
 			$.get('WHATSNEW', function (whatsNew) {
 				alert(whatsNew);
 				localStorage.setItem('whatsNewShown', true);
-			});
+			}, 'html');
 		}
 	}
 
 	function patchOptions() {
-		App.options.scope = 'https://www.googleapis.com/auth/tasks https://www.googleapis.com/auth/userinfo.email';
-		//App.options.redirect_uri = this.options.redirect_uris[0];
-		App.options.redirect_uri = document.location.protocol + '//' + document.location.host + document.location.pathname;
+		FT.options.scope = 'https://www.googleapis.com/auth/tasks https://www.googleapis.com/auth/userinfo.email';
+		//FT.options.redirect_uri = this.options.redirect_uris[0];
+		FT.options.redirect_uri = document.location.protocol + '//' + document.location.host + document.location.pathname;
 	}
 
 	function setLogger(level) {
@@ -147,6 +229,9 @@ window.App = (function($) {
 				},
 				error: function () {
 					(l === 1) ? console.error.apply(console, arguments) : f();
+				},
+				getLevel: function () {
+					return level;
 				}
 			}
 		}(level));
@@ -176,7 +261,7 @@ window.App = (function($) {
 			}
 		};
 
-		App.startSyncQueue(); // for possible not completed tasks
+		FT.startSyncQueue(); // for possible not completed tasks
 	}
 
 	/* Chrome only */
@@ -191,6 +276,7 @@ window.App = (function($) {
 				css = [ fontFamily, fontSize, backgroundImage, color ].join("; ");
 			console.log("%c" + text, css);
 		}
+		console.info('Thanks for your interest in Fire Tasks! For any details please refer to https://github.com/koliada/FireTasks');
 	}
 
 	/**
@@ -222,7 +308,7 @@ window.App = (function($) {
 							location.reload();
 						}
 					};
-				App.confirm(confirmData);
+				FT.confirm(confirmData);
 				return false;
 			}
 			syncErrors = [];
@@ -255,7 +341,7 @@ window.App = (function($) {
 		}
 
 		function hideOverlay() {
-			App.toggleSidebar(true);
+			FT.toggleSidebar(true);
 			overlayEl.classList.remove('fade-in');
 			canvasEl.classList.remove(tasksActionsCls);
 			overlayEl.classList.add('fade-out');
@@ -263,7 +349,7 @@ window.App = (function($) {
 		}
 
 		function showOverlay() {
-			App.toggleSidebar(true);
+			FT.toggleSidebar(true);
 			overlayEl.classList.remove('fade-out');
 			overlayEl.classList.add('fade-in');
 		}
@@ -304,13 +390,13 @@ window.App = (function($) {
 
 		function invokePhoneLayout() {
 			drawCanvas(types.task);
-			App.toggleSidebar(false);
+			FT.toggleSidebar(false);
 			canvasEl.classList.add(tasksActionsCls);
 			overlayEl.addEventListener('click', hideOverlay);
 			overlayEl.removeEventListener('click', invokePhoneLayout);
 		}
 
-		if (App.getBodySize().width >= 1280) {
+		if (FT.getBodySize().width >= 1280) {
 			overlayEl.addEventListener('click', hideOverlay);
 		} else {
 			overlayEl.addEventListener('click', invokePhoneLayout);
@@ -321,40 +407,37 @@ window.App = (function($) {
 	}
 
 	function onOptionsSaved() {
-		App.setAutoFetch();
-		App.setSidebarAnimation();
+		FT.setAutoFetch();
+		FT.setSidebarAnimation();
 	}
 
 
 	return {
 
-		version: version,
+		getVersion: function () {
+			return version;
+		},
 
 		getEntityTypes: function () {
 			return entityTypes;
 		},
 
-		/*install: function(isFFOS) {
-
+		install: function () {
 			// Turn it to false to always install 'normal' package
-			var supportHIDPI = false;
-			//var isFFOS = ("mozApps" in navigator && navigator.userAgent.search("Mobile") != -1);
-
-			if ( isFFOS ) {
-				var manifestUrl = 'http://koliada.github.io/FireTasks/manifest.webapp';
-				var req = navigator.mozApps.install(manifestUrl);
-				req.onsuccess = function() {
+			//var supportHIDPI = false;
+			if (FT.isFFOS) {
+				var req = navigator.mozApps.install(FT.getManifestUrl());
+				req.onsuccess = function () {
 					//alert(this.result.origin);
 					//alert('Fire Tasks installed. Check your home screen!');
 				};
-				req.onerror = function() {
+				req.onerror = function () {
 					alert('Installation failed: ' + this.error.name);
 				};
-
 			} else {
-				window.location.href = "app.html"
+				window.location.href = 'app.html#';
 			}
-		},*/
+		},
 
 		/* JSON data from Google Cloud Console */
 		options: {
@@ -368,9 +451,10 @@ window.App = (function($) {
 		},
 
 		init: function () {
-			App.toggleSidebar();
-			App.setSidebarAnimation();
+			FT.toggleSidebar();
+			FT.setSidebarAnimation();
 
+			updateConnectionStatus();
 			showLogo();
 			updateVersion();
 			showWhatsNew();
@@ -380,6 +464,7 @@ window.App = (function($) {
 			initSync();
 			setListeners();
 
+			Auth.init();
 			List.init();
 			Task.init();
 			EditMode.init();
@@ -394,7 +479,7 @@ window.App = (function($) {
 			delay = delay || Settings.get('syncInterval');
 
 			if (delay === 0) {
-				App.stopAutoFetch();
+				FT.stopAutoFetch();
 				Logger.info("Automatic local data refresh won't start because of the settings");
 				return;
 			}
@@ -406,6 +491,10 @@ window.App = (function($) {
 			// make private
 			Logger.info('Auto fetch started, timeout ' + delay + ' seconds');
 			refreshInterval = setInterval(function () {
+				if (!FT.isOnline()) {
+					Logger.info('Automatic reload skipped because of offline mode');
+					return;
+				}
 				Logger.info('Automatic reload initiated');
 				List.getList();
 			}, delay * 1000);
@@ -419,6 +508,11 @@ window.App = (function($) {
 				return true;
 			}
 			return false;
+		},
+
+		preventStartupSync: function () {
+			Logger.info('Startup sync prevented');
+			syncCalled = true;
 		},
 
 		/**
@@ -457,7 +551,7 @@ window.App = (function($) {
 			function onFinish(lists) {
 				List.storage.set(lists, function () {
 					lblDescription.html('Successful!');
-					App.toggleSidebar(true);
+					FT.toggleSidebar(true);
 					btnStart.html('Go to app').prop('disabled', false).off().on('click', function () {
 						List.loadData();
 						setupForm.removeClass().addClass('fade-out');
@@ -470,10 +564,10 @@ window.App = (function($) {
 				});
 			}
 
-			App.toggleSidebar();
+			FT.toggleSidebar();
 
-			List.preventOnLoadRefresh();
-			App.stopAutoFetch();
+			FT.preventStartupSync();
+			FT.stopAutoFetch();
 
 			setupForm.removeClass().addClass('fade-in');
 
@@ -513,6 +607,43 @@ window.App = (function($) {
 		},
 
 		/**
+		 * Loads all data from the server
+		 * Refreshes views at the end
+		 * @param {Function} [callback] Callback to be called after all data is fetched
+		 */
+		loadAll: function (callback) {
+			var processed = 0,
+				timeStart = (new Date()).getTime();
+			Logger.info('loadAll(): synchronization started');
+			FT.stopAutoFetch();
+			Auth.dataCalculation.start();
+			List.getList(function (lists) {
+				EV.fire('lists-loaded', lists); // notify view to re-render lists
+				if (lists.length > 0) {
+					for (var i = 0; i < lists.length; i++) {
+						(function (i) {
+							Task.getList(lists[i], function (list, tasks) {
+								lists[i].tasks = tasks;
+								if (processed++ === lists.length - 1) {
+									List.view.toggleProgress(false);
+									Task.view.toggleProgress(false);
+									List.storage.set(lists, function () {
+										Logger.info('loadAll(): synchronization completed, time: ' + ((new Date()).getTime() - timeStart).toString() + ' ms, data transferred: ' + Auth.dataCalculation.getValue() + ' bytes');
+										Task.view.getListEl().sortable('destroy');
+										var list = List.getLastActive();
+										delete list.tasks; // triggers refresh from storage
+										Task.loadData(list);
+										callback && callback(lists);
+									});
+								}
+							}, false);
+						}(i));
+					}
+				}
+			});
+		},
+
+		/**
 		 * Fires on ERROR CODE 404
 		 * Tells entities to remove corresponding item
 		 * @param entity
@@ -522,13 +653,16 @@ window.App = (function($) {
 				return;
 			}
 			switch (entity.type) {
-				case App.getEntityTypes().LIST:
-					utils.status.show('List not found');
+				case FT.getEntityTypes().LIST:
 					EV.fire('list-not-found', entity.id);
 					break;
-				case App.getEntityTypes().TASK:
-					utils.status.show('Task not found');
-					EV.fire('task-not-found', entity.id);
+				case FT.getEntityTypes().TASK:
+					// First making sure that list exists
+					List.getById(entity.listId, function (list) {
+						if (list) {
+							EV.fire('task-not-found', entity.id);
+						}
+					});
 					break;
 				default:
 					utils.status.show('Resource not found');
@@ -550,6 +684,7 @@ window.App = (function($) {
 		 *    p: <message text>
 		 *    cancel: <cancel button label>
 		 *    ok: <confirm button label>
+		 *    action <confirm button action>
 		 *    recommend: <true to set ok button with 'recommend' class, 'danger' otherwise>
 		 *    hideCancel: <true to show confirm button only>
 		 */
@@ -623,10 +758,20 @@ window.App = (function($) {
 
 		/**
 		 * Parses version number to integer number
+		 * @param {String} versionString
 		 * @returns {Number}
 		 */
-		getVersionInteger: function () {
-			return parseInt(App.version.replace(/\./g, ''));
+		getVersionInteger: function (versionString) {
+			versionString = versionString || FT.getVersion();
+			return parseInt(versionString.replace(/\./g, ''));
+		},
+
+		getManifestUrl: function () {
+			return manifestUrl;
+		},
+
+		isOnline: function () {
+			return isOnline;
 		},
 
 		showInstructionalOverlay: showInstructionalOverlay,
@@ -643,7 +788,12 @@ window.App = (function($) {
 
 
 (function () {
-	App.init();
+	if (location.pathname.indexOf('app.html') === -1) {
+		FT.install();
+		return;
+	}
+	utils.status.init();
+	FT.init();
 }());
 
 /**

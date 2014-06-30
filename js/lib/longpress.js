@@ -40,7 +40,7 @@ window.Longpress = (function() {
 			function onStart(ev) {
 				// TODO: investigate touchdown event appearance
 				/* prevents second binding */
-				if (longPressStarted || (ev.type === 'mousedown' && App.isFFOS)) {
+				if (longPressStarted || (ev.type === 'mousedown' && FT.isFFOS)) {
 					return;
 				} else {
 					longPressStarted = true;

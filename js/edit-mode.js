@@ -44,31 +44,39 @@ window.EditMode = (function ($) {
 	/**
 	 * Handles tasks selecting
 	 * @param {Element} [el]
+	 * @param {Boolean} [checked] If not set, will be toggled
 	 */
-	function onCheck(el) {
+	function onCheck(el, checked) {
 		el = el.currentTarget || el;
-		var checked = Task.view.getCheckedItems();
-		if (checked.length === 0) {
+		var checkedIds = EditMode.getCheckedItems();
+		if (checkedIds.length === 0) {
 			EditMode.disable();
 			return;
 		}
-		toggleSelected($(el).parents('a').first());
-		updateCheckedCounter(checked.length);
+		toggleSelected($(el).parents('a').first(), checked);
+		updateCheckedCounter(checkedIds.length);
 	}
 
 	/**
 	 * Toggles task selection state
 	 * @param {jQuery} a Node
+	 * @param {Boolean} [checked] If not set, will be toggled
 	 */
-	function toggleSelected(a) {
-		a[0].classList.toggle(CLASS_SELECTED);
+	function toggleSelected(a, checked) {
+		if (typeof checked === 'undefined') {
+			a[0].classList.toggle(CLASS_SELECTED);
+		} else if (checked === true) {
+			a[0].classList.add(CLASS_SELECTED);
+		} else {
+			a[0].classList.remove(CLASS_SELECTED);
+		}
 	}
 
 	/**
 	 * Handles multiple deletion
 	 */
 	function onDelete() {
-		var ids = Task.view.getCheckedItems(),
+		var ids = EditMode.getCheckedItems(),
 			listId = List.getLastActive().id;
 
 		if (ids.length === 0) {
@@ -87,7 +95,7 @@ window.EditMode = (function ($) {
 			}
 		};
 
-		App.confirm(data);
+		FT.confirm(data);
 
 		function iterate(ids) {
 			var id = ids.shift();
@@ -99,7 +107,7 @@ window.EditMode = (function ($) {
 				if (ids.length > 0) {
 					iterate(ids);
 				} else {
-					App.startSyncQueue();
+					FT.startSyncQueue();
 				}
 			});
 		}
@@ -107,12 +115,23 @@ window.EditMode = (function ($) {
 
 	/**
 	 * Handles multiple move to another list
+	 *
+	 * Sequence:
+	 * 	buildMoveTasksDialog() - generates target list chooser
+	 * 	bindListeners() - binds click handlers to the list items
+	 * 	filterChildren() - filters child nodes when target list gets selected, fills up the ids[] array
+	 * 	every internal iterate() function triggers Task.updateTask() method with 'start immediately' parameter only on last selected item
 	 */
 	function onMove() {
 		var tasksMoveForm = $('#tasks-move-to'),
-			checkedIds = Task.view.getCheckedItems(),
+			checkedIds = EditMode.getCheckedItems(),
 			ids = [],
 			listId = List.getLastActive().id;
+
+		if (!FT.isOnline()) {
+			utils.status.show('You are offline.\nUnfortunately, Fire Tasks is unable to move tasks in offline mode at the moment :(', 4000);
+			return;
+		}
 
 		if (checkedIds.length === 0) {
 			showNoTasksSelectedMessage();
@@ -172,10 +191,27 @@ window.EditMode = (function ($) {
 			tasksMoveForm.find('button[data-id]').off().on('click', function () {
 
 				var targetListId = this.dataset.id;
-				EditMode.disable();
 
-				filterChildren(checkedIds, function () {
-					iterate(ids.reverse()); // TODO: investigate why we need to reverse ids array
+				// First checking if target list exists
+				List.getById(targetListId, function(list) {
+					if (list) {
+						EditMode.disable();
+						filterChildren(checkedIds, function () {
+							iterate(ids.reverse()); // TODO: investigate why we need to reverse ids array
+						});
+					} else {
+						FT.confirm({
+							h1: 'Target list not found',
+							p: 'Target list seems deleted. We need to resynchronize data to keep data consistent.',
+							ok: 'Resynchronize',
+							recommend: true,
+							hideCancel: true,
+							action: function () {
+								EditMode.disable();
+								FT.loadAll();
+							}
+						});
+					}
 				});
 
 				function iterate(ids) {
@@ -206,7 +242,7 @@ window.EditMode = (function ($) {
 	 */
 	function onIndentUnindent() {
 		var action = this.dataset.action.toLowerCase(),
-			ids = Task.view.getCheckedItems(),
+			ids = EditMode.getCheckedItems(),
 			listId = List.getLastActive().id;
 
 		if (ids.length === 0) {
@@ -255,9 +291,9 @@ window.EditMode = (function ($) {
 				if (ids.length > 0) {
 					iterate(ids);
 				} else {
-					App.startSyncQueue();
 					EditMode.preventDisabling(false);
 					setButtonsDisabled(false);
+					FT.startSyncQueue();
 				}
 			}
 		}
@@ -282,10 +318,10 @@ window.EditMode = (function ($) {
 	/**
 	 * Handles task list representation in Edit Mode
 	 * Updates list for work in Edit Mode
-	 * @param {Boolean} p True to enable Edit Mode representation
+	 * @param {Boolean} enable True to enable Edit Mode representation
 	 */
-	function toggleListView(p) {
-		if (p) {
+	function toggleListView(enable) {
+		if (enable) {
 			// TODO: animation (ex. sliding)
 			dom.list.find('.danger').show();
 			dom.list.find('.pack-checkbox:not(.danger)').hide();
@@ -294,7 +330,6 @@ window.EditMode = (function ($) {
 			dom.list.find('.danger').hide().find('input[type="checkbox"]').prop('checked', false);
 			dom.list.find('.pack-checkbox:not(.danger)').show();
 			dom.list.find('.' + CLASS_SELECTED).removeClass(CLASS_SELECTED);
-			Task.view.getCheckedItems(); // TODO: replace with normal setter/emptier
 			dom.list.removeClass('edit-mode');
 		}
 	}
@@ -341,9 +376,10 @@ window.EditMode = (function ($) {
 
 		enable: function () {
 			enabled = true;
-			App.stopAutoFetch();
-			Task.preventNextDelayedFetch();
-			List.preventOnLoadRefresh();
+			FT.stopAutoFetch();
+			FT.preventStartupSync();
+			EditMode.preventDisabling(false);
+			setButtonsDisabled(false);
 			updateCheckedCounter(0);
 			showOverlay();
 		},
@@ -353,7 +389,7 @@ window.EditMode = (function ($) {
 				return;
 			}
 			enabled = false;
-			App.setAutoFetch();
+			FT.setAutoFetch();
 			hideOverlay();
 		},
 
@@ -369,8 +405,29 @@ window.EditMode = (function ($) {
 			preventDisabling = v;
 		},
 
-		selectNode: function (taskId, checked) {
-			var el = dom.list[0].querySelector('a[data-id="'+ taskId +'"]').querySelector('.pack-checkbox.danger input[type="checkbox"]');
+		/**
+		 * Counts checked nodes in Edit Mode
+		 * @returns {Array} Ids array
+		 */
+		getCheckedItems: function () {
+			var checked = [];
+			dom.list.find('.pack-checkbox.danger input[type="checkbox"]:checked').each(function (index, item) {
+				checked.push($(item).parents('a').first().attr('data-id'));
+			});
+			return checked;
+		},
+
+		/**
+		 * Marks node selected
+		 * @param {String} taskId
+		 * @param {Boolean} checked
+		 */
+		setNodeChecked: function (taskId, checked) {
+			var node = dom.list[0].querySelector('a[data-id="'+ taskId +'"]'),
+				el = node && node.querySelector('.pack-checkbox.danger input[type="checkbox"]');
+			if (!el) {
+				return;
+			}
 			el.checked = Boolean(checked);
 			onCheck(el);
 		}

@@ -102,12 +102,12 @@ window.List = function () {
 	 * @param {String} listId
 	 */
 	function remove(listId) {
-		if (List.view.getActionChooserList().id === List.getLastActive().id) {
+		if (List.view.getActionChooserList().id === List.getLastActive().id || listId === List.getLastActive().id) {
 			localStorage.removeItem('lastListId');
 			lastActive = null;
 			getPrevious(listId, function (previousList) {
+				FT.toggleSidebar(true);
 				List.storage.remove(listId, function () {
-					Task.setDelayedFetch();
 					Task.loadData(previousList);
 				});
 			});
@@ -142,26 +142,11 @@ window.List = function () {
 		}
 	}
 
-	/**
-	 * Initiates local data refresh on app launch
-	 */
-	function setOnStartRefresh() {
-		if (!Settings.get('syncOnStart')) {
-			Logger.info("onStart refresh won't start because of the setting");
-			return;
-		}
-		onStartRefreshTimeout = setTimeout(function () {
-			List.getList();
-		}, 2000);
-	}
-
-
 	return {
 
 		init: function () {
 			setListeners();
 			initSync();
-			setOnStartRefresh();
 		},
 
 		/**
@@ -179,7 +164,7 @@ window.List = function () {
 					setLastActive(lists);
 					onDataLoaded(lists);
 				} else {
-					App.runSetup();
+					FT.runSetup();
 				}
 			});
 		},
@@ -220,9 +205,29 @@ window.List = function () {
 			});
 		},
 
-		preventOnLoadRefresh: function () {
-			Logger.info('onStart lists refresh prevented');
-			clearTimeout(onStartRefreshTimeout);
+		/**
+		 * Fetches list from server
+		 * @param listId
+		 * @param [callback]
+		 */
+		getById: function (listId, callback) {
+			var data = {
+				type: 'GET',
+				url: 'https://www.googleapis.com/tasks/v1/users/@me/lists/' + listId,
+				entity: {
+					type: FT.getEntityTypes().LIST,
+					id: listId
+				}
+			};
+
+			Auth.makeRequest(data, function (success, res) {
+				if (success) {
+					callback && callback(res);
+				} else {
+					EV.fire('list-not-found', listId);
+					callback && callback(null);
+				}
+			});
 		},
 
 		/**
@@ -259,7 +264,7 @@ window.List = function () {
 				List.storage.get(null, function (storageItems) {
 
 					if (!storageItems) {
-						App.runSetup();
+						FT.runSetup();
 						return;
 					}
 
@@ -447,7 +452,7 @@ window.List = function () {
 					title: value
 				},
 				entity: {
-					type: App.getEntityTypes().LIST,
+					type: FT.getEntityTypes().LIST,
 					id: listId
 				}
 			};
@@ -472,7 +477,7 @@ window.List = function () {
 				type: 'DELETE',
 				url: 'https://www.googleapis.com/tasks/v1/users/@me/lists/' + listId,
 				entity: {
-					type: App.getEntityTypes().LIST,
+					type: FT.getEntityTypes().LIST,
 					id: listId
 				}
 			};

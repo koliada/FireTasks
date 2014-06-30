@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# version 0.5.6.2014.0524.2
+# version 0.6.0.2014.0630.1
 
 CACHE:
 app.html
@@ -60,6 +60,12 @@ js/settings.min.js
 js/status.min.js
 js/task.min.js
 js/task.view.min.js
+
+# icons
+icons/styles/action_icons.png
+style/switches/images/check/default.png
+style/switches/images/check/danger.png
+
 
 
 # generated

@@ -397,7 +397,7 @@ window.Task = (function ($) {
 		/* Finishes sequence */
 		function finish(list) {
 			if (params.startImmediately) {
-				App.startSyncQueue();
+				FT.startSyncQueue();
 			}
 			if (params.openList) {
 				Task.loadData(list);
@@ -414,6 +414,7 @@ window.Task = (function ($) {
 	function onNotFound(taskId) {
 		Task.storage.get(null, taskId, function (task) {
 			if (task) {
+				EV.fire('task-removed', task.id); // tells view to remove node
 				Task.storage.remove(null, task.id);
 			}
 		})
@@ -517,29 +518,31 @@ window.Task = (function ($) {
 		},
 
 		/**
-		 * Sets delayed tasks reload
-		 * @param {Object} [list] List resource
+		 * Fetches task from server
+		 * @param listId
+		 * @param taskId
+		 * @param [callback]
 		 */
-		setDelayedFetch: function (list) {
-			clearInterval(tasksRefreshTimeout);
+		getById: function (listId, taskId, callback) {
+			listId = listId || List.getLastActive().id;
+			var data = {
+				type: 'GET',
+				url: 'https://www.googleapis.com/tasks/v1/lists/' + listId + '/tasks/' + taskId,
+				entity: {
+					type: FT.getEntityTypes().TASK,
+					id: taskId,
+					listId: listId
+				}
+			};
 
-			if (!Settings.get('reloadTasksOnListOpen')) {
-				Logger.info("Tasks reload won't start because of the setting");
-				return;
-			}
-
-			App.stopAutoFetch();
-			tasksRefreshTimeout = setTimeout(function () {
-				App.setAutoFetch();
-				Task.getList(list);
-			}, 1500);
-		},
-
-		/**
-		 * Prevents next delayed tasks fetch set by {@link Task.setDelayedFetch}
-		 */
-		preventNextDelayedFetch: function () {
-			clearTimeout(tasksRefreshTimeout);
+			Auth.makeRequest(data, function (success, res) {
+				if (success) {
+					callback && callback(res);
+				} else {
+					EV.fire('task-not-found', taskId);
+					callback && callback(null);
+				}
+			});
 		},
 
 		storage: {
@@ -696,7 +699,12 @@ window.Task = (function ($) {
 			var data = {
 				type: 'POST',
 				url: 'https://www.googleapis.com/tasks/v1/lists/' + params.listId + '/tasks',
-				pack: params.pack
+				pack: params.pack,
+				entity: {
+					type: FT.getEntityTypes().TASK,
+					id: null,
+					listId: params.listId
+				}
 			};
 
 			data.query_params = '';
@@ -767,13 +775,18 @@ window.Task = (function ($) {
 					var data = {
 						type: 'PATCH',
 						url: 'https://www.googleapis.com/tasks/v1/lists/' + params.listId + '/tasks/' + params.taskId,
-						pack: params.pack
+						pack: params.pack,
+						entity: {
+							type: FT.getEntityTypes().TASK,
+							id: params.taskId,
+							listId: params.listId
+						}
 					};
-					App.addSyncTask(data);
+					FT.addSyncTask(data);
 
 					Task.storage.update(params.listId, params.taskId, params.pack, function (task) {
 						if (params.startImmediately) {
-							App.startSyncQueue();
+							FT.startSyncQueue();
 						}
 						if ((Object.keys(params.pack).length === 1 && params.pack.status === 'completed') ||
 							(Object.keys(params.pack).length === 2 && params.pack.status === 'needsAction' && params.pack.completed === null)) {
@@ -809,9 +822,14 @@ window.Task = (function ($) {
 
 			var data = {
 				type: 'DELETE',
-				url: 'https://www.googleapis.com/tasks/v1/lists/' + params.listId + '/tasks/' + params.taskId
+				url: 'https://www.googleapis.com/tasks/v1/lists/' + params.listId + '/tasks/' + params.taskId,
+				entity: {
+					type: FT.getEntityTypes().TASK,
+					id: params.taskId,
+					listId: params.listId
+				}
 			};
-			App.addSyncTask(data);
+			FT.addSyncTask(data);
 
 			Task.view.hideNode(params.taskId);
 
@@ -851,7 +869,7 @@ window.Task = (function ($) {
 				function finalize() {
 					setTimeout(function () {
 						if (params.startImmediately) {
-							App.startSyncQueue();
+							FT.startSyncQueue();
 						}
 						EV.fire('task-removed', params.taskId);
 						callback && callback(params.taskId);
@@ -874,28 +892,78 @@ window.Task = (function ($) {
 			listId = listId || List.getLastActive();
 			parentId = parentId || null;
 			previousId = previousId || null;
+			var previousProcessed = false, parentProcessed = false;
 
 			var data = {
 				type: 'POST',
-				url: 'https://www.googleapis.com/tasks/v1/lists/' + listId + '/tasks/' + taskId + '/move'
+				url: 'https://www.googleapis.com/tasks/v1/lists/' + listId + '/tasks/' + taskId + '/move',
+				entity: {
+					type: FT.getEntityTypes().TASK,
+					id: taskId,
+					listId: listId
+				}
 			};
 
 			data.query_params = '';
+
+			// We need to ensure that previous and parent tasks are present on the server
 			if (previousId !== null) {
-				data.query_params += 'previous=' + previousId + '&';
+				Task.getById(listId, previousId, function (task) {
+					if (task && !task.deleted) {
+						data.query_params += 'previous=' + previousId + '&';
+						previousProcessed = true;
+						doMove();
+					} else {
+						abort();
+					}
+				});
+			} else {
+				previousProcessed = true;
 			}
 			if (parentId !== null) {
-				data.query_params += 'parent=' + parentId;
+				Task.getById(listId, parentId, function (task) {
+					if (task && !task.deleted) {
+						data.query_params += 'parent=' + parentId + '&';
+						parentProcessed = true;
+						doMove();
+					} else {
+						abort();
+					}
+				});
+			} else {
+				parentProcessed = true;
 			}
 
-			App.addSyncTask(data);
+			doMove(); // fires if parentId and previousId are null
 
-			Task.storage.move(listId, taskId, parentId, previousId, function (lists) {
-				if (startImmediately) {
-					App.startSyncQueue();
+			function doMove() {
+				if (!previousProcessed || !parentProcessed) {
+					return;
 				}
-				if (typeof callback !== 'undefined') callback(lists);
-			});
+				FT.addSyncTask(data);
+				Task.storage.move(listId, taskId, parentId, previousId, function (lists) {
+					if (startImmediately) {
+						FT.startSyncQueue();
+					}
+					if (typeof callback !== 'undefined') callback(lists);
+				});
+			}
+
+			function abort() {
+				if (EditMode.isEnabled()) {
+					// restores EditMode with selection
+					var selIds = EditMode.getCheckedItems(),
+						token = EV.listen('tasks-rendered', function () {
+							EditMode.enable();
+							selIds.forEach(function (id) {
+								EditMode.setNodeChecked(id, true);
+							});
+							//EditMode.abortBatch();
+							EV.stopListen(token);
+						});
+				}
+				Task.getList();
+			}
 		}
 	};
 

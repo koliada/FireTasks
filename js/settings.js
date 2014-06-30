@@ -25,7 +25,6 @@ window.Settings = (function ($) {
 				clearCache: $('#settings-clear-cache'),
 				syncInterval: $('#settings-sync-interval'),
 				syncOnStart: $('#settings-sync-on-start'),
-				reloadTasksOnListOpen: $('#settings-reload-tasks-on-list-open'),
 				vibrateOnLongPress: $('#settings-vibrate-on-long-press'),
 				sidebarAnimation: $('#settings-sidebar-animation')
 			}
@@ -56,12 +55,6 @@ window.Settings = (function ($) {
 			},
 			syncOnStart: {
 				'el': dom.fields.syncOnStart,
-				'type': types.bool,
-				'elType': elTypes.checkbox,
-				'default': true
-			},
-			reloadTasksOnListOpen: {
-				'el': dom.fields.reloadTasksOnListOpen,
 				'type': types.bool,
 				'elType': elTypes.checkbox,
 				'default': true
@@ -98,7 +91,7 @@ window.Settings = (function ($) {
 
 		function showLayout(ev) {
 			ev.preventDefault();
-			App.showInDevelopmentTooltip();
+			FT.showInDevelopmentTooltip();
 			//dom.layout.removeClass().addClass('fade-in');
 		}
 
@@ -142,7 +135,6 @@ window.Settings = (function ($) {
 		dom.btnOpen.on('click', showLayout);
 		dom.btnClose.on('click', hideLayout);
 		dom.fields.logout.on('click', onLogout);
-		dom.fields.clearCache.on('click', onClearCache);
 	}
 
 	/**
@@ -241,6 +233,10 @@ window.Settings = (function ($) {
 	 */
 	function onLogout(ev) {
 		ev.preventDefault();
+		if (!FT.isOnline()) {
+			utils.status.show('You are offline.\nIt is impossible to logout in offline mode', 4000);
+			return;
+		}
 		var data = {
 			h1: 'Log Out',
 			p: 'Revoke access given to a Fire Tasks?',
@@ -250,37 +246,7 @@ window.Settings = (function ($) {
 				Auth.revokeToken();
 			}
 		};
-		App.confirm(data);
-	}
-
-	/**
-	 * Tries to reload application cache
-	 * @param ev
-	 */
-	function onClearCache(ev) {
-		ev.preventDefault();
-		function onNoUpdate() {
-			utils.status.show('No new version available');
-		}
-
-		window.applicationCache.addEventListener('noupdate', onNoUpdate);
-		var data = {
-			h1: 'Force update',
-			p: 'Clear cache and try to download latest version?',
-			cancel: 'Cancel',
-			ok: 'Confirm',
-			action: function () {
-				try {
-					window.applicationCache.update();
-					setTimeout(function () {
-						window.applicationCache.removeEventListener('noupdate', onNoUpdate);
-					}, 1000);
-				} catch (e) {
-					utils.status.show('An error occurred');
-				}
-			}
-		};
-		App.confirm(data);
+		FT.confirm(data);
 	}
 
 

@@ -2,6 +2,15 @@
 
 	var ev = {};
 	factory(ev);
+
+	/**
+	 * Event Processor
+	 *
+	 * @singleton
+	 * @name EV
+	 * @type {Object}
+	 * @exports EV as window.EV
+	 */
 	scope.EV = ev;
 
 }(this, function (ev) {
@@ -12,6 +21,8 @@
 	/**
 	 * Subscribe for event
 	 *
+	 * @public
+	 * @name EV.listen
 	 * @param event {String} Event name to be subscribed
 	 * @param method {Function} Function to be executed when event fires
 	 * @returns {*} Token on success, boolean false otherwise
@@ -46,6 +57,8 @@
 	/**
 	 * Unsubscribe from event
 	 *
+	 * @public
+	 * @name EV.stopListen
 	 * @param token {String} Unique id of subscription to remove
 	 * @returns {*} Token on success, boolean false otherwise
 	 */
@@ -70,6 +83,8 @@
 	/**
 	 * Remove all listeners from given event
 	 *
+	 * @public
+	 * @name EV.removeListeners
 	 * @param event {String} Event to remove all subscribers from
 	 * @returns {boolean}
 	 */
@@ -88,6 +103,8 @@
 	/**
 	 * Fire event
 	 *
+	 * @public
+	 * @name EV.fire
 	 * @param event {String} Event to fire
 	 * @param [data] {*} Any data to be passed to subscribers
 	 * @returns {boolean}

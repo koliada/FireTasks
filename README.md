@@ -27,7 +27,7 @@ Version 0.5.6 provides:
 - Marking tasks as completed/uncompleted from list
 - Reordering tasks by dragging
 - Package tasks processing: indenting, unindenting, moving to another list and mass deletion
-- Offline data storing for offline work and more responsive UI (unstable)
+- Offline work (with limitations, unstable)
 - Firefox OS-native UI
 - Tablet UI (1280px and up of display width)
 
@@ -71,6 +71,37 @@ section, send them to [@alex_koliada](https://twitter.com/alex_koliada) in Engli
 or send mail concerning Fire Tasks to alex.fiator@gmail.com with 'Fire Tasks' in a subject field.
 
 
+TODO
+----
+<pre>
+<b>Features</b>
+- Due date field & notifications
+- Tasks sorting (alphabetical, by date)
+- Displaying recently deleted/completed tasks
+- Task list sharing
+- Multiple accounts
+- Theme switching (light/dark)
+- <s>Force update (currently not working on Firefox OS)</s> Not necessary when app will be released as packaged
+
+<b>Bugs</b>
+- Long press event sometimes calls click event too
+- Chrome cancel button displaying issues (dialogs)
+- <s>Dropdowns displaying issues (hide arrows)</s>
+- <s>Offline work: restoring task queue from storage</s>
+
+<b>Improvements</b>
+- <s>Push notifications / background synchronizing</s> - Seems that this won't work
+- <s>Stretching task to display full contents</s>
+- Better drag&drop
+- Localization
+- <s>Long press on task list</s>
+- Automatically scroll lists and forms to top on activate/scroll list on selection
+- Better authentication and requests processing
+- Make first input active on forms activation
+- Actualize screenshots when tasks actions are implemented
+</pre>
+
+
 Contribute
 ----------
 Contributors are welcomed!
@@ -80,6 +111,12 @@ Either you can write code or help translate Fire Tasks to your language, feel fr
 Changelog
 ----------
 <pre>
+Version 0.6.0
+- More intelligent synchronization & offline mode fixes
+- Only one synchronization method left - complete update
+- Force update function removed (it cannot work on Firefox OS anyway)
+- Internal changes & bug fixes
+
 Version 0.5.6
 - Tap & hold on task to enter Edit Mode
 

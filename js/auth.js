@@ -11,13 +11,44 @@ var Auth = {
 	token: '',
 	noConnectionErrors: 0,
 
+	init: function () {
+		"use strict";
+		$.ajaxSetup({
+			xhr: function () {
+				return new window.XMLHttpRequest({mozSystem: true, cache: false});
+			}
+		})
+	},
+
+	dataCalculation: {
+		started: false,
+		value: 0,
+
+		start: function () {
+			"use strict";
+			Auth.dataCalculation.value = 0;
+			Auth.dataCalculation.started = true;
+		},
+
+		getValue: function (resetValue) {
+			"use strict";
+			if (typeof resetValue === 'undefined') resetValue = true;
+			var value = Auth.dataCalculation.value;
+			if (resetValue) {
+				Auth.dataCalculation.value = 0;
+			}
+			Auth.dataCalculation.started = false;
+			return value;
+		}
+	},
+
 	login: function(callback, refresh) {
 
 		var controlTimeout;
 
 		/*gapi.auth.authorize({
-		 client_id: App.options.client_id,
-		 scope: App.options.scope,
+		 client_id: FT.options.client_id,
+		 scope: FT.options.scope,
 		 immediate:
 		 //					(refresh === false)
 		 refresh
@@ -26,15 +57,15 @@ var Auth = {
 		var email = Settings.get('email');
 
 		if (email) {
-			App.options.email = email;
+			FT.options.email = email;
 		} else {
-			App.options.email = null;
+			FT.options.email = null;
 			refresh = true;
 		}
 
 		var tokenOld = Auth.token;
 
-		GO2.init(App.options);
+		GO2.init(FT.options);
 		GO2.login(false, (refresh === false));	// (force_approval_prompt, immediate)
 
 		/* Checking if iframe has failed */
@@ -45,7 +76,7 @@ var Auth = {
 				if (tokenOld === Auth.token) {
 					GO2.logout();
 					GO2.login(false, false);
-					App.stopAutoFetch();
+					FT.stopAutoFetch();
 				}
 			}, 5000);	// should be enough
 		}
@@ -60,19 +91,25 @@ var Auth = {
 						type: 'GET',
 						dataType: 'json',
 						timeout: 10000
-					}).done(function(res) {
+					}).done(function (res) {
 						Auth.token = accessToken;
 						localStorage.setItem('accessToken', accessToken);
-						if (App.options.email && App.options.email != res.email) {
-							List.storage.clear(function() {
+						if (FT.options.email && FT.options.email != res.email) {
+							List.storage.clear(function () {
 								alert('You have signed in as different user');
-								App.runSetup();
+								FT.runSetup();
 							});
 							return;
 						}
 						Settings.set('email', res.email);
-						//App.setAutoFetch();
+						//FT.setAutoFetch();
 						callback && callback(accessToken);
+					}).fail(function (jqXHR, textStatus, errorThrown) {
+						"use strict";
+						// TODO: I event don't know if this gonna work
+						utils.status.show('Something went wrong :(\nRetrying...', 2000);
+						GO2.logout();
+						Auth.login(callback, true);
 					});
 					/* TODO: handle some additional processing */
 				}
@@ -136,7 +173,7 @@ var Auth = {
 
 	makeRequest: function( data, callback_success, callback_error ) {
 
-		if (App.unrecoverableErrorOccurred()) {
+		if (FT.unrecoverableErrorOccurred()) {
 			console.error('Auth has caught unrecoverable error and will not proceed.');
 			return;
 		}
@@ -157,51 +194,66 @@ var Auth = {
 				type: type,
 				contentType : 'application/json; charset=UTF-8',
 				dataType: 'json'
-			}).done(function(data, textStatus, jqXHR) {
+			}).done(function(res, textStatus, jqXHR) {
+				// TODO: remove when 'show deleted' functionality is available
+				if (res && res.deleted) {
+					FT.onResourceNotFound(data.entity);
+				}
 				Auth.noConnectionErrors = 0;
-				callback_success(true, data, textStatus, jqXHR);
+				callback_success(true, res, textStatus, jqXHR);
 			}).fail(function(jqXHR, textStatus, errorThrown) {
 
 				if (jqXHR.status == 0) {
-					if (Auth.noConnectionErrors > 1) {
-						Task.view.toggleProgress(false);
-						setTimeout(function() {
-							App.setAutoFetch();
-							Auth.noConnectionErrors--;
-							Task.view.toggleProgress(true);
-							Auth.makeRequest(data, callback_success, callback_error);
-						}, 10000);
-						return;
-					}
-					List.view.toggleProgress(false);
-					Task.view.toggleProgress(false);
-					utils.status.show('No connection. Retrying...', 1500);
-					Logger.warn('No connection. Retrying...');
-					App.stopAutoFetch();
-					setTimeout(function() {
-						App.setAutoFetch();
-						Auth.noConnectionErrors++;
+
+					function proceed() {
+						FT.startSyncQueue();
+						FT.setAutoFetch();
 						Task.view.toggleProgress(true);
 						Auth.makeRequest(data, callback_success, callback_error);
-					}, 1000);
+					}
+
+					List.view.toggleProgress(false);
+					Task.view.toggleProgress(false);
+					FT.stopAutoFetch();
+					Sync.clearStarted();
+					if (FT.isOnline()) {
+						if (Auth.noConnectionErrors > 1) {
+							setTimeout(function () {
+								Auth.noConnectionErrors--;
+								proceed();
+							}, 10000);
+							return;
+						}
+						utils.status.show('No connection. Retrying...', 1500);
+						Logger.warn('No connection. Retrying...');
+						setTimeout(function () {
+							Auth.noConnectionErrors++;
+							proceed();
+						}, 1000);
+					} else {
+						EV.listen('connection-online', function () {
+							proceed();
+						});
+					}
+
 					return;
 				}
 
 				else if (jqXHR.status == 401) {
 					//utils.status.show('Access token has expired. Refreshing...');
 					localStorage.removeItem('accessToken');
-					App.stopAutoFetch();
+					FT.stopAutoFetch();
 					GO2.logout();
 					Auth.getAccessToken(function() {
 						//console.log('here reload');
-						App.setAutoFetch();
+						FT.setAutoFetch();
 						Auth.makeRequest(data, callback_success, callback_error);
 					});
 					return;
 				}
 
 				else if (jqXHR.status == 404) {
-					App.onResourceNotFound(data.entity);
+					FT.onResourceNotFound(data.entity);
 					callback_success(true, null, textStatus, errorThrown, data.entity);
 					return;
 				}
@@ -230,6 +282,12 @@ var Auth = {
 				} else {
 					callback_success(false, jqXHR, textStatus, errorThrown);
 				}
+			}).always(function(){
+				"use strict";
+				var jqXHR = (arguments[0] && arguments[0].getResponseHeader) ? arguments[0] : arguments[2];
+				if (Auth.dataCalculation.started) {
+					Auth.dataCalculation.value += parseInt(jqXHR.getResponseHeader('Content-Length') || 0);
+				}
 			});
 		});
 	},
@@ -246,7 +304,7 @@ var Auth = {
 			dataType: 'json'
 		}).done(function(data) {
 
-				if (data.audience == App.options.client_id) {
+				if (data.audience == FT.options.client_id) {
 					callback(true);
 				}
 
@@ -284,7 +342,7 @@ var Auth = {
 							delete Auth.token;
 							GO2.logout();
 							Settings.hideLayout(false);
-							App.runSetup();
+							FT.runSetup();
 							//window.location.reload();
 						});
 					},

@@ -49,7 +49,7 @@ Task.view = (function ($) {
 		dom.drawer.on('click', onDrawerClick);
 		dom.list.on('change', '.pack-checkbox:not(.danger) input[type="checkbox"]', onToggleCompleted);
 		dom.btnActions.on('click', function() {
-			App.showInDevelopmentTooltip();
+			FT.showInDevelopmentTooltip();
 		});
 		dom.btnNewTask.on('click', onNewTask);
 		dom.btnDelete.on('click', onDeleteTask);
@@ -62,7 +62,7 @@ Task.view = (function ($) {
 		/* Due date picker */
 		dom.form.find('[name="due"]').parents('label').first().click(function (ev) {
 			ev.preventDefault();
-			App.showInDevelopmentTooltip();
+			FT.showInDevelopmentTooltip();
 		});
 	}
 
@@ -88,6 +88,7 @@ Task.view = (function ($) {
 		//a.href = '#';
 		a.dataset.id = task.id;
 		a.setAttribute('draggable', 'false');
+		a.setAttribute('oncontextmenu', 'return(false);');
 		labelCheckboxDanger.className = 'pack-checkbox danger';
 		labelCheckboxDanger.innerHTML = '<input type="checkbox"><span></span>';
 		labelCheckbox.className = 'pack-checkbox';
@@ -147,7 +148,7 @@ Task.view = (function ($) {
 	}
 
 	/**
-	 * Binds jQuery UI
+	 * Binds jQuery UI Sortable
 	 */
 	function bindSortable() {
 
@@ -160,17 +161,17 @@ Task.view = (function ($) {
 			scrollSensitivity: 70,
 			update: function (event, ui) {
 				onTaskSort(ui.item[0]);
-				App.setAutoFetch();
+				FT.setAutoFetch();
 			},
 			start: function (event, ui) {
 				/* Disable Edit Mode */
 				EditMode.disable();
-				App.stopAutoFetch();
+				FT.stopAutoFetch();
 
 				/* Collapse children nodes */
 				var children = $(ui.item[0]).find('li');
 				if (children.length > 0) {
-					$(ui.item[0]).find('.item-title').first().prepend('<span class="item-children-num">(+' + children.length + ' more) </span>');
+					$(ui.item[0]).find('.item-title').first().prepend('<span class="item-children-num">(+' + children.length + ' more)&nbsp;</span>');
 					children.hide();
 					$(this).sortable("refreshPositions");
 					$(ui.item[0]).css('height', 'auto');
@@ -279,8 +280,7 @@ Task.view = (function ($) {
 	function showForm() {
 		dom.form.removeClass().addClass('fade-in');
 		/* TODO: make first input active */
-		App.stopAutoFetch();
-		Task.preventNextDelayedFetch();
+		FT.stopAutoFetch();
 	}
 
 	/**
@@ -288,7 +288,7 @@ Task.view = (function ($) {
 	 */
 	function hideForm() {
 		dom.form.removeClass().addClass('fade-out');
-		App.setAutoFetch();
+		FT.setAutoFetch();
 	}
 
 	/**
@@ -396,7 +396,7 @@ Task.view = (function ($) {
 	 * Fires when anything in the area of main drawer is clicked
 	 */
 	function onDrawerClick() {
-		App.toggleSidebar();
+		FT.toggleSidebar();
 	}
 
 	/**
@@ -425,7 +425,7 @@ Task.view = (function ($) {
 		};
 		Task.updateTask(params, function () {
 			if (!update_children) {
-				App.startSyncQueue();
+				FT.startSyncQueue();
 				return;
 			}
 			Task.storage.get(listId, taskId, function (task) {
@@ -443,14 +443,14 @@ Task.view = (function ($) {
 							openList: false
 						};
 					if (!childId) {
-						App.startSyncQueue();
+						FT.startSyncQueue();
 						return;
 					}
 					Task.updateTask(params, function () {
 						if (childrenIds.length > 0) {
 							iterateChildren(childrenIds);
 						} else {
-							App.startSyncQueue();
+							FT.startSyncQueue();
 						}
 					});
 				}
@@ -462,6 +462,10 @@ Task.view = (function ($) {
 	 * Prepares new task form
 	 */
 	function onNewTask() {
+		if (!FT.isOnline()) {
+			utils.status.show('You are offline.\nUnfortunately, Fire Tasks is unable to create tasks in offline mode at the moment :(', 4000);
+			return;
+		}
 		renderForm('CREATE', {});
 	}
 
@@ -476,7 +480,7 @@ Task.view = (function ($) {
 			editMode = $(el).siblings('.danger').first(),
 			taskId = $(el).parent('a')[0].dataset.id;
 		if (editMode.is(':visible')) {
-			App.switchCheckbox(editMode.find('input[type="checkbox"]'));
+			FT.switchCheckbox(editMode.find('input[type="checkbox"]'));
 			return;
 		}
 
@@ -503,7 +507,7 @@ Task.view = (function ($) {
 		var el = ev.currentTarget;
 		Task.storage.get(null, el.parentElement.dataset.id, function(task) {
 			EditMode.enable();
-			EditMode.selectNode(task.id, true);
+			EditMode.setNodeChecked(task.id, true);
 		});
 	}
 
@@ -529,7 +533,7 @@ Task.view = (function ($) {
 				Task.deleteTask(params);
 			}
 		};
-		App.confirm(data);
+		FT.confirm(data);
 	}
 
 	/**
@@ -586,6 +590,7 @@ Task.view = (function ($) {
 		 */
 		toggleProgress: function (show) {
 			dom.btnActions.prop('disabled', show);
+			dom.btnNewTask.prop('disabled', show);
 			if (show) {
 				dom.progressBar.show();
 			} else {
@@ -662,19 +667,6 @@ Task.view = (function ($) {
 			if (getNodeCount() === 0) {
 				renderEmptyList();
 			}
-		},
-
-		/* TODO: maybe unify? */
-		/**
-		 * Counts checked nodes in Edit Mode
-		 * @returns {Array} Ids array
-		 */
-		getCheckedItems: function () {
-			var checked = [];
-			dom.list.find('.pack-checkbox.danger input[type="checkbox"]:checked').each(function (index, item) {
-				checked.push($(item).parents('a').first().attr('data-id'));
-			});
-			return checked;
 		},
 
 		/**

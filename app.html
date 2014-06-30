@@ -145,9 +145,20 @@
 				<header>Synchronization</header>
 
 				<ol>
+					<li>
+						<a href="#" class="prevent-default">
+							<label class="pack-switch">
+								<input type="checkbox" id="settings-sync-on-start">
+								<span></span>
+							</label>
+							<p>Automatic Synchronization</p>
+							<p>When Fire Tasks starts and when a task gets changed</p>
+						</a>
+					</li>
+
 					<li class="select">
 						<label for="settings-sync-interval">
-						<span>Sync interval</span>
+						<span>Periodically synchronize</span>
 						<span>Refresh offline data when app is running</span>
 						<span class="button icon icon-dialog">
 							<select id="settings-sync-interval">
@@ -158,28 +169,6 @@
 							</select>
 						</span>
 						</label>
-					</li>
-
-					<li>
-						<a href="#" class="prevent-default">
-							<label class="pack-switch">
-								<input type="checkbox" id="settings-sync-on-start">
-								<span></span>
-							</label>
-							<p>Sync on start</p>
-							<p>When Fire Tasks starts</p>
-						</a>
-					</li>
-
-					<li>
-						<a href="#" class="prevent-default">
-							<label class="pack-switch">
-								<input type="checkbox" id="settings-reload-tasks-on-list-open">
-								<span></span>
-							</label>
-							<p>Reload list's tasks</p>
-							<p>When list opens</p>
-						</a>
 					</li>
 				</ol>
 
@@ -212,7 +201,7 @@
 
 				<ol>
 					<!--<li>
-						<a href="#" id="settings-install" onclick="App.install(true);">
+						<a href="#" id="settings-install" onclick="FT.install(true);">
 							<p>Install Fire Tasks</p>
 						</a>
 					</li>-->
@@ -226,12 +215,6 @@
 						<a href="https://github.com/koliada/FireTasks/issues" target="_blank">
 							<p>Feedback</p>
 							<p>Issues on GitHub</p>
-						</a>
-					</li>
-					<li>
-						<a href="#" id="settings-clear-cache" class="prevent-default">
-							<p>Try force update</p>
-							<p>Clear cache & install latest version</p>
 						</a>
 					</li>
 					<li>

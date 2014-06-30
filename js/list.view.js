@@ -60,15 +60,23 @@ if (window.List) window.List.view = (function($) {
 	 * Handles 'Sync now' button
 	 */
 	function onSyncClick() {
-		App.stopAutoFetch();
-		List.preventOnLoadRefresh();
-		List.getList();
+		if (!FT.isOnline()) {
+			utils.status.show('You are offline, how do you suppose to synchronize? :)', 3000);
+			return;
+		}
+		FT.stopAutoFetch();
+		FT.preventStartupSync();
+		FT.loadAll();
 	}
 
 	/**
 	 * Prepares new list form
 	 */
 	function onNewList() {
+		if (!FT.isOnline()) {
+			utils.status.show('You are offline.\nUnfortunately, Fire Tasks is unable to create lists in offline mode at the moment :(', 4000);
+			return;
+		}
 		renderForm('CREATE', {});
 	}
 
@@ -102,7 +110,7 @@ if (window.List) window.List.view = (function($) {
 				List.deleteList(list.id);
 			}
 		};
-		App.confirm(data);
+		FT.confirm(data);
 	}
 
 	/**
@@ -135,7 +143,7 @@ if (window.List) window.List.view = (function($) {
 	function showForm() {
 		dom.form.removeClass().addClass('fade-in');
 		/* TODO: make first input active */
-		App.stopAutoFetch();
+		FT.stopAutoFetch();
 	}
 
 	/**
@@ -143,7 +151,7 @@ if (window.List) window.List.view = (function($) {
 	 */
 	function hideForm() {
 		dom.form.removeClass().addClass('fade-out');
-		App.setAutoFetch();
+		FT.setAutoFetch();
 	}
 
 	/**
@@ -286,9 +294,8 @@ if (window.List) window.List.view = (function($) {
 		var id = ev.target.dataset.id;
 		List.storage.get(id, function (list) {
 			if (list) {
-				Task.setDelayedFetch();
 				Task.loadData(list);
-				App.toggleSidebar();
+				FT.toggleSidebar();
 			}
 		});
 	}
@@ -342,14 +349,14 @@ if (window.List) window.List.view = (function($) {
 		 */
 		toggleProgress: function (show) {
 
-			$('#btn-sync-lists').prop('disabled', show);
-			$('#btn-list-actions').prop('disabled', show);
+			dom.btnSync.prop('disabled', show);
+			dom.btnNewList.prop('disabled', show);
 
 			if (show) {
 				dom.progressBar.show();
 			} else {
 				dom.progressBar.hide();
-				App.setAutoFetch();
+				FT.setAutoFetch();
 			}
 		},
 

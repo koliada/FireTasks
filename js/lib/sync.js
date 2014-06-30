@@ -94,6 +94,7 @@
  *        Sync.onError( [object] eventDetails ) Fires on any error occurred
  *
  * In case of errors it could be useful to call Sync.clearStorage() so that failed tasks won't be queued again
+ * In need of hard resetting the currently running queue you can call Sync.clearStarted()
  */
 
 ;
@@ -298,15 +299,15 @@
 						return action;
 					},
 					onStart: function (func) {
-						action.onstart = func || new Function;
+						action.onstart = func || function(){};
 						return action;
 					},
 					onPause: function (func) {
-						action.onpause = func || new Function;
+						action.onpause = func || function(){};
 						return action;
 					},
 					onFinish: function (func) {
-						action.onfinish = func || new Function;
+						action.onfinish = func || function(){};
 						return action;
 					}
 				};
@@ -564,6 +565,13 @@
 				}
 			}
 		});
+	};
+
+	/**
+	 * Hardly Clears tasks queue
+	 */
+	sync.clearStarted = function () {
+		started = [];
 	};
 
 
