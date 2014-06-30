@@ -374,13 +374,14 @@ window.EditMode = (function ($) {
 			setListeners();
 		},
 
-		enable: function () {
+		enable: function (resetCounter) {
+			if (typeof resetCounter === 'undefined') resetCounter = true;
 			enabled = true;
 			FT.stopAutoFetch();
 			FT.preventStartupSync();
 			EditMode.preventDisabling(false);
 			setButtonsDisabled(false);
-			updateCheckedCounter(0);
+			resetCounter && updateCheckedCounter(0);
 			showOverlay();
 		},
 

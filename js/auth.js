@@ -214,6 +214,7 @@ var Auth = {
 
 					List.view.toggleProgress(false);
 					Task.view.toggleProgress(false);
+					EditMode.isEnabled() && EditMode.enable(false); // enables buttons so that user can proceed, resetCounter = false
 					FT.stopAutoFetch();
 					Sync.clearStarted();
 					if (FT.isOnline()) {

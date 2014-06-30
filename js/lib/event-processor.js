@@ -112,7 +112,7 @@
 	ev.fire = function (event, data) {
 
 		if (!events[event]) {
-			console.log("Event '" + event + "' not found.");
+			//console.log("Event '" + event + "' not found.");
 			return false;
 		}
 
