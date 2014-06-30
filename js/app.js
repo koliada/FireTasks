@@ -11,7 +11,7 @@ window.FT = (function($) {
 
 	'use strict';
 
-	var version = '0.5.6',
+	var version = '0.6.0',
 		manifestUrl = 'http://koliada.github.io/FireTasks/manifest.webapp',
 		//manifestUrl = 'http://dev.alex-koliada.com/FireTasks/manifest.webapp',
 		actions = {
