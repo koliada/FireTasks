@@ -26,7 +26,8 @@ window.Settings = (function ($) {
 				syncInterval: $('#settings-sync-interval'),
 				syncOnStart: $('#settings-sync-on-start'),
 				vibrateOnLongPress: $('#settings-vibrate-on-long-press'),
-				sidebarAnimation: $('#settings-sidebar-animation')
+				noAnimations: $('#settings-animations'),
+				ignoreCompletedWhenSharing: $('#settings-ignore-completed-when-sharing')
 			}
 		},
 		types = {
@@ -64,9 +65,15 @@ window.Settings = (function ($) {
 				'type': types.bool,
 				'elType': elTypes.checkbox,
 				'default': true
-			},
-			sidebarAnimation: {
-				'el': dom.fields.sidebarAnimation,
+			}/*,
+			noAnimations: {
+				'el': dom.fields.noAnimations,
+				'type': types.bool,
+				'elType': elTypes.checkbox,
+				'default': false
+			}*/,
+			ignoreCompletedWhenSharing: {
+				'el': dom.fields.ignoreCompletedWhenSharing,
 				'type': types.bool,
 				'elType': elTypes.checkbox,
 				'default': true
@@ -120,12 +127,14 @@ window.Settings = (function ($) {
 
 		function showLayout(ev) {
 			ev.preventDefault();
-			dom.layout.removeClass().addClass('fade-in');
+			dom.layout[0].classList.remove('fade-out');
+			dom.layout[0].classList.add('fade-in');
 		}
 
 		function hideLayout(ev) {
 			ev.preventDefault();
-			dom.layout.removeClass().addClass('fade-out');
+			dom.layout[0].classList.remove('fade-in');
+			dom.layout[0].classList.add('fade-out');
 		}
 
 		setListeners();
@@ -212,7 +221,8 @@ window.Settings = (function ($) {
 	 */
 	function showLayout() {
 		initSettingsPage();
-		dom.layout.removeClass().addClass('fade-in');
+		dom.layout[0].classList.remove('fade-out');
+		dom.layout[0].classList.add('fade-in');
 	}
 
 	/**
@@ -224,7 +234,8 @@ window.Settings = (function ($) {
 			apply = true;
 		}
 		apply && applyChanges();
-		dom.layout.removeClass().addClass('fade-out');
+		dom.layout[0].classList.remove('fade-in');
+		dom.layout[0].classList.add('fade-out');
 	}
 
 	/**
@@ -265,7 +276,7 @@ window.Settings = (function ($) {
 		 */
 		get: function (key) {
 			var value = localStorage.getItem(STORAGE_PREFIX + STORAGE_DELIMITER + key);
-			if (value === null || typeof value === 'undefined') {
+			if (value === null || value === 'undefined' || typeof options[key] === 'undefined') {
 				return null;
 			}
 			switch (options[key].type) {

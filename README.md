@@ -18,7 +18,7 @@ Features
 Although Fire Tasks is in an early beta and does not have many useful features,
 it is functional and surely can bring you relief if you tend to use Google Tasks on other platforms.
 
-Version 0.6.0 provides:
+Version 0.7.0 provides:
 
 - Authentication with the Google Tasks API
 - Retrieving task lists and tasks
@@ -27,7 +27,9 @@ Version 0.6.0 provides:
 - Marking tasks as completed/uncompleted from list
 - Reordering tasks by dragging
 - Package tasks processing: indenting, unindenting, moving to another list and mass deletion
-- Offline work (with limitations, unstable)
+- Offline work (with limitations on creation, unstable)
+- Alphabetical sorting of tasks
+- Exporting task list to text file
 - Firefox OS-native UI
 - Tablet UI (1280px and up of display width)
 
@@ -75,10 +77,13 @@ TODO
 ----
 <pre>
 <b>Features</b>
+- Full offline work support (offline list and task creation)
 - Due date field & notifications
-- Tasks sorting (alphabetical, by date)
+- Tasks sorting
+-- <s>alphabetical</s>
+-- by date
+- <s>Task list sharing</s>
 - Displaying recently deleted/completed tasks
-- Task list sharing
 - Multiple accounts
 - Theme switching (light/dark)
 - <s>Force update (currently not working on Firefox OS)</s> Not necessary when app will be released as packaged
@@ -92,6 +97,8 @@ TODO
 <b>Improvements</b>
 - <s>Push notifications / background synchronizing</s> - Seems that this won't work
 - <s>Stretching task to display full contents</s>
+- Option to suppress some animations to improve performance - implemented but not enabled due to issues in Firefox
+- Handle case when user closes Google's authentication dialog
 - Better drag&drop
 - Localization
 - <s>Long press on task list</s>
@@ -111,6 +118,11 @@ Either you can write code or help translate Fire Tasks to your language, feel fr
 Changelog
 ----------
 <pre>
+Version 0.7.0
+- Task list alphabetical sort
+- Task list exporting (plus setting to ignore completed tasks)
+- Internal changes & bug fixes
+
 Version 0.6.0
 - More intelligent synchronization & offline mode fixes
 - Only one synchronization method left - complete update

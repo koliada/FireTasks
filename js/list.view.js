@@ -141,7 +141,7 @@ if (window.List) window.List.view = (function($) {
 	 * Shows form for list creating/editing
 	 */
 	function showForm() {
-		dom.form.removeClass().addClass('fade-in');
+		dom.form.removeClass('fade-out').addClass('fade-in');
 		/* TODO: make first input active */
 		FT.stopAutoFetch();
 	}
@@ -150,7 +150,7 @@ if (window.List) window.List.view = (function($) {
 	 * Hides form opened with {@link showForm}
 	 */
 	function hideForm() {
-		dom.form.removeClass().addClass('fade-out');
+		dom.form.removeClass('fade-in').addClass('fade-out');
 		FT.setAutoFetch();
 	}
 
@@ -310,7 +310,7 @@ if (window.List) window.List.view = (function($) {
 			actionChooserList = list;
 			dom.actionChooser.find('header')[0].innerHTML = list.title;
 			dom.btnDeleteList[0].disabled = list.title === 'Uncategorized';
-			dom.actionChooser.removeClass().addClass('fade-in');
+			dom.actionChooser.removeClass('fade-out').addClass('fade-in');
 		});
 	}
 
@@ -318,7 +318,7 @@ if (window.List) window.List.view = (function($) {
 	 * Hides action chooser opened with {@link showActionChooser}
 	 */
 	function hideActionChooser() {
-		dom.actionChooser.removeClass().addClass('fade-out');
+		dom.actionChooser.removeClass('fade-in').addClass('fade-out');
 	}
 
 	/**

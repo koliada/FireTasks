@@ -24,12 +24,88 @@ Task.view = (function ($) {
 			list: $('#tasks').find('ol').first(),
 			form: $('#task-form'),
 			progressBar: $('#progress-tasks'),
+			actionChooser: $('#tasks-actions'),
+			sortModeChooser: $('#tasks-sort-mode'),
+			btnSortTasks: $('#btn-sort-tasks'),
+			btnSortTasksMyOrder: $('#btn-sort-tasks-my-order'),
+			btnSortTasksAlphabetical: $('#btn-sort-tasks-alphabetical'),
+			btnSortTasksDueDate: $('#btn-sort-tasks-due-date'),
+			btnShareTasks: $('#btn-share-tasks'),
 			btnActions: $('#btn-tasks-actions'),
 			btnNewTask: $('#btn-new-task'),
 			btnBack: $('#btn-task-form-back'),
 			btnOk: $('#btn-task-form-ok'),
 			btnDelete: $('#btn-task-form-delete')
 		};
+
+	var sortModeManager = (function () {
+		var sortMode,
+			sortModes = {
+				myOrder: 'MY-ORDER',
+				alphabetical: 'ALPHABETICAL',
+				dueDate: 'DUE-DATE'
+			},
+			sortModeStorageKey = 'tasksSortMode';
+
+		return {
+			/**
+			 * Saves active sorting mode to storage
+			 * @param [value] If skipped, 'My order' will be used
+			 */
+			set: function (value) {
+				if (typeof value === 'undefined') {
+					value = sortModeManager.get();
+					if (value === null || typeof value === 'undefined') {
+						localStorage.setItem(sortModeStorageKey, sortModes.myOrder);
+						sortMode = sortModes.myOrder;
+					}
+				} else {
+					var present = false;
+					for (var mode in sortModes) {
+						if (!sortModes.hasOwnProperty(mode)) continue;
+						if (sortModes[mode] === value) {
+							present = true;
+							break;
+						}
+					}
+					if (!present) {
+						throw "Unrecognized sorting mode passed, expected values: MY-ORDER|ALPHABETICAL|DUE-DATE";
+					}
+					localStorage.setItem(sortModeStorageKey, value);
+					sortMode = value;
+				}
+			},
+
+			/**
+			 * Returns saved sorting mode without any processing
+			 * If there's no cached value, fetches from storage
+			 * @returns {*}
+			 */
+			get: function () {
+				return (typeof sortMode === 'undefined') ? localStorage.getItem(sortModeStorageKey) : sortMode;
+			},
+
+			/**
+			 * Returns object with pre-defined sort types
+			 * @returns {{myOrder: string, alphabetical: string, dueDate: string}}
+			 */
+			getSortModes: function () {
+				return sortModes;
+			},
+
+			isMyOrder: function () {
+				return this.get() === sortModes.myOrder;
+			},
+
+			isAlphabetical: function () {
+				return this.get() === sortModes.alphabetical;
+			},
+
+			isDueDate: function () {
+				return this.get() === sortModes.dueDate;
+			}
+		}
+	}());
 
 
 	function setListeners() {
@@ -46,13 +122,25 @@ Task.view = (function ($) {
 		EV.listen('task-removed', removeNode);
 
 		/* List actions and buttons */
-		dom.drawer.on('click', onDrawerClick);
+		dom.list.on('click', onListClick);
 		dom.list.on('change', '.pack-checkbox:not(.danger) input[type="checkbox"]', onToggleCompleted);
-		dom.btnActions.on('click', function() {
-			FT.showInDevelopmentTooltip();
-		});
+		dom.btnActions.on('click', showActionChooser);
 		dom.btnNewTask.on('click', onNewTask);
 		dom.btnDelete.on('click', onDeleteTask);
+
+		/* Action chooser */
+		// TODO: event delegation
+		var buttons = dom.actionChooser[0].querySelectorAll('button');
+		for (var i = 0; i < buttons.length; i++) {
+			buttons[i].addEventListener('click', onActionButtonClicked);
+		}
+
+		/* Sort mode chooser */
+		// TODO: event delegation
+		buttons = dom.sortModeChooser[0].querySelectorAll('button');
+		for (i = 0; i < buttons.length; i++) {
+			buttons[i].addEventListener('click', onSortButtonClicked);
+		}
 
 		/* Task Form */
 		dom.btnBack.on('click', hideForm);
@@ -94,12 +182,13 @@ Task.view = (function ($) {
 		labelCheckbox.className = 'pack-checkbox';
 		labelCheckbox.innerHTML = '<input type="checkbox" ' + ((task.status === 'completed') ? 'checked' : '') + '><span></span>';
 		divClickable.classList.add('clickable');
+		!sortModeManager.isMyOrder() && divClickable.classList.add('not-sortable');
 		divClickable.innerHTML = '<p class="item-title"><span>' + task.title + '</span></p>' +
 			((!task.notes || task.notes == '') ? '' : '<p class="item-notes">' + task.notes + '</p>');
 		Longpress.bindLongPressHandler(divClickable, 400, onLongPress, onEditTask, EditMode.isEnabled);
 		labelHandle.classList.add('task-handle');
 		labelHandle.innerHTML = '<div class="action-icon menu"></div>';
-		if (typeof task.children !== 'undefined' && task.children.length !== 0) {
+		if (sortModeManager.isMyOrder() && typeof task.children !== 'undefined' && task.children.length !== 0) {
 			task.children.forEach(function(child) {
 				olInner.appendChild(createNode(child));
 			});
@@ -107,7 +196,7 @@ Task.view = (function ($) {
 		a.appendChild(labelCheckboxDanger);
 		a.appendChild(labelCheckbox);
 		a.appendChild(divClickable);
-		a.appendChild(labelHandle);
+		sortModeManager.isMyOrder() && a.appendChild(labelHandle);
 		li.appendChild(a);
 		li.appendChild(olInner);
 
@@ -278,7 +367,7 @@ Task.view = (function ($) {
 	 * Shows form for task creating/editing
 	 */
 	function showForm() {
-		dom.form.removeClass().addClass('fade-in');
+		dom.form.removeClass('fade-out').addClass('fade-in');
 		/* TODO: make first input active */
 		FT.stopAutoFetch();
 	}
@@ -287,7 +376,7 @@ Task.view = (function ($) {
 	 * Hides form opened by {@link showForm}
 	 */
 	function hideForm() {
-		dom.form.removeClass().addClass('fade-out');
+		dom.form.removeClass('fade-in').addClass('fade-out');
 		FT.setAutoFetch();
 	}
 
@@ -348,7 +437,7 @@ Task.view = (function ($) {
 
 	/**
 	 * Renders task list and appends to DOM
-	 * @param {Array} items Set of task resources
+	 * @param {TaskCollection} items Set of task resources
 	 */
 	function renderList(items) {
 
@@ -357,8 +446,12 @@ Task.view = (function ($) {
 			return;
 		}
 
+		Longpress.unbind();
+
 		var domList = dom.list[0];
 		domList.innerHTML = '';
+
+		items = sortTasks(items);
 
 		items.forEach(function(task) {
 			domList.appendChild(createNode(task));
@@ -369,13 +462,13 @@ Task.view = (function ($) {
 		}
 
 		Task.view.toggleProgress(false);
-		bindSortable();
+		sortModeManager.isMyOrder() && bindSortable();
 		EV.fire('tasks-rendered');
 	}
 
 	/**
 	 * Renders empty list
-	 * Is used when there's no tasks in list
+	 * Is used when there are no tasks in list
 	 */
 	function renderEmptyList() {
 		dom.list.html('<li><a draggable="false"><p style="text-align: center;">This list is empty</p></a></li>');
@@ -395,7 +488,7 @@ Task.view = (function ($) {
 	/**
 	 * Fires when anything in the area of main drawer is clicked
 	 */
-	function onDrawerClick() {
+	function onListClick() {
 		FT.toggleSidebar();
 	}
 
@@ -579,6 +672,153 @@ Task.view = (function ($) {
 		}
 	}
 
+	/**
+	 * Sorts tasks array
+	 * @param {TaskCollection} items
+	 * @returns {Array} Sorted array (original array if sorting mode equals 'my order')
+	 */
+	function sortTasks(items) {
+
+		if (sortModeManager.isAlphabetical()) {
+			return items.toPlainArray().sort(function (a, b) {
+				var res = (a.title.toLowerCase() >= b.title.toLowerCase());
+				return res ? 1 : -1;
+			});
+		} else if (sortModeManager.isDueDate()) {
+			return items.toPlainArray().sort();
+		} else {
+			return items;
+		}
+	}
+
+	/**
+	 * Saves new sorting mode and initiates task list reload
+	 * @param {String} mode
+	 */
+	function setSortMode(mode) {
+		if (sortModeManager.get() === mode) {
+			Logger.info('setSortMode(): passed sorting mode is already set');
+			return;
+		}
+		sortModeManager.set(mode);
+		Task.loadData();
+	}
+
+	/**
+	 * Shows available task actions
+	 * @param ev
+	 */
+	function showActionChooser(ev) {
+		FT.stopAutoFetch();
+		dom.actionChooser.removeClass('fade-out').addClass('fade-in');
+	}
+
+	/**
+	 * Hides action chooser opened with {@link showActionChooser}
+	 */
+	function hideActionChooser() {
+		FT.setAutoFetch();
+		dom.actionChooser.removeClass('fade-in').addClass('fade-out');
+	}
+
+	/**
+	 * Shows sort mode chooser
+	 */
+	function showSortModeChooser() {
+		FT.stopAutoFetch();
+		dom.sortModeChooser.removeClass('fade-out').addClass('fade-in');
+	}
+
+	/**
+	 * Hides sort mode chooser opened with {@link showSortModeChooser}
+	 */
+	function hideSortModeChooser() {
+		FT.stopAutoFetch();
+		dom.sortModeChooser.removeClass('fade-in').addClass('fade-out');
+	}
+
+	/**
+	 * Handles action chooser buttons clicks
+	 * @param ev
+	 */
+	function onActionButtonClicked(ev) {
+		switch (ev.target.id) {
+			case dom.btnSortTasks[0].id:
+				onSortTasks();
+				break;
+			case dom.btnShareTasks[0].id:
+				onShareTasks();
+				break;
+		}
+		ev.preventDefault();
+		hideActionChooser();
+	}
+
+	/**
+	 * Handles sort mode buttons clicks
+	 * @param ev
+	 */
+	function onSortButtonClicked(ev) {
+		switch (ev.target.id) {
+			case dom.btnSortTasksMyOrder[0].id:
+				setSortMode(sortModeManager.getSortModes().myOrder);
+				break;
+			case dom.btnSortTasksAlphabetical[0].id:
+				setSortMode(sortModeManager.getSortModes().alphabetical);
+				break;
+			case dom.btnSortTasksDueDate[0].id:
+				setSortMode(sortModeManager.getSortModes().dueDate);
+				break;
+		}
+		ev.preventDefault();
+		hideSortModeChooser();
+	}
+
+	/**
+	 * Calls sort mode dialog
+	 */
+	function onSortTasks() {
+		showSortModeChooser();
+	}
+
+	function onShareTasks() {
+
+		Task.storage.get(null, null, function (tasks) {
+			tasks = sortModeManager.isMyOrder() ? tasks : tasks.toPlainArray();
+			var listTitle = List.getLastActive().title,
+				text = listTitle + '\n' + tasks.toText(Settings.get('ignoreCompletedWhenSharing'));
+			share(new Blob([text], {type: 'text/plain'}), listTitle + '.txt');
+		}, true);
+
+		function share(blob, name) {
+			if (FT.isMozActivityAvailable) {
+				new MozActivity({
+					name: 'share',
+					data: {
+						number: 1,
+						blobs: [blob],
+						filenames: [name]
+					}
+				});
+			} else {
+				var url = window.URL.createObjectURL(blob);
+				FT.confirm({
+					h1: 'Download file',
+					p: 'Use links below to initiate file download.<br/>\
+						<a href="' + url + '" download="' + name + '">Download "' + name + '"</a><br/>\
+						<a href="' + location.href + '" onclick="window.open(\'' + url + '\');">Alternative link</a>',
+					ok: 'Done',
+					recommend: true,
+					hideCancel: true,
+					action: function () {
+						window.URL.revokeObjectURL(blob);
+					}
+				});
+			}
+		}
+	}
+
+	sortModeManager.set();
 	setListeners();
 
 
@@ -676,6 +916,13 @@ Task.view = (function ($) {
 		 */
 		getListEl: function () {
 			return dom.list;
+		},
+
+		/**
+		 * Returns sortModeManager that can be useful for debugging
+		 */
+		getSortModeManager: function () {
+			return sortModeManager;
 		}
 	}
 

@@ -230,12 +230,18 @@ body {
 												padding-top: 0.6rem;
 												display: table-cell;
 												vertical-align: middle;
+												word-break: break-word;
 											}
 										}
 									}
 
 									&.longpress-ready {
 										background-color: rgb(7, 131, 82);
+									}
+
+									&.not-sortable {
+										width: auto;
+										padding-right: 0;
 									}
 								}
 
@@ -424,13 +430,15 @@ body {
 	}
 
 	section#confirm {
+
+		a {
+			color: rgb(248, 80, 80);
+			font-weight: bold;
+		}
+
 		ul.unrecoverable-error-dialog {
 			li {
 				list-style-type: disc;
-				a {
-					color: rgb(248, 80, 80);
-					font-weight: bold;
-				}
 			}
 		}
 
@@ -468,6 +476,24 @@ body {
 	section#list-actions-mask.fade-in {
 		z-index: 119;
 		background: transparent;
+	}
+
+	/* ANIMATIONS */
+	section#drawer.no-animation,
+	[data-type="edit"].no-animation,
+	label.pack-switch.no-animation input ~ span:after,
+	section#drawer.no-animation .task-handle {
+		.transition-none() !important;
+
+//		-webkit-transition-duration: 0s;
+//		-moz-transition-duration: 0s;
+//		-o-transition-duration: 0s;
+//		transition-duration: 0s;
+//		transition-property-duration: 0s;
+	}
+	[data-position="back"].no-animation {
+		animation: fadeIn 0s forwards;
+		-webkit-animation: fadeIn 0s forwards;
 	}
 
 	/* Tablet UI for full-width screens */

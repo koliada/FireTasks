@@ -12,12 +12,78 @@ window.Task = (function ($) {
 
 	"use strict";
 
-	var tasksRefreshTimeout = null;
-
 	function setListeners() {
 		EV.listen('lists-rendered', Task.loadData);
 		EV.listen('task-not-found', onNotFound);
 	}
+
+	/**
+	 * @class TaskCollection
+	 * @extends Array
+	 * @param {Array} tasks
+	 * @returns {TaskCollection}
+	 * @constructor
+	 */
+	var TaskCollection = function (tasks) {
+
+		// fills up the collection
+		this.push.apply(this, tasks);
+
+		/**
+		 * [chainable] Converts nested data to plain array
+		 * @returns {TaskCollection}
+		 */
+		this.toPlainArray = function () {
+			// we use internal function so that external method would not be polluted with unnecessary parameters
+			function iterate(items, arr) {
+				var children;
+				arr = arr || [];
+				for (var i = 0; i < items.length; i++) {
+					children = items[i].children;
+					delete items[i].children;
+					arr.push(items[i]);
+					if (children.length > 0) {
+						arr = iterate(children, arr);
+					}
+				}
+				return arr;
+			}
+
+			return new TaskCollection(iterate(this));
+		};
+
+		/**
+		 * Converts collection to plain text representation
+		 * @param {Boolean} [ignoreCompleted] False to consider completed tasks too
+		 * @returns {String}
+		 */
+		this.toText = function (ignoreCompleted) {
+			ignoreCompleted = (typeof ignoreCompleted === 'undefined') ? true : ignoreCompleted;
+
+			function iterate(items, str, level) {
+				var indent = '',
+					children,
+					i;
+				str = str || '';
+				for (i = 0; i < level; i++) {
+					indent += ' ';
+				}
+				for (i = 0; i < items.length; i++) {
+					if (ignoreCompleted && items[i].status === 'completed') continue;
+					str += indent + '- ' + items[i].title + '\n';
+					if (items[i].notes) str += indent + '  ' + items[i].notes + '\n';
+					children = items[i].children;
+					if (children && children.length > 0) {
+						str = iterate(children, str, ++level);
+					}
+				}
+				return str;
+			}
+
+			return iterate(this, null, 0);
+		}
+	};
+	TaskCollection.prototype = Array.prototype;
 
 	/**
 	 * Builds tasks tree from fetched data
@@ -426,7 +492,7 @@ window.Task = (function ($) {
 	 */
 	function onDataLoaded(tasks) {
 		tasks = tasks || [];
-		EV.fire('tasks-loaded', tasks);
+		EV.fire('tasks-loaded', new TaskCollection(tasks));
 	}
 
 
@@ -461,7 +527,7 @@ window.Task = (function ($) {
 		/**
 		 * Fetches tasks from server
 		 * @param {Object} [list] List resource; Last active by default
-		 * @param [callback]
+		 * @param {Function} [callback]
 		 * @param {Boolean} [updateList] False to forbid update given list resource with fetched tasks; true by default
 		 */
 		getList: function (list, callback, updateList) {
@@ -551,16 +617,19 @@ window.Task = (function ($) {
 			 * Retrieves task resource from local data
 			 * @param {String} [listId] List id to lookup in; Last active by default
 			 * @param {String} [taskId] null to retrieve full set of tasks of the given list id
-			 * @param callback
+			 * @param {Function} callback
+			 * @param {Boolean} [returnCollection] True to wrap tasks with {@link TaskCollection}
 			 */
-			get: function (listId, taskId, callback) {
+			get: function (listId, taskId, callback, returnCollection) {
 				listId = listId || List.getLastActive().id;
 				List.storage.get(listId, function (list) {
+					var res = list.tasks;
 					if (!taskId) {
-						callback(list.tasks);
+						callback(returnCollection ? new TaskCollection(res) : res);
 						return;
 					}
-					callback(iterateGet(taskId, list.tasks));
+					res = iterateGet(taskId, res);
+					callback((res && returnCollection) ? new TaskCollection(res) : res);
 				});
 			},
 

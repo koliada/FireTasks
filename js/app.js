@@ -11,9 +11,9 @@ window.FT = (function($) {
 
 	'use strict';
 
-	var version = '0.6.0',
-		manifestUrl = 'http://koliada.github.io/FireTasks/manifest.webapp',
-		//manifestUrl = 'http://dev.alex-koliada.com/FireTasks/manifest.webapp',
+	var version = '0.7.0',
+		devMode = true,
+		manifestUrl = devMode ? 'http://dev.alex-koliada.com/FireTasks/manifest.webapp' : 'http://koliada.github.io/FireTasks/manifest.webapp',
 		actions = {
 			'MAIN_QUEUE': 'mainQueue'
 		},
@@ -34,33 +34,9 @@ window.FT = (function($) {
 	function setListeners() {
 
 		EV.listen('options-saved', onOptionsSaved);
-		EV.listen('lists-loaded', function () {
-			if (!(localStorage.getItem('instructionalOverlayShown') === 'true')) {
-				FT.showInstructionalOverlay();
-				localStorage.setItem('instructionalOverlayShown', true);
-			}
-		});
-		EV.listen('tasks-loaded', function () {
-			// On-Start Synchronization
-			if (!Settings.get('syncOnStart')) {
-				Logger.info("onStart refresh won't start because of the setting");
-				return;
-			}
-			if (!FT.isOnline()) {
-				Logger.info("onStart refresh won't start immediately because internet connection is offline. Waiting for connection restore");
-				EV.listen('connection-online', function() {
-					callSync();
-				});
-				return;
-			}
-			if (!syncCalled) {
-				callSync();
-			}
-
-			function callSync() {
-				syncCalled = true;
-				FT.loadAll();
-			}
+		EV.listen('tasks-rendered', function () {
+			checkInstructionalOverlay();
+			setupStartupSynchronization();
 		});
 
 		window.addEventListener('online', function (e) {
@@ -105,6 +81,41 @@ window.FT = (function($) {
 		 console.log('pass');
 		 GO2._handleMessage(false);
 		 };*/
+	}
+
+	/**
+	 * Triggers showing of instructional overlay if needed
+	 */
+	function checkInstructionalOverlay() {
+		if (!(localStorage.getItem('instructionalOverlayShown') === 'true')) {
+			FT.showInstructionalOverlay();
+			localStorage.setItem('instructionalOverlayShown', true);
+		}
+	}
+
+	/**
+	 * Sets up startup synchronization
+	 */
+	function setupStartupSynchronization() {
+		if (!Settings.get('syncOnStart')) {
+			Logger.info("onStart refresh won't start because of the setting");
+			return;
+		}
+		if (!FT.isOnline()) {
+			Logger.info("onStart refresh won't start immediately because internet connection is offline. Waiting for connection restore");
+			EV.listen('connection-online', function () {
+				callSync();
+			});
+			return;
+		}
+		if (!syncCalled) {
+			callSync();
+		}
+
+		function callSync() {
+			syncCalled = true;
+			FT.loadAll();
+		}
 	}
 
 	/**
@@ -198,6 +209,9 @@ window.FT = (function($) {
 	}
 
 	function setLogger(level) {
+		if (['ERROR', 'WARNING', 'INFO'].indexOf(level) === -1) {
+			throw ('Logger.setLevel(): wrong logging level, expected values: ERROR|WARNING|INFO');
+		}
 		window.Logger = (function(level) {
 
 			var l = 0,
@@ -232,9 +246,12 @@ window.FT = (function($) {
 				},
 				getLevel: function () {
 					return level;
-				}
+				},
+				/* May be useful for debugging */
+				setLevel: setLogger
 			}
 		}(level));
+		return window.Logger;
 	}
 
 	function initStorage() {
@@ -276,7 +293,7 @@ window.FT = (function($) {
 				css = [ fontFamily, fontSize, backgroundImage, color ].join("; ");
 			console.log("%c" + text, css);
 		}
-		console.info('Thanks for your interest in Fire Tasks! For any details please refer to https://github.com/koliada/FireTasks');
+		console.info('Thank you for your interest in Fire Tasks! For any details please refer to https://github.com/koliada/FireTasks');
 	}
 
 	/**
@@ -408,7 +425,7 @@ window.FT = (function($) {
 
 	function onOptionsSaved() {
 		FT.setAutoFetch();
-		FT.setSidebarAnimation();
+		FT.setAnimations();
 	}
 
 
@@ -451,9 +468,6 @@ window.FT = (function($) {
 		},
 
 		init: function () {
-			FT.toggleSidebar();
-			FT.setSidebarAnimation();
-
 			updateConnectionStatus();
 			showLogo();
 			updateVersion();
@@ -463,6 +477,9 @@ window.FT = (function($) {
 			initStorage();
 			initSync();
 			setListeners();
+
+			FT.toggleSidebar();
+			FT.setAnimations();
 
 			Auth.init();
 			List.init();
@@ -485,6 +502,11 @@ window.FT = (function($) {
 			}
 
 			if (refreshInterval || !delay) {
+				return;
+			}
+
+			if (delay < 60) {
+				Logger.warn('Delay value should be equal to or greater than 60 (measured in seconds)');
 				return;
 			}
 
@@ -554,7 +576,7 @@ window.FT = (function($) {
 					FT.toggleSidebar(true);
 					btnStart.html('Go to app').prop('disabled', false).off().on('click', function () {
 						List.loadData();
-						setupForm.removeClass().addClass('fade-out');
+						setupForm.removeClass('fade-in').addClass('fade-out');
 						showInstructionalOverlay();
 						lblDescription.html(lblDescriptionOldValue);
 						progress.val(0);
@@ -569,7 +591,7 @@ window.FT = (function($) {
 			FT.preventStartupSync();
 			FT.stopAutoFetch();
 
-			setupForm.removeClass().addClass('fade-in');
+			setupForm.removeClass('fade-out').addClass('fade-in');
 
 			// Start button
 			btnStart.prop('disabled', false);
@@ -618,7 +640,6 @@ window.FT = (function($) {
 			FT.stopAutoFetch();
 			Auth.dataCalculation.start();
 			List.getList(function (lists) {
-				EV.fire('lists-loaded', lists); // notify view to re-render lists
 				if (lists.length > 0) {
 					for (var i = 0; i < lists.length; i++) {
 						(function (i) {
@@ -629,10 +650,11 @@ window.FT = (function($) {
 									Task.view.toggleProgress(false);
 									List.storage.set(lists, function () {
 										Logger.info('loadAll(): synchronization completed, time: ' + ((new Date()).getTime() - timeStart).toString() + ' ms, data transferred: ' + Auth.dataCalculation.getValue() + ' bytes');
-										Task.view.getListEl().sortable('destroy');
+										//Task.view.getSortModeManager().isMyOrder() && Task.view.getListEl().sortable('destroy');
 										var list = List.getLastActive();
 										delete list.tasks; // triggers refresh from storage
-										Task.loadData(list);
+										EV.fire('list-selected', list); // updates last active
+										EV.fire('lists-loaded', lists); // triggers lists view re-render and tasks load
 										callback && callback(lists);
 									});
 								}
@@ -708,14 +730,14 @@ window.FT = (function($) {
 				confirm.find('#btn-confirm-ok').parent('menu').prepend(confirm.find('#btn-confirm-cancel').show());
 			}
 
-			confirm.removeClass().addClass('fade-in');
+			confirm.removeClass('fade-out').addClass('fade-in');
 
 			/* Listeners */
 			confirm.unbind('click').on('click', '#btn-confirm-cancel', function () {
-				confirm.removeClass().addClass('fade-out');
+				confirm.removeClass('fade-in').addClass('fade-out');
 			}).on('click', '#btn-confirm-ok', function () {
-				confirm.removeClass().addClass('fade-out');
-				data.action();
+				confirm.removeClass('fade-in').addClass('fade-out');
+				data.action && data.action();
 			});
 		},
 
@@ -726,6 +748,8 @@ window.FT = (function($) {
 		},
 
 		isFFOS: ("mozApps" in navigator && navigator.userAgent.search("Mobile") != -1),
+
+		isMozActivityAvailable: typeof MozActivity !== 'undefined',
 
 		showInDevelopmentTooltip: function (timeout) {
 			timeout = timeout || 1000;
@@ -744,16 +768,26 @@ window.FT = (function($) {
 			}
 		},
 
+		// TODO: move to a more appropriate place?
 		/**
-		 * Sets sidebar animation
-		 * Uses {@link Settings}
+		 * Sets animation
+		 * Uses {@link Settings.get}
 		 */
-		setSidebarAnimation: function () {
-			/*if (Settings.get('sidebarAnimation')) {
-				document.getElementById('drawer').classList.add('animate');
+		setAnimations: function () {
+			var noAnimation = Settings.get('noAnimations');
+			if (noAnimation === true) {
+				document.getElementById('drawer').classList.add('no-animation');
+				$('[data-position="back"]').addClass('no-animation');
+				$('[data-type="edit"]').addClass('no-animation');
+				$('label.pack-switch').addClass('no-animation');
+				Logger.info('setAnimations(): animations suppressing enabled');
 			} else {
-				document.getElementById('drawer').classList.remove('animate');
-			}*/
+				document.getElementById('drawer').classList.remove('no-animation');
+				$('[data-position="back"]').removeClass('no-animation');
+				$('[data-type="edit"]').removeClass('no-animation');
+				$('label.pack-switch').removeClass('no-animation');
+				Logger.info('setAnimations(): animations suppressing disabled');
+			}
 		},
 
 		/**

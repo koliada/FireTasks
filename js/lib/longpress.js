@@ -9,6 +9,8 @@
  */
 window.Longpress = (function() {
 
+	'use strict';
+
 	var longPressTimeout = null,
 		longPressStarted = false,
 		longPressPrevented = false,
@@ -120,6 +122,14 @@ window.Longpress = (function() {
 					}
 				}, 200);
 			}
+		},
+
+		/**
+		 * Clears started events
+		 */
+		unbind: function () {
+			clearTimeout(longPressTimeout);
+			longPressStarted = null;
 		}
 	}
 }());

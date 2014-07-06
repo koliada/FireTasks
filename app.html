@@ -188,13 +188,28 @@
 					<!--<li>
 						<a href="#" class="prevent-default">
 							<label class="pack-switch">
-								<input type="checkbox" id="settings-sidebar-animation">
+								<input type="checkbox" id="settings-animations">
 								<span></span>
 							</label>
-							<p>Sidebar animation</p>
-							<p>Turn off for better performance</p>
+							<p>Suppress animations</p>
+							<p>May increase performance</p>
 						</a>
 					</li>-->
+				</ol>
+
+				<header>Miscellaneous</header>
+
+				<ol>
+					<li>
+						<a href="#" class="prevent-default">
+							<label class="pack-switch">
+								<input type="checkbox" id="settings-ignore-completed-when-sharing">
+								<span></span>
+							</label>
+							<p>Ignore completed tasks</p>
+							<p>When sharing task list</p>
+						</a>
+					</li>
 				</ol>
 
 				<header>About</header>
@@ -276,7 +291,7 @@
 			<header style="text-align: center;">
 				<img src="images/logo.png" alt="Logo" />
 				<h1>Fire Tasks</h1>
-				<label>Version <span class="app-version">0.6.0</span> (<time>2014-06-30</time>)</label>
+				<label>Version <span class="app-version">0.7.0</span> (<time>2014-07-07</time>)</label>
 			</header>
 
 			<header><h2>About Fire Tasks</h2></header>
@@ -367,6 +382,31 @@
 		<menu>
 			<button id="btn-rename-list" class="prevent-default">Rename task list</button>
 			<button id="btn-delete-list" class="prevent-default">Delete task list</button>
+			<button class="prevent-default">Cancel</button>
+		</menu>
+	</form>
+</section>
+
+<!-- TASKS ACTIONS -->
+<section id="tasks-actions" data-position="back" class="fullscreen">
+	<form role="dialog" data-type="action">
+		<header>Tasks Actions</header>
+		<menu>
+			<button id="btn-sort-tasks" class="prevent-default">Sort mode</button>
+			<button id="btn-share-tasks" class="prevent-default">Export task list</button>
+			<button class="prevent-default">Cancel</button>
+		</menu>
+	</form>
+</section>
+
+<!-- TASKS SORT MODE -->
+<section id="tasks-sort-mode" data-position="back" class="fullscreen">
+	<form role="dialog" data-type="action">
+		<header>Set sort mode</header>
+		<menu>
+			<button id="btn-sort-tasks-my-order" class="prevent-default">My order</button>
+			<button id="btn-sort-tasks-alphabetical" class="prevent-default">Alphabetical</button>
+			<button id="btn-sort-tasks-due-date" class="prevent-default" disabled="disabled">Due date</button>
 			<button class="prevent-default">Cancel</button>
 		</menu>
 	</form>
@@ -511,13 +551,12 @@
 </section>
 
 
-<script type="text/javascript" src="js/status.min.js"></script>
-
 <script type="text/javascript" src="js/lib/jquery-2.1.0.min.js"></script>
 <script type="text/javascript" src="js/lib/jquery-ui-1.10.3.custom.min.js"></script>
 <script type="text/javascript" src="js/lib/jquery.ui.touch-punch.min.js"></script>
 <script type="text/javascript" src="js/lib/localforage.min.js"></script>
 
+<script type="text/javascript" src="js/status.min.js"></script>
 <script type="text/javascript" defer src="js/lib/google-oauth2.min.js"></script>
 <script type="text/javascript" defer src="js/lib/event-processor.min.js"></script>
 <script type="text/javascript" defer src="js/lib/sync.min.js"></script>
@@ -532,13 +571,12 @@
 <script type="text/javascript" defer src="js/app.min.js"></script>
 
 <!-- DEBUG -->
-<!--<script type="text/javascript" src="js/status.js"></script>
-
-<script type="text/javascript" src="js/lib/jquery-2.1.0.min.js"></script>
+<!--<script type="text/javascript" src="js/lib/jquery-2.1.0.min.js"></script>
 <script type="text/javascript" src="js/lib/jquery-ui-1.10.3.custom.min.js"></script>
 <script type="text/javascript" src="js/lib/jquery.ui.touch-punch.js"></script>
 <script type="text/javascript" src="js/lib/localforage.min.js"></script>
 
+<script type="text/javascript" src="js/status.js"></script>
 <script type="text/javascript" defer src="js/lib/google-oauth2.js"></script>
 <script type="text/javascript" defer src="js/lib/event-processor.js"></script>
 <script type="text/javascript" defer src="js/lib/sync.js"></script>

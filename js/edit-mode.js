@@ -142,9 +142,9 @@ window.EditMode = (function ($) {
 
 		function toggleListChooser(v) {
 			if (v) {
-				tasksMoveForm.removeClass().addClass('fade-in');
+				tasksMoveForm.removeClass('fade-out').addClass('fade-in');
 			} else {
-				tasksMoveForm.removeClass().addClass('fade-out');
+				tasksMoveForm.removeClass('fade-in').addClass('fade-out');
 			}
 		}
 
@@ -303,7 +303,7 @@ window.EditMode = (function ($) {
 	 * Shows edit mode controls
 	 */
 	function showOverlay() {
-		dom.el.removeClass().addClass('edit');
+		dom.el.removeClass('edit').addClass('edit');
 		toggleListView(true);
 	}
 
