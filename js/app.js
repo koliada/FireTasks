@@ -97,26 +97,36 @@ window.FT = (function($) {
 	 * Sets up startup synchronization
 	 */
 	function setupStartupSynchronization() {
-		if (!Settings.get('syncOnStart')) {
-			Logger.info("onStart refresh won't start because of the setting");
-			return;
-		}
+		// Firstly check if we're online. If not, wait for 'connection-online' event.
 		if (!FT.isOnline()) {
 			Logger.info("onStart refresh won't start immediately because internet connection is offline. Waiting for connection restore");
 			EV.listen('connection-online', function () {
-				callSync();
+				setupStartupSynchronization();
 			});
 			return;
 		}
+
+		// Secondly, check if there are uncompleted tasks. If it's confirmed, launch queue and wait it finishes.
 		if (Sync.getStoredTasks().length > 0) {
 			Logger.info("onStart refresh won't start immediately because synchronization module detected uncompleted tasks. Waiting for tasks to complete");
 			FT.startSyncQueue();
 			return;
 		}
+
+		// Thirdly, check if 'syncOnStart' setting is set to true. If yes, continue.
+		if (!Settings.get('syncOnStart')) {
+			Logger.info("onStart refresh won't start because of the setting");
+			return;
+		}
+
+		// At last, we check if synchronization was already called. If not, finally launch the sequence
 		if (!syncCalled) {
 			callSync();
 		}
 
+		/**
+		 * Launches synchronization sequence and sets a flag which indicates that synchronization was called
+		 */
 		function callSync() {
 			syncCalled = true;
 			FT.loadAll();
