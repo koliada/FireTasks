@@ -18,7 +18,7 @@ Features
 Although Fire Tasks is in an early beta and does not have many useful features,
 it is functional and surely can bring you relief if you tend to use Google Tasks on other platforms.
 
-Version 0.7.0 provides:
+Version 0.7.1 provides:
 
 - Authentication with the Google Tasks API
 - Retrieving task lists and tasks
@@ -70,7 +70,7 @@ Fire Tasks was tested on US ZTE Open with Firefox OS v1.1 and v1.3, and on the F
 
 Report any issues here, on the [GitHub Issues](https://github.com/koliada/FireTasks/issues)
 section, send them to [@alex_koliada](https://twitter.com/alex_koliada) in English
-or send mail concerning Fire Tasks to alex.fiator@gmail.com with 'Fire Tasks' in a subject field.
+or send mail concerning Fire Tasks to alex.fiator@gmail.com with 'Fire Tasks' in the subject field.
 
 
 TODO
@@ -98,13 +98,14 @@ TODO
 - <s>Push notifications / background synchronizing</s> - Seems that this won't work
 - <s>Stretching task to display full contents</s>
 - Option to suppress some animations to improve performance - implemented but not enabled due to issues in Firefox
-- Handle case when user closes Google's authentication dialog
+- <s>Handle case when user closes Google's authentication dialog</s>
 - Better drag&drop
 - Localization
 - <s>Long press on task list</s>
 - Automatically scroll lists and forms to top on activate/scroll list on selection
 - Better authentication and requests processing
 - Make first input active on forms activation
+- Automatic lists and forms scrolling to relevant position
 - Actualize screenshots when tasks actions are implemented
 </pre>
 
@@ -118,6 +119,11 @@ Either you can write code or help translate Fire Tasks to your language, feel fr
 Changelog
 ----------
 <pre>
+Version 0.7.1
+- Special background dialog that opens when authentication is needed implemented
+- Critical bug concerning task indention/unindention in offline mode fixed
+- Internal changes & small bug fixes
+
 Version 0.7.0
 - Task list alphabetical sort
 - Task list exporting (plus setting to ignore completed tasks)

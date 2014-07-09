@@ -977,33 +977,49 @@ window.Task = (function ($) {
 
 			// We need to ensure that previous and parent tasks are present on the server
 			if (previousId !== null) {
-				Task.getById(listId, previousId, function (task) {
-					if (task && !task.deleted) {
-						data.query_params += 'previous=' + previousId + '&';
-						previousProcessed = true;
-						doMove();
-					} else {
-						abort();
-					}
-				});
+				if (FT.isOnline()) {
+					Task.getById(listId, previousId, function (task) {
+						if (task && !task.deleted) {
+							processPrevious();
+						} else {
+							abort();
+						}
+					});
+				} else {
+					processPrevious();
+				}
 			} else {
 				previousProcessed = true;
 			}
 			if (parentId !== null) {
-				Task.getById(listId, parentId, function (task) {
-					if (task && !task.deleted) {
-						data.query_params += 'parent=' + parentId + '&';
-						parentProcessed = true;
-						doMove();
-					} else {
-						abort();
-					}
-				});
+				if (FT.isOnline()) {
+					Task.getById(listId, parentId, function (task) {
+						if (task && !task.deleted) {
+							processParent();
+						} else {
+							abort();
+						}
+					});
+				} else {
+					processParent();
+				}
 			} else {
 				parentProcessed = true;
 			}
 
 			doMove(); // fires if parentId and previousId are null
+
+			function processPrevious() {
+				data.query_params += 'previous=' + previousId + '&';
+				previousProcessed = true;
+				doMove();
+			}
+
+			function processParent() {
+				data.query_params += 'parent=' + parentId + '&';
+				parentProcessed = true;
+				doMove();
+			}
 
 			function doMove() {
 				if (!previousProcessed || !parentProcessed) {

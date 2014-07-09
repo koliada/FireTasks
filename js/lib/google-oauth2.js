@@ -24,16 +24,20 @@
  GO2.onlogout: callback()
  */
 
+/**
+ * @see http://timc.idv.tw/wordcloud/
+ */
+
 'use strict';
 
 (function (w) {
 
-	var windowName = 'google_oauth2_login_popup';
+	var windowName = 'google_oauth2_login_popup',
+		GO2;
 
 	// If the script loads in a popup matches the windowName,
 	// we need to handle the request instead.
 	if (w.name === windowName) {
-		var GO2;
 		if (w.opener && w.opener.GO2)
 			GO2 = w.opener.GO2;
 		if (w.parent && w.parent.GO2)
@@ -74,7 +78,7 @@
 		popupWidth = 500,
 		popupHeight = 550;
 
-	var GO2 = {
+	GO2 = {
 		// init
 		init: function go2_init(options) {
 			if (!options || !options.client_id)
@@ -200,14 +204,6 @@
 				expires_in * 1000
 			);
 		},
-		/* Koliada @ 2013-12-15 */
-		/*_handleCode: function(code, s_id) {
-			if (state_id !== s_id)
-				return;
-
-			if (GO2.onlogin)
-				GO2.onlogin(code);
-		},*/
 		// Remove pending immediate_frame
 		_removeImmediateFrame: function go2_removeImmediateFrame() {
 			if (!immediate_frame)

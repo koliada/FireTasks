@@ -11,7 +11,7 @@ window.FT = (function($) {
 
 	'use strict';
 
-	var version = '0.7.0',
+	var version = '0.7.1',
 		devMode = true,
 		manifestUrl = devMode ? 'http://dev.alex-koliada.com/FireTasks/manifest.webapp' : 'http://koliada.github.io/FireTasks/manifest.webapp',
 		actions = {
@@ -106,6 +106,11 @@ window.FT = (function($) {
 			EV.listen('connection-online', function () {
 				callSync();
 			});
+			return;
+		}
+		if (Sync.getStoredTasks().length > 0) {
+			Logger.info("onStart refresh won't start immediately because synchronization module detected uncompleted tasks. Waiting for tasks to complete");
+			FT.startSyncQueue();
 			return;
 		}
 		if (!syncCalled) {
@@ -267,6 +272,7 @@ window.FT = (function($) {
 			Task.view.toggleProgress(true);
 		}).onFinish(function () {
 			Task.view.toggleProgress(false);
+			setupStartupSynchronization(); // should be done after stored tasks has been completed
 		});
 
 		initSyncErrorsListener();
@@ -277,8 +283,6 @@ window.FT = (function($) {
 				updateSyncErrors(eventDetails);
 			}
 		};
-
-		FT.startSyncQueue(); // for possible not completed tasks
 	}
 
 	/* Chrome only */
@@ -475,8 +479,8 @@ window.FT = (function($) {
 			setLogger('ERROR');
 			patchOptions();
 			initStorage();
-			initSync();
 			setListeners();
+			initSync();
 
 			FT.toggleSidebar();
 			FT.setAnimations();

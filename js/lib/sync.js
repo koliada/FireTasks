@@ -95,6 +95,7 @@
  *
  * In case of errors it could be useful to call Sync.clearStorage() so that failed tasks won't be queued again
  * In need of hard resetting the currently running queue you can call Sync.clearStarted()
+ * Sync.getStoredTasks() can be used to check stored queue (if any)
  */
 
 ;
@@ -180,7 +181,7 @@
 			if (typeof s !== 'undefined') {
 				return JSON.parse(s);
 			} else {
-				return undefined;
+				return null;
 			}
 		}
 
@@ -640,4 +641,12 @@
 	 * @type {clearStorage}
 	 */
 	sync.clearStorage = clearStorage;
+
+	/**
+	 * Fetches Queue data from Storage
+	 * @returns {Object|null}
+	 */
+	sync.getStoredTasks = function () {
+		return storage();
+	}
 }));

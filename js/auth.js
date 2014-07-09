@@ -14,7 +14,23 @@ window.Auth = (function ($) {
 	"use strict";
 
 	var token = '',
-		noConnectionErrors = 0;
+		noConnectionErrors = 0,
+		dom = {
+			authWaitingDialog: $('#auth-waiting-dialog'),
+			btnReopenDialog: $('#btn-auth-waiting-reopen-dialog')
+		};
+
+	function openAuthWaitingDialog(callback) {
+		dom.authWaitingDialog.removeClass('fade-out').addClass('fade-in');
+		dom.btnReopenDialog.on('click', function () {
+			login(callback, true);
+		});
+	}
+
+	function hideAuthWaitingDialog() {
+		dom.authWaitingDialog.removeClass('fade-in').addClass('fade-out');
+		dom.btnReopenDialog.off();
+	}
 
 	function login (callback, refresh) {
 
@@ -31,6 +47,9 @@ window.Auth = (function ($) {
 		var tokenOld = token;
 
 		GO2.init(FT.options);
+		if (refresh === true) {
+			openAuthWaitingDialog(callback);
+		}
 		GO2.login(false, (refresh === false));	// (force_approval_prompt, immediate)
 
 		/* Checking if iframe has failed */
@@ -40,6 +59,7 @@ window.Auth = (function ($) {
 				clearTimeout(controlTimeout);
 				if (tokenOld === token) {
 					GO2.logout();
+					openAuthWaitingDialog(callback);
 					GO2.login(false, false);
 					FT.stopAutoFetch();
 				}
@@ -47,6 +67,8 @@ window.Auth = (function ($) {
 		}
 
 		GO2.onlogin = function(accessToken) {
+
+			hideAuthWaitingDialog();
 
 			validateToken(accessToken, function(valid) {
 				if(valid) {
@@ -76,14 +98,8 @@ window.Auth = (function ($) {
 						GO2.logout();
 						login(callback, true);
 					});
-					/* TODO: handle some additional processing */
 				}
 			});
-		};
-
-		/* TODO: Check */
-		GO2.oncancel = function() {
-			alert('Fire Tasks requires Google Authentication for proper work. We will add offline mode later.');
 		};
 	}
 
@@ -147,7 +163,7 @@ window.Auth = (function ($) {
 				xhr: function () {
 					return new window.XMLHttpRequest({mozSystem: true, cache: false});
 				}
-			})
+			});
 		},
 
 		dataCalculation: (function() {
@@ -304,6 +320,7 @@ window.Auth = (function ($) {
 
 		revokeToken: function() {
 
+			// TODO: progress indication while request
 			getAccessToken(function(accessToken) {
 
 				$.ajax({

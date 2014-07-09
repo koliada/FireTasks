@@ -291,7 +291,7 @@
 			<header style="text-align: center;">
 				<img src="images/logo.png" alt="Logo" />
 				<h1>Fire Tasks</h1>
-				<label>Version <span class="app-version">0.7.0</span> (<time>2014-07-07</time>)</label>
+				<label>Version <span class="app-version">0.7.1</span> (<time>2014-07-10</time>)</label>
 			</header>
 
 			<header><h2>About Fire Tasks</h2></header>
@@ -310,13 +310,13 @@
 			<header><h2>Credits</h2></header>
 			<p>Technology and assets used in the making of Fire Tasks</p>
 			<ul>
+				<li>Special thanks go to <a href="https://twitter.com/justguitarman" target="_blank">Andrey Prepiyalo</a> for the gorgeous Fire Tasks logo</li>
 				<li>The <a href="http://buildingfirefoxos.com/" target="_blank">Firefox OS Building Blocks</a> are immensely helpful when you want to create an application that blends in with the stock system interface</li>
 				<li><a href="https://github.com/mozilla/localForage" target="_blank">localForage</a>, a Mozilla's library for simple access to asynchronous storage</li>
 				<li>The <a href="http://timc.idv.tw/wordcloud/" target="_blank">HTML5 Word Cloud</a> for sharing Google OAuth class</li>
-				<li>The <a href="https://github.com/flaki/checkinfox" target="_blank">Check-in Fox</a>, a FourSquare client for Firefox OS, for inspiration and sharing some code (like this About page)</li>
+				<li>The <a href="https://github.com/flaki/checkinfox" target="_blank">Check-in Fox</a>, a FourSquare client for Firefox OS, for inspiration and sharing some ideas</li>
 				<li><a href="https://play.google.com/store/apps/details?id=ch.teamtasks.tasks" target="_blank">Tasks Android App</a> for inspiration and some great ideas</li>
 				<li>The <a href="https://github.com/dmitryf/elements" target="_blank">LESS Elements</a>, a set of useful mixins for <a href="http://lesscss.org/">LESS</a>, the CSS pre-processor</li>
-				<li>Fire Tasks logo by <a href="https://twitter.com/justguitarman" target="_blank">Andrey Prepiyalo</a></li>
 			</ul>
 
 			<header><h2>Privacy</h2></header>
@@ -330,7 +330,7 @@
 			</p>
 
 			<p>
-				Developers do not log, track or in other ways monitor your activity on Google Tasks.
+				Google Analytics is used to collect anonymous stats about app usage
 			</p>
 
 			<p>
@@ -548,6 +548,23 @@
 <!-- INSTRUCTIONAL OVERLAY -->
 <section id="instructional-overlay" data-position="back">
 	<canvas width="640" height="480">Browser doesn't support canvas. Tap anywhere to start using Fire Tasks!</canvas>
+</section>
+
+<!-- AUTHENTICATION WAITING DIALOG -->
+<section id="auth-waiting-dialog" data-position="back" class="fullscreen">
+	<form role="dialog" data-type="confirm">
+		<section>
+			<h1>Waiting for authentication</h1>
+			<p>
+				Fire Tasks needs Google authentication.<br/>
+				Please login with your Google account by pressing the button bellow.
+			</p>
+			<p style="text-align: center;"><progress></progress></p>
+		</section>
+		<menu>
+			<button class="recommend prevent-default" id="btn-auth-waiting-reopen-dialog">Open Authentication Dialog</button>
+		</menu>
+	</form>
 </section>
 
 
