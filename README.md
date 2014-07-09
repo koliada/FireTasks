@@ -102,7 +102,6 @@ TODO
 - Better drag&drop
 - Localization
 - <s>Long press on task list</s>
-- Automatically scroll lists and forms to top on activate/scroll list on selection
 - Better authentication and requests processing
 - Make first input active on forms activation
 - Automatic lists and forms scrolling to relevant position

@@ -12,7 +12,7 @@ window.FT = (function($) {
 	'use strict';
 
 	var version = '0.7.1',
-		devMode = true,
+		devMode = false,
 		manifestUrl = devMode ? 'http://dev.alex-koliada.com/FireTasks/manifest.webapp' : 'http://koliada.github.io/FireTasks/manifest.webapp',
 		actions = {
 			'MAIN_QUEUE': 'mainQueue'
@@ -643,6 +643,7 @@ window.FT = (function($) {
 			Logger.info('loadAll(): synchronization started');
 			FT.stopAutoFetch();
 			Auth.dataCalculation.start();
+			Task.view.toggleProgress(true);
 			List.getList(function (lists) {
 				if (lists.length > 0) {
 					for (var i = 0; i < lists.length; i++) {

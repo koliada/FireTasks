@@ -292,6 +292,7 @@ if (window.List) window.List.view = (function($) {
 	 */
 	function openList(ev) {
 		var id = ev.target.dataset.id;
+		Task.view.toggleProgress(true);
 		List.storage.get(id, function (list) {
 			if (list) {
 				Task.loadData(list);
