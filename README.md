@@ -86,6 +86,7 @@ TODO
 - Displaying recently deleted/completed tasks
 - Multiple accounts
 - Theme switching (light/dark)
+- Swipe to mark task completed
 - <s>Force update (currently not working on Firefox OS)</s> Not necessary when app will be released as packaged
 
 <b>Bugs</b>
