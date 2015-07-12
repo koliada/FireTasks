@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html manifest="manifest.appcache">
+<html>
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no"/>
@@ -44,8 +44,10 @@
 	<!-- Finally mine -->
 	<link rel="stylesheet" type="text/css" href="css/base.css">
 
+	<link rel="icon" type="image/x-icon" href="images/logo.png">
+
 </head>
-<body>
+<body id="firetasks">
 
 <!-- INDEX -->
 <section id="index" data-position="current">
@@ -58,8 +60,12 @@
 			<h1>Lists</h1>
 			<progress class="pack-activity" value="0" max="100" id="progress-lists" style="display: none;"></progress>
 		</header>
-		<nav>
-			<ul id="lists"></ul>
+		<!--<nav data-bind="visible: accounts.data().length === 0">
+			<ul class="no-accounts">
+				<li><a>No accounts!</a></li>
+			</ul>
+		</nav>-->
+		<nav id="lists">
 		</nav>
 		<div role="toolbar">
 			<ul>
@@ -87,14 +93,64 @@
 			<progress class="pack-activity light" value="0" max="100" id="progress-tasks" style="display: none;"></progress>
 		</header>
 		<header>
-			<h2>Initializing...</h2>
+			<h2 id="active-list-title">Initializing...</h2>
 		</header>
 		<article class="content scrollable header">
 			<div data-type="list" id="tasks">
 				<ol></ol>
+				<!--<ol data-bind="if: _activeList().tasks.getLength() === 0">
+					<li>
+						<a draggable="false"><p style="text-align: center;">This list is empty</p></a>
+					</li>
+				</ol>-->
 			</div>
 		</article>
 	</section>
+
+	<!-- ACCOUNT TEMPLATE -->
+	<script id="account-template" type="text/x-mustache-template">
+		<h2 class="account-item" data-id="{{{getId}}}">{{{getName}}}</h2>
+		<ul></ul>
+	</script>
+
+	<!-- LIST TEMPLATE -->
+	<script id="list-template" type="text/x-mustache-template">
+		<li class="list-item {{#selected}}list-selected{{/selected}}" {{#isDeleted}}style="display: none;{{/isDeleted}}">
+			<a draggable="false" oncontextmenu="return(false);"
+			   data-id="{{{getId}}}"
+			   data-account-id="account.getId">{{{getName}}}</a>
+		</li>
+	</script>
+
+	<!-- TASK TEMPLATE -->
+	<script id="task-template" type="text/x-mustache-template">
+		<li class="task-item {{#isCompleted}}completed{{/isCompleted}} {{#selected}}selected{{/selected}}">
+			<a data-id="{{{getId}}}" draggable="false" oncontextmenu="return(false);">
+				<label class="pack-checkbox danger" {{^inEditMode}}style="display: none;"{{/inEditMode}}>
+					<input class="for-edit-mode" type="checkbox" {{#selected}}checked{{/selected}}>
+					<span></span>
+				</label>
+				<label class="pack-checkbox" {{#inEditMode}}style="display: none;"{{/inEditMode}}">
+					<input class="for-completion" type="checkbox" {{#isCompleted}}checked{{/isCompleted}}>
+					<span></span>
+				</label>
+
+				<div class="clickable">
+					<p class="item-title">
+						<span>{{{getName}}}</span>
+					</p>
+					{{#hasNotes}}
+					<p class="item-notes">{{{getNotes}}}</p>
+					{{/hasNotes}}
+				</div>
+				<label class="task-handle">
+					<span class="action-icon menu"></span>
+				</label>
+			</a>
+			<ol>
+			</ol>
+		</li>
+	</script>
 
 	<!-- EDIT MODE -->
 	<section>
@@ -104,7 +160,7 @@
 					<menu type="toolbar">
 						<button id="btn-edit-mode-close" class="prevent-default">done</button>
 					</menu>
-					<h1><span class="selected_num">0</span> selected</h1>
+					<h1><span id="selected-tasks-count">0</span> selected</h1>
 				</header>
 			</section>
 			<div role="toolbar">
@@ -133,11 +189,10 @@
 
 				<header>Accounts</header>
 
-				<ol>
+				<ol id="settings-accounts">
 					<li>
-						<a href="#" id="settings-logout" class="prevent-default">
-							<p>Log Out</p>
-							<p class="profile-email"></p>
+						<a href="#" id="settings-add-account" class="prevent-default">
+							<p>Add Account</p>
 						</a>
 					</li>
 				</ol>
@@ -291,7 +346,7 @@
 			<header style="text-align: center;">
 				<img src="images/logo.png" alt="Logo" />
 				<h1>Fire Tasks</h1>
-				<label>Version <span class="app-version">0.7.1</span> (<time>2014-07-10</time>)</label>
+				<label id="app-version">Version <span class="app-version">{{{version}}}</span> (<time>{{{releaseDate}}}</time>)</label>
 			</header>
 
 			<header><h2>About Fire Tasks</h2></header>
@@ -438,9 +493,25 @@
 
 			<form>
 				<p>
-					<input type="text" name="list_name" placeholder="New List" autocomplete="off">
+					<input type="text" name="title" placeholder="New List" autocomplete="off" required>
 					<button type="reset">Clear</button>
 				</p>
+			</form>
+
+			<header><h2>Create in account</h2></header>
+
+			<form>
+				<ol>
+					<li>
+						<label>
+						<span class="button icon icon-dialog">
+							<select name="account">
+								<option value="">Error loading accounts lists</option>
+							</select>
+						</span>
+						</label>
+					</li>
+				</ol>
 			</form>
 
 		</article>
@@ -454,7 +525,7 @@
 			<a id="btn-task-form-back" href="#" class="prevent-default"><span class="icon icon-back">back</span></a>
 			<menu type="toolbar">
 				<button id="btn-task-form-delete">Delete</button>
-				<button id="btn-task-form-ok">Error</button>
+				<button id="btn-task-form-ok">&lt;Error&gt;</button>
 			</menu>
 			<h1>Create Task</h1>
 		</header>
@@ -462,7 +533,7 @@
 
 			<form>
 				<p class="has-margin">
-					<input type="text" name="title" placeholder="New Task" autocomplete="off">
+					<input type="text" name="title" placeholder="New Task" autocomplete="off" required>
 					<button type="reset">Clear</button>
 				</p>
 				<a href="#" class="prevent-default">
@@ -482,7 +553,7 @@
 				</label>
 			</form>
 
-			<header><h2>Due date</h2></header>
+			<!--<header><h2>Due date</h2></header>
 
 			<form>
 				<ol>
@@ -490,13 +561,13 @@
 					<label>
 						<span class="button icon icon-dialog">
 							<input name="due" placeholder="Due date" type="date" class="hidden-input" disabled="disabled" />
-							<!-- TODO: clear button -->
+							&lt;!&ndash; TODO: clear button &ndash;&gt;
 						<span class="datetime" id="start-date-locale"></span>
 						</span>
 					</label>
 				</li>
 				</ol>
-			</form>
+			</form>-->
 
 			<header><h2>Task list</h2></header>
 
@@ -505,8 +576,8 @@
 				<li>
 					<label>
 						<span class="button icon icon-dialog">
-							<select name="listId">
-								<option value="">Error loading task lists</option>
+							<select name="list" disabled="disabled">
+								<option value="">&lt;Error loading task lists&gt;</option>
 							</select>
 						</span>
 					</label>
@@ -521,12 +592,11 @@
 <section id="setup" data-position="back">
 	<form role="dialog" data-type="confirm">
 		<section>
-			<h1>Work offline</h1>
-			<p>Fire Tasks needs your tasks to be downloaded and stored on your device. Press Start to begin.</p>
-			<span class="description"></span><span role="status"><span>0</span>%</span>
-			<progress value="0" max="100"></progress>
+			<h1>Please wait while your account is being set up</h1>
+			<!--<span class="description"></span><span role="status"><span>0</span>%</span>-->
+			<progress value="0" max="100" class="pack-activity"></progress>
 		</section>
-		<menu><button id="btn-start-import" class="full prevent-default">Start</button></menu>
+		<menu><button id="btn-start-import" class="full prevent-default" disabled="disabled">Cancel</button></menu>
 	</form>
 </section>
 
@@ -551,7 +621,7 @@
 </section>
 
 <!-- AUTHENTICATION WAITING DIALOG -->
-<section id="auth-waiting-dialog" data-position="back" class="fullscreen">
+<section id="auth-wait-dialog" data-position="back" class="fullscreen">
 	<form role="dialog" data-type="confirm">
 		<section>
 			<h1>Waiting for authentication</h1>
@@ -562,50 +632,77 @@
 			<p style="text-align: center;"><progress></progress></p>
 		</section>
 		<menu>
-			<button class="recommend prevent-default" id="btn-auth-waiting-reopen-dialog">Open Authentication Dialog</button>
+			<button class="recommend prevent-default" id="btn-auth-wait-reopen-dialog">Open Authentication Dialog</button>
 		</menu>
 	</form>
 </section>
 
 
+<!--{{{htmlCommentMarkClosing}}}
 <script type="text/javascript" src="js/lib/jquery-2.1.0.min.js"></script>
-<script type="text/javascript" src="js/lib/jquery-ui-1.10.3.custom.min.js"></script>
-<script type="text/javascript" src="js/lib/jquery.ui.touch-punch.min.js"></script>
-<script type="text/javascript" src="js/lib/localforage.min.js"></script>
-
-<script type="text/javascript" src="js/status.min.js"></script>
-<script type="text/javascript" defer src="js/lib/google-oauth2.min.js"></script>
-<script type="text/javascript" defer src="js/lib/event-processor.min.js"></script>
-<script type="text/javascript" defer src="js/lib/sync.min.js"></script>
-<script type="text/javascript" defer src="js/lib/longpress.min.js"></script>
-<script type="text/javascript" defer src="js/auth.min.js"></script>
-<script type="text/javascript" defer src="js/settings.min.js"></script>
-<script type="text/javascript" defer src="js/list.min.js"></script>
-<script type="text/javascript" defer src="js/list.view.min.js"></script>
-<script type="text/javascript" defer src="js/task.min.js"></script>
-<script type="text/javascript" defer src="js/task.view.min.js"></script>
-<script type="text/javascript" defer src="js/edit-mode.min.js"></script>
-<script type="text/javascript" defer src="js/app.min.js"></script>
-
-<!-- DEBUG -->
-<!--<script type="text/javascript" src="js/lib/jquery-2.1.0.min.js"></script>
 <script type="text/javascript" src="js/lib/jquery-ui-1.10.3.custom.min.js"></script>
 <script type="text/javascript" src="js/lib/jquery.ui.touch-punch.js"></script>
 <script type="text/javascript" src="js/lib/localforage.min.js"></script>
+
+<script type="text/javascript" defer src="js/lib/libs.min.js"></script>
+<script type="text/javascript" defer src="js/app.min.js"></script>
+{{{htmlCommentMarkOpening}}}-->
+
+<!-- DEBUG -->
+<script type="text/javascript" src="js/lib/jquery-2.1.0.min.js"></script>
+<!--<script type="text/javascript" src="js/lib/knockout-3.2.0.debug.js"></script>-->
+<!--<script type="text/javascript" src="js/lib/knockout-repeat.js"></script>-->
+<!--<script type="text/javascript" src="http://code.jquery.com/jquery-2.1.1.js"></script>-->
+<script type="text/javascript" src="js/lib/jquery-ui-1.10.3.custom.min.js"></script>
+<script type="text/javascript" src="js/lib/jquery.ui.touch-punch.js"></script>
+<script type="text/javascript" src="js/lib/localforage.js"></script>
+<script type="text/javascript" src="js/lib/mustache.js"></script>
 
 <script type="text/javascript" src="js/status.js"></script>
 <script type="text/javascript" defer src="js/lib/google-oauth2.js"></script>
 <script type="text/javascript" defer src="js/lib/event-processor.js"></script>
 <script type="text/javascript" defer src="js/lib/sync.js"></script>
-<script type="text/javascript" defer src="js/lib/longpress.js"></script>
-<script type="text/javascript" defer src="js/auth.js"></script>
+<!--<script type="text/javascript" defer src="js/lib/longpress.js"></script>-->
+<!--<script type="text/javascript" defer src="js/auth.js"></script>-->
 <script type="text/javascript" defer src="js/settings.js"></script>
-<script type="text/javascript" defer src="js/list.js"></script>
-<script type="text/javascript" defer src="js/list.view.js"></script>
-<script type="text/javascript" defer src="js/task.js"></script>
-<script type="text/javascript" defer src="js/task.view.js"></script>
-<script type="text/javascript" defer src="js/edit-mode.js"></script>
-<script type="text/javascript" defer src="js/app.js"></script>-->
+<!--<script type="text/javascript" defer src="js/list_.js"></script>-->
+<!--<script type="text/javascript" defer src="js/list.view.js"></script>-->
+<!--<script type="text/javascript" defer src="js/task.js"></script>-->
+<!--<script type="text/javascript" defer src="js/task.view.js"></script>-->
+<!--<script type="text/javascript" defer src="js/edit-mode.js"></script>-->
+
+<script type="text/javascript" defer src="js/Utils.js"></script>
+<script type="text/javascript" defer src="js/DomHelper.js"></script>
+<script type="text/javascript" defer src="js/ViewManager.js"></script>
+<script type="text/javascript" defer src="js/EditMode.js"></script>
+<script type="text/javascript" defer src="js/BasicView.js"></script>
+<script type="text/javascript" defer src="js/AccountView.js"></script>
+<script type="text/javascript" defer src="js/ListView.js"></script>
+<script type="text/javascript" defer src="js/TaskView.js"></script>
+<script type="text/javascript" defer src="js/BasicStorage.js"></script>
+<script type="text/javascript" defer src="js/BasicCollection.js"></script>
+<script type="text/javascript" defer src="js/BasicEntity.js"></script>
+<script type="text/javascript" defer src="js/BasicFormDialog.js"></script>
+<script type="text/javascript" defer src="js/AccountSetupDialog.js"></script>
+<script type="text/javascript" defer src="js/AuthWaitDialog.js"></script>
+<script type="text/javascript" defer src="js/ListFormDialog.js"></script>
+<script type="text/javascript" defer src="js/TaskFormDialog.js"></script>
+<script type="text/javascript" defer src="js/ListActionsDialog.js"></script>
+<script type="text/javascript" defer src="js/Task.js"></script>
+<script type="text/javascript" defer src="js/TasksCollection.js"></script>
+<!--<script type="text/javascript" defer src="js/TasksView.js"></script>-->
+<script type="text/javascript" defer src="js/List.js"></script>
+<script type="text/javascript" defer src="js/ListsStorage.js"></script>
+<!--<script type="text/javascript" defer src="js/ListsView.js"></script>-->
+<script type="text/javascript" defer src="js/ListsCollection.js"></script>
+<script type="text/javascript" defer src="js/Proxy.js"></script>
+<script type="text/javascript" defer src="js/AccountsCollection.js"></script>
+<script type="text/javascript" defer src="js/AccountsStorage.js"></script>
+<script type="text/javascript" defer src="js/Account.js"></script>
+<script type="text/javascript" defer src="js/ActiveListManager.js"></script>
+<script type="text/javascript" defer src="js/SynchronizationManager.js"></script>
+
+<script type="text/javascript" defer src="js/app.js"></script>
 
 </body>
 </html>

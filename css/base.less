@@ -3,6 +3,8 @@
 
 @color-light-blue: rgba(0,213,255,0.3);
 
+.keyframe-spin();
+
 #browser-wrapper  {
 	height: 100%;
 	width: 100%;
@@ -29,6 +31,7 @@ body {
 			/* Avoids appearing of scroll bar over tasks list */
 			z-index: 90;
 			header {
+				/* top toolbar */
 				menu[type="toolbar"] {
 					button {
 						cursor: pointer;
@@ -48,6 +51,15 @@ body {
 				}
 			}
 
+			/* bottom toolbar */
+			div[role="toolbar"] {
+				#btn-sync-lists {
+					&.rotate:before {
+						.animation(spin, 1400ms, infinite, linear);
+					}
+				}
+			}
+
 			nav {
 				/* Attempt to fix Chrome scroll bar visibility */
 				&::-webkit-scrollbar {
@@ -55,18 +67,30 @@ body {
 				}
 
 				ul {
-					li {
-						a {
-							&.list-selected {
-								background-color: rgba(0,0,0, 0.85);
-							}
+					li.list-item {
 
+						cursor: pointer;
+
+						&.list-selected a {
+							background-color: rgba(0,0,0, 0.85);
+						}
+
+						a {
+							/* deprecated */
+							//pointer-events: none;
 							&.longpress-ready {
 								background-color: rgb(7, 131, 82);
 								.transition(background-color, 0.2s);
 							}
 						}
 					}
+				}
+
+				/* Adds additional space so that last list item is not covered by bottom toolbar */
+				&:after {
+					content: '';
+					display: block;
+					height: 4.0rem;
 				}
 			}
 
@@ -121,6 +145,10 @@ body {
 				div[data-type="list"] {
 					height: 100%;
 
+					& > ol {
+						padding-bottom: 4rem;
+					}
+
 					ol {
 						position: relative; // needed for sortable
 						height: auto;
@@ -166,6 +194,10 @@ body {
 								text-decoration: line-through;
 							}
 
+							&.selected > a {
+								background-color: @color-light-blue;
+							}
+
 							a {
 								margin-left: 0;
 								margin-right: 0;
@@ -181,10 +213,6 @@ body {
 									background-color: rgba(0,213,255,0.3);
 								}
 
-								&.selected {
-									background-color: @color-light-blue;
-								}
-
 								label.pack-checkbox {
 									position: absolute;
 									margin: auto;
@@ -194,9 +222,9 @@ body {
 									height: 6rem;
 									width: 3rem;
 
-									&.danger {
-										display: none;
-									}
+									//&.danger {
+									//	display: none;
+									//}
 								}
 
 								div.clickable {
@@ -583,4 +611,9 @@ body {
 	a {
 		cursor: pointer;
 	}
+}
+
+html {
+	-ms-touch-action: manipulation;
+	touch-action: manipulation;
 }

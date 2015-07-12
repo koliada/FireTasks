@@ -15,6 +15,7 @@ window.Auth = (function ($) {
 
 	var token = '',
 		noConnectionErrors = 0,
+		hasQueuedTasks = false,
 		dom = {
 			authWaitingDialog: $('#auth-waiting-dialog'),
 			btnReopenDialog: $('#btn-auth-waiting-reopen-dialog')
@@ -204,7 +205,50 @@ window.Auth = (function ($) {
 			}
 
 
-			getAccessToken(function(token) {
+			getAccessToken(function (token) {
+
+				function processNoConnection() {
+
+					function proceed() {
+						FT.startSyncQueue();
+						FT.setAutoFetch();
+						//Task.view.toggleProgress(true);
+						//Auth.makeRequest(data, callback_success, callback_error);
+						hasQueuedTasks = false;
+					}
+
+					hasQueuedTasks = true;
+					List.view.toggleProgress(false);
+					Task.view.toggleProgress(false);
+					EditMode.isEnabled() && EditMode.enable(false); // enables buttons so that user can proceed, resetCounter = false
+					FT.stopAutoFetch();
+					Sync.clearStarted();
+					if (FT.isOnline()) {
+						if (noConnectionErrors > 1) {
+							setTimeout(function () {
+								noConnectionErrors--;
+								proceed();
+							}, 10000);
+							return;
+						}
+						utils.status.show('No connection. Retrying...', 1500);
+						Logger.warn('No connection. Retrying...');
+						setTimeout(function () {
+							noConnectionErrors++;
+							proceed();
+						}, 1000);
+					} else {
+						var onlineListenerId = EV.listen('connection-online', function () {
+							proceed();
+							EV.stopListen(onlineListenerId);
+						});
+					}
+				}
+
+				if (!FT.isOnline()) {
+					processNoConnection();
+					return;
+				}
 
 				var fields = ( typeof data.fields === 'undefined' ) ? '' : '&fields=' + data.fields;
 				var query_params = ( typeof data.query_params !== 'undefined' ) ? '?' + data.query_params + '&' : '?';
@@ -228,40 +272,8 @@ window.Auth = (function ($) {
 					callback_success(true, res, textStatus, jqXHR);
 				}).fail(function(jqXHR, textStatus, errorThrown) {
 
-					function proceed() {
-						FT.startSyncQueue();
-						FT.setAutoFetch();
-						Task.view.toggleProgress(true);
-						Auth.makeRequest(data, callback_success, callback_error);
-					}
-
 					if (jqXHR.status == 0) {
-
-						List.view.toggleProgress(false);
-						Task.view.toggleProgress(false);
-						EditMode.isEnabled() && EditMode.enable(false); // enables buttons so that user can proceed, resetCounter = false
-						FT.stopAutoFetch();
-						Sync.clearStarted();
-						if (FT.isOnline()) {
-							if (noConnectionErrors > 1) {
-								setTimeout(function () {
-									noConnectionErrors--;
-									proceed();
-								}, 10000);
-								return;
-							}
-							utils.status.show('No connection. Retrying...', 1500);
-							Logger.warn('No connection. Retrying...');
-							setTimeout(function () {
-								noConnectionErrors++;
-								proceed();
-							}, 1000);
-						} else {
-							EV.listen('connection-online', function () {
-								proceed();
-							});
-						}
-
+						processNoConnection();
 						return;
 					}
 
@@ -316,6 +328,10 @@ window.Auth = (function ($) {
 					}
 				});
 			});
+		},
+
+		hasQueuedTasks: function () {
+			return hasQueuedTasks;
 		},
 
 		revokeToken: function() {

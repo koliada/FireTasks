@@ -1,0 +1,42 @@
+{
+  "framework": "mocha",
+  "launch_in_dev": ["Chrome"],
+  "launch_in_ci": [
+    "Chrome",
+    "Firefox"
+  ],
+  "src_files_ignore": [
+
+  ],
+  "src_files": [
+    "js/lib/*.js",
+
+    "js/Utils.js",
+    "js/DomHelper.js",
+    "js/BasicEntity.js",
+    "js/BasicStorage.js",
+    "js/BasicCollection.js",
+    "js/AccountSetupDialog.js",
+    "js/AuthWaitDialog.js",
+    "js/List.js",
+    "js/Task.js",
+    "js/TasksCollection.js",
+    "js/TasksView.js",
+    "js/app.js",
+    "js/Proxy.js",
+    "js/Account.js",
+    "js/ListsStorage.js",
+    "js/ListsView.js",
+    "js/ListsCollection.js",
+    "js/AccountsStorage.js",
+    "js/AccountsCollection.js",
+
+    "tests/lib/chai.js",
+    "tests/lib/chai-as-promised.js",
+    "tests/lib/chai.init.js",
+    "tests/lib/sinon*.js",
+
+    "tests/mocks/*.js",
+    "tests/*.js"
+  ]
+}

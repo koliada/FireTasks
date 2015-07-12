@@ -50,12 +50,12 @@
 				w.location.hash.replace(/^.*state=go2_([^&]+).*$/, '$1')
 			);
 		}
-		/*if (GO2 && w.location.href.indexOf('code') !== -1) {
+		if (GO2 && w.location.href.indexOf('code') !== -1) {
 			GO2._handleCode(
 				w.location.href.replace(/^.*code=([^&]+).*$/, '$1'),
 				w.location.href.replace(/^.*state=go2_([^&]+).*$/, '$1')
 			);
-		}*/
+		}
 		if (GO2 && w.location.search.indexOf('error=') !== -1) {
 			GO2._handleMessage(false);
 		}
@@ -109,6 +109,17 @@
 
 			return true;
 		},
+		// for testing
+		_getConfig: function go2_getConfig() {
+			return {
+				client_id: client_id,
+				scope: scope,
+				redirect_uri: redirect_uri,
+				email: email,
+				popupHeight: popupHeight,
+				popupWidth: popupWidth
+			};
+		},
 		login: function go2_login(force_approval_prompt, immediate) {
 			if (access_token)
 				return;
@@ -118,6 +129,8 @@
 
 			var url = 'https://accounts.google.com/o/oauth2/auth' +
 				'?response_type=token' +
+				//'?response_type=code' +
+				//'&access_type=offline' +
 				'&redirect_uri=' + encodeURIComponent(redirect_uri) +
 				'&scope=' + encodeURIComponent(scope) +
 				'&state=go2_' + state_id +
@@ -125,13 +138,11 @@
 				'&login_hint=' + email;
 
 			if (!immediate && force_approval_prompt) {
-//				console.log('force');
-				//url += '&approval_prompt=force';
-				url += '&approval_prompt=auto';
+				url += '&approval_prompt=force';
+				//url += '&approval_prompt=auto';
 			}
 
 			if (immediate) {
-				//console.log('immediate');
 				url += '&approval_prompt=auto';
 
 				// Open up an iframe to login
@@ -144,6 +155,7 @@
 				immediate_frame.name = windowName;
 				immediate_frame.target = '_top';
 				immediate_frame.mozbrowser = true;
+				immediate_frame.onload = GO2._onImmediateFrameLoad;
 				document.body.appendChild(immediate_frame);
 
 				return;
@@ -191,7 +203,7 @@
 			access_token = token;
 
 			if (GO2.onlogin)
-				GO2.onlogin(access_token);
+				GO2.onlogin(access_token, expires_in);
 
 			// Remove the token if timed out.
 			clearTimeout(timer);
@@ -204,13 +216,43 @@
 				expires_in * 1000
 			);
 		},
+		_handleCode: function (code, s_id) {
+			if (state_id !== s_id)
+				return;
+
+			// Remove pending immediate_frame
+			GO2._removeImmediateFrame();
+
+			// Do nothing if there is no token received.
+			if (!code) {
+				//return;
+				if (GO2.oncancel)
+					GO2.oncancel();
+			}
+
+			access_token = code;
+
+			if (GO2.onlogin)
+				GO2.onlogin(access_token);
+		},
 		// Remove pending immediate_frame
 		_removeImmediateFrame: function go2_removeImmediateFrame() {
-			if (!immediate_frame)
+			if (!immediate_frame || !immediate_frame.parentNode)
 				return;
 
 			document.body.removeChild(immediate_frame);
 			immediate_frame = null;
+		},
+
+		_onImmediateFrameLoad: function go2_onImmediateFrameLoad() {
+			if (!immediate_frame) {
+				return;
+			}
+			if (immediate_frame && immediate_frame.childNodes.length === 0) {
+				if (GO2.onImmediateFail) {
+					GO2.onImmediateFail();
+				}
+			}
 		}
 	};
 

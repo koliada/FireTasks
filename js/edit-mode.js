@@ -15,7 +15,7 @@ window.EditMode = (function ($) {
 
 	var dom = {
 			el: $('#edit-mode'),
-			list: Task.view.getListEl(),
+			//list: Task.view.getListEl(),
 			btnDisable: $('#btn-edit-mode-close'),
 			btnDelete: $('#btn-delete-tasks'),
 			btnMove: $('#btn-move-tasks'),
@@ -32,7 +32,7 @@ window.EditMode = (function ($) {
 		dom.btnDisable.on('click', EditMode.disable);
 
 		/* Checking in Edit Mode */
-		dom.list.on('change', '.pack-checkbox.danger input[type="checkbox"]', onCheck);
+		//dom.list.on('change', '.pack-checkbox.danger input[type="checkbox"]', onCheck);
 
 		/* Actions */
 		dom.btnDelete.on('click', onDelete);

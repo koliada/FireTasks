@@ -83,11 +83,13 @@
  * Chainable methods are available with getter or setter Sync.action(...). Obviously, NOT applicable to getter without params: Sync.action().
  * Sync.action(...).onStart[ [string] actionName ]() Fires on {@link Sync.start()} and {@link Sync.resume()} as it also calls the {@link Sync.start()} eventually
  *                   .onPause[ [string] actionName ]() Fires when Queue of the Action <actionName> is paused
+ *                   .onEvery[ [string] actionName ]() Fires every time when a task from Action <actionName> is completed
  *                   .onFinish[ [string] actionName ]() Fires when all Tasks in a Queue of the Action <actionName> have been successfully completed
  *        Example:
  *        Sync.action('MyAction', null)
  *            .onStart(function() {...})
  *            .onPause(function() {...})
+ *            .onEvery(function() {...})
  *            .onFinish(function() {...});
  *
  * Also, action-independent Sync.onError is available:
@@ -95,7 +97,7 @@
  *
  * In case of errors it could be useful to call Sync.clearStorage() so that failed tasks won't be queued again
  * In need of hard resetting the currently running queue you can call Sync.clearStarted()
- * Sync.getStoredTasks() can be used to check stored queue (if any)
+ * Sync.getStoredTasks( [string] actionName ) can be used to check stored queue (if any)
  */
 
 ;
@@ -178,10 +180,10 @@
 	function storage(data) {
 		if (typeof data === 'undefined') {
 			var s = localStorage.getItem(STORAGE_VAR);
-			if (typeof s !== 'undefined') {
+			if (typeof s !== 'undefined' && s !== null) {
 				return JSON.parse(s);
 			} else {
-				return null;
+				return [];
 			}
 		}
 
@@ -194,7 +196,7 @@
 	 * Clears Queue stored within localStorage
 	 */
 	function clearStorage() {
-		localStorage.removeItem(STORAGE_VAR);
+		storage([]);
 	}
 
 
@@ -307,6 +309,10 @@
 						action.onpause = func || function(){};
 						return action;
 					},
+					onEvery: function (func) {
+						action.onevery = func || function(){};
+						return action;
+					},
 					onFinish: function (func) {
 						action.onfinish = func || function(){};
 						return action;
@@ -314,7 +320,7 @@
 				};
 
 				this.actions[actionName] = action;
-				this.actions[actionName].onStart().onPause().onFinish();
+				this.actions[actionName].onStart().onPause().onEvery().onFinish();
 				return this.actions[actionName];
 
 			} else {
@@ -430,6 +436,9 @@
 		var tasks = toArray(param);
 
 		var returnArray = [];
+
+		getStoredTasks();
+
 		tasks.forEach(function (task) {
 			var id = getUniqueId().toString();
 			if (task.actionName && task.data) {
@@ -437,6 +446,7 @@
 					id: id,
 					actionName: task.actionName,
 					data: task.data,
+					callbackFnName: task.callbackFnName,
 					start: function () {
 						Sync.start(this.actionName);
 						return this;
@@ -562,9 +572,13 @@
 				} else {
 					started[actionName] = null;
 					currentlyRunning[actionName] = null;
-					Actions.actions[actionName].onfinish(args);
+					Actions.actions[actionName].onfinish.apply(Actions.actions[actionName].onfinish, args);
 				}
 			}
+
+			// Task object will always be last argument
+			args[args.length] = task;
+			Actions.actions[actionName].onevery.apply(Actions.actions[actionName].onevery, args);
 		});
 	};
 
@@ -644,9 +658,44 @@
 
 	/**
 	 * Fetches Queue data from Storage
+	 * @param {String} [actionName] Pass actionName to filter only needed Action; omit to get complete queue
 	 * @returns {Object|null}
 	 */
-	sync.getStoredTasks = function () {
-		return storage();
-	}
+	sync.getStoredTasks = function (actionName) {
+		if (typeof actionName === 'undefined') {
+			return storage();
+		}
+		var result = [];
+		storage().forEach(function (task) {
+			if (task.actionName === actionName) {
+				result.push(task);
+			}
+		});
+		return result;
+	};
+
+	/**
+	 * Updates stored Queue within provided callback function
+	 * @param {Function} callbackFn
+	 */
+	sync.updateQueueData = function (callbackFn) {
+		if (typeof callbackFn !== 'function') {
+			handleEvent(eventTypes.ERROR, {
+				eventName: 'Sync.updateQueueData',
+				message: "'callbackFn' not passed or is not a function"
+			});
+		}
+
+		getStoredTasks();
+
+		for (var i = 0; i < queue.length; i++) {
+			queue[i].data = callbackFn(queue[i].data) || queue[i].data;
+		}
+
+//		var updated = [];
+//		storage().forEach(function (task) {
+//			updated.push(callbackFn(task));
+//		});
+		storage(queue);
+	};
 }));

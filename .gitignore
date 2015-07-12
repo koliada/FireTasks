@@ -1,2 +1,5 @@
-.idea
-node_modules
+.idea/
+node_modules/
+release/
+build.js
+*.iml

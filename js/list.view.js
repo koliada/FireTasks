@@ -36,7 +36,7 @@ if (window.List) window.List.view = (function($) {
 	function setListeners() {
 		EV.listen('list-selected', selectNode);
 		EV.listen('lists-loaded', renderList);
-		EV.listen('list-renamed', updateNode);
+		EV.listen('list-updated', updateNode);
 		EV.listen('list-removed', removeNode);
 		EV.listen('list-not-found', removeNode);
 
@@ -73,10 +73,6 @@ if (window.List) window.List.view = (function($) {
 	 * Prepares new list form
 	 */
 	function onNewList() {
-		if (!FT.isOnline()) {
-			utils.status.show('You are offline.\nUnfortunately, Fire Tasks is unable to create lists in offline mode at the moment :(', 4000);
-			return;
-		}
 		renderForm('CREATE', {});
 	}
 
@@ -240,15 +236,17 @@ if (window.List) window.List.view = (function($) {
 
 	/**
 	 * Updates node in DOM
-	 * @param {Object} list List resource
+	 * @param {Object} list List resource; pass list.replaceId to replace list id
 	 */
 	function updateNode(list) {
 		try {
-			if (List.getLastActive().id === list.id) {
-				list.selected = true;
+			var id = list.replaceId || list.id;
+
+			if (List.getLastActive().id === id) {
+				list.selected(true);
 			}
 
-			var oldNode = dom.list.find('a[data-id="' + list.id + '"]').parent('li')[0],
+			var oldNode = dom.list.find('a[data-id="' + id + '"]').parent('li')[0],
 				newNode = createNode(list),
 				previousNode = getPreviousAlphabetically($(newNode).find('a').text());
 
@@ -355,8 +353,10 @@ if (window.List) window.List.view = (function($) {
 
 			if (show) {
 				dom.progressBar.show();
+				dom.btnSync[0].classList.add('rotate');
 			} else {
 				dom.progressBar.hide();
+				dom.btnSync[0].classList.remove('rotate');
 				FT.setAutoFetch();
 			}
 		},

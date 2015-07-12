@@ -19,7 +19,9 @@ window.Settings = (function ($) {
 			layout: $('#settings'),
 			btnOpen: $('#btn-settings'),
 			btnClose: $('#btn-settings-back'),
+			accounts: $('#settings-accounts'),
 			fields: {
+				addAccount: $('#settings-add-account'),
 				logout: $('#settings-logout'),
 				email: $('#settings-logout').find('.profile-email'),
 				clearCache: $('#settings-clear-cache'),
@@ -66,12 +68,12 @@ window.Settings = (function ($) {
 				'elType': elTypes.checkbox,
 				'default': true
 			}/*,
-			noAnimations: {
-				'el': dom.fields.noAnimations,
-				'type': types.bool,
-				'elType': elTypes.checkbox,
-				'default': false
-			}*/,
+			 noAnimations: {
+			 'el': dom.fields.noAnimations,
+			 'type': types.bool,
+			 'elType': elTypes.checkbox,
+			 'default': false
+			 }*/,
 			ignoreCompletedWhenSharing: {
 				'el': dom.fields.ignoreCompletedWhenSharing,
 				'type': types.bool,
@@ -144,6 +146,7 @@ window.Settings = (function ($) {
 		dom.btnOpen.on('click', showLayout);
 		dom.btnClose.on('click', hideLayout);
 		dom.fields.logout.on('click', onLogout);
+		dom.fields.addAccount.on('click', onAddAccount);
 	}
 
 	/**
@@ -185,6 +188,16 @@ window.Settings = (function ($) {
 						break;
 				}
 			}
+		}
+
+		$('.settings-account').remove();
+		var accounts = FT.accounts.data;
+		if (accounts.length > 0) {
+			var fragment = document.createDocumentFragment();
+			accounts.forEach(function(account) {
+				fragment.appendChild(createAccountElement(account));
+			});
+			appendAccountElement(fragment);
 		}
 	}
 
@@ -230,10 +243,15 @@ window.Settings = (function ($) {
 	 * @param {Boolean} [apply] Whether settings will be saved; true by default
 	 */
 	function hideLayout(apply) {
-		if (typeof apply === 'undefined') {
+		if (FT.accounts.getLength() === 0) {
+			utils.status.show("Please add an account to start work");
+			return;
+		}
+		if (!FT.isDefined(apply)) {
 			apply = true;
 		}
 		apply && applyChanges();
+		FT.toggleSidebar(true);
 		dom.layout[0].classList.remove('fade-in');
 		dom.layout[0].classList.add('fade-out');
 	}
@@ -260,13 +278,44 @@ window.Settings = (function ($) {
 		FT.confirm(data);
 	}
 
+	function onAddAccount(ev) {
+		ev.preventDefault();
+		FT.accounts.add().then(function (account) {
+			if (account.added()) {
+				appendNewAccount(account);
+			}
+		});
+	}
+
+	function appendNewAccount(account) {
+		var fragment = document.createDocumentFragment();
+		fragment.appendChild(createAccountElement(account));
+		appendAccountElement(fragment);
+	}
+
+	function createAccountElement(account) {
+		var email = account.get('email');
+		var li = document.createElement('li');
+		li.dataset.email = email;
+		li.classList.add('settings-account');
+		li.innerHTML = '\
+			<a href="#" class="prevent-default">\
+				<p>' + email + '</p>\
+				<p>Google</p>\
+			</a>';
+		return li;
+	}
+
+	function appendAccountElement(fragment) {
+		dom.accounts[0].insertBefore(fragment, dom.fields.addAccount[0].parentNode);
+	}
 
 	return {
 
 		init: function () {
 			setListeners();
 			setDefaults();
-			initSettingsPage();
+			//initSettingsPage();
 		},
 
 		/**
@@ -306,6 +355,13 @@ window.Settings = (function ($) {
 		 */
 		remove: function (key) {
 			localStorage.removeItem(STORAGE_PREFIX + STORAGE_DELIMITER + key);
+		},
+
+		/**
+		 * Public alias for opening Settings layout
+		 */
+		showLayout: function () {
+			showLayout();
 		},
 
 		/**

@@ -1,5 +1,5 @@
 {
-	"version": "0.7.1",
+	"version": "0.8",
 	"size": "3299631",
 	"name": "Fire Tasks",
 	"description": "A Google Tasks Client",
@@ -17,6 +17,9 @@
 	"developer": {
 		"name": "Alexei Koliada",
 		"url": "http://alex-koliada.com"
+	},
+	"permissions": {
+		"desktop-notification":{}
 	},
 	"appcache_path": "/FireTasks/manifest.appcache",
 

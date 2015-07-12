@@ -109,7 +109,7 @@ Task.view = (function ($) {
 
 
 	function setListeners() {
-		EV.listen('list-renamed', setListTitle);
+		EV.listen('list-updated', setListTitle);
 		EV.listen('list-selected', function () {
 			setListTitle()
 		});
@@ -555,10 +555,6 @@ Task.view = (function ($) {
 	 * Prepares new task form
 	 */
 	function onNewTask() {
-		if (!FT.isOnline()) {
-			utils.status.show('You are offline.\nUnfortunately, Fire Tasks is unable to create tasks in offline mode at the moment :(', 4000);
-			return;
-		}
 		renderForm('CREATE', {});
 	}
 
