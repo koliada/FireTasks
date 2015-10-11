@@ -1,0 +1,13 @@
+<!--
+  ~ Alexei Koliada 2015.
+  ~ This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
+  ~ http://creativecommons.org/licenses/by-sa/4.0/deed.en_US
+  -->
+
+<script id="list-template" type="text/x-mustache-template">
+    <li class="list-item {{#selected}}list-selected{{/selected}}" {{#isDeleted}}style="display: none;{{/isDeleted}}">
+        <a draggable="false" oncontextmenu="return(false);"
+           data-id="{{{getId}}}"
+           data-account-id="account.getId">{{{getName}}}</a>
+    </li>
+</script>

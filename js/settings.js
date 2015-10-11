@@ -16,12 +16,12 @@ window.Settings = (function ($) {
 	var STORAGE_PREFIX = 'settings',
 		STORAGE_DELIMITER = '.',
 		dom = {
-			layout: $('#settings'),
+			layout: $('#settings-layout'),
 			btnOpen: $('#btn-settings'),
 			btnClose: $('#btn-settings-back'),
 			accounts: $('#settings-accounts'),
 			fields: {
-				addAccount: $('#settings-add-account'),
+				addAccountBtn: $('#settings-add-account'),
 				logout: $('#settings-logout'),
 				email: $('#settings-logout').find('.profile-email'),
 				clearCache: $('#settings-clear-cache'),
@@ -115,38 +115,38 @@ window.Settings = (function ($) {
 	/**
 	 * About layout
 	 */
-	(function () {
-		var dom = {
-			layout: $('#about'),
-			btnOpen: $('#settings-about'),
-			btnClose: $('#btn-about-back')
-		};
-
-		function setListeners() {
-			dom.btnOpen.on('click', showLayout);
-			dom.btnClose.on('click', hideLayout);
-		}
-
-		function showLayout(ev) {
-			ev.preventDefault();
-			dom.layout[0].classList.remove('fade-out');
-			dom.layout[0].classList.add('fade-in');
-		}
-
-		function hideLayout(ev) {
-			ev.preventDefault();
-			dom.layout[0].classList.remove('fade-in');
-			dom.layout[0].classList.add('fade-out');
-		}
-
-		setListeners();
-	}());
+	//(function () {
+	//	var dom = {
+	//		layout: $('#about'),
+	//		btnOpen: $('#settings-about'),
+	//		btnClose: $('#btn-about-back')
+	//	};
+    //
+	//	function setListeners() {
+	//		dom.btnOpen.on('click', showLayout);
+	//		dom.btnClose.on('click', hideLayout);
+	//	}
+    //
+	//	function showLayout(ev) {
+	//		ev.preventDefault();
+	//		dom.layout[0].classList.remove('fade-out');
+	//		dom.layout[0].classList.add('fade-in');
+	//	}
+    //
+	//	function hideLayout(ev) {
+	//		ev.preventDefault();
+	//		dom.layout[0].classList.remove('fade-in');
+	//		dom.layout[0].classList.add('fade-out');
+	//	}
+    //
+	//	setListeners();
+	//}());
 
 	function setListeners() {
-		dom.btnOpen.on('click', showLayout);
-		dom.btnClose.on('click', hideLayout);
+		//dom.btnOpen.on('click', showLayout);
+		//dom.btnClose.on('click', hideLayout);
 		dom.fields.logout.on('click', onLogout);
-		dom.fields.addAccount.on('click', onAddAccount);
+		dom.fields.addAccountBtn.on('click', onAddAccount);
 	}
 
 	/**
@@ -307,7 +307,7 @@ window.Settings = (function ($) {
 	}
 
 	function appendAccountElement(fragment) {
-		dom.accounts[0].insertBefore(fragment, dom.fields.addAccount[0].parentNode);
+		dom.accounts[0].insertBefore(fragment, dom.fields.addAccountBtn[0].parentNode);
 	}
 
 	return {

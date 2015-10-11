@@ -265,4 +265,4 @@
 		w.GO2 = GO2;
 	}
 
-})(this);
+})(window || global || this);

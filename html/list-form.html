@@ -1,0 +1,45 @@
+<!--
+  ~ Alexei Koliada 2015.
+  ~ This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
+  ~ http://creativecommons.org/licenses/by-sa/4.0/deed.en_US
+  -->
+
+<section id="list-form" data-position="back">
+    <section role="region">
+        <header class="fixed">
+            <a id="btn-list-form-back" href="#" class="prevent-default"><span class="icon icon-back">back</span></a>
+            <menu type="toolbar">
+                <button id="btn-list-form-ok">Create</button>
+            </menu>
+            <h1>Create Task List</h1>
+        </header>
+        <article class="content scrollable header">
+
+            <header><h2>Set list name</h2></header>
+
+            <form>
+                <p>
+                    <input type="text" name="title" placeholder="New List" autocomplete="off" required>
+                    <button type="reset">Clear</button>
+                </p>
+            </form>
+
+            <header><h2>Create in account</h2></header>
+
+            <form>
+                <ol>
+                    <li>
+                        <label>
+						<span class="button icon icon-dialog">
+							<select name="account">
+                                <option value="">Error loading accounts lists</option>
+                            </select>
+						</span>
+                        </label>
+                    </li>
+                </ol>
+            </form>
+
+        </article>
+    </section>
+</section>

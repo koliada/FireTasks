@@ -1,13 +1,8 @@
-/*
- * Alexei Koliada 2014.
- * This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
- * http://creativecommons.org/licenses/by-sa/4.0/deed.en_US
- */
-
-(function (scope) {
+(function () {
     "use strict";
 
-    var _CLASSES = {
+    var utils = require('./utils'),
+        _CLASSES = {
             fadeOut: 'fade-out',
             fadeIn: 'fade-in'
         },
@@ -132,17 +127,18 @@
         if (arguments.length < 2) {
             throw new Error('insufficient arguments, minimum 2');
         }
-        if (!FT.isString(arguments[0])) {
+        if (!utils.isString(arguments[0])) {
             throw new TypeError('event name must be a string');
         }
         var handler,
             userHandler,
             eventName = arguments[0];
 
-        if (arguments.length === 2 && FT.isFunction(arguments[1])) {
+        if (arguments.length === 2 && utils.isFunction(arguments[1])) {
             userHandler = arguments[1];
             handler = wrapHandler(userHandler);
-        } else if (arguments.length === 3 && FT.isString(arguments[1]) && FT.isFunction(arguments[2])) {
+        }
+        if (arguments.length === 3 && utils.isString(arguments[1]) && utils.isFunction(arguments[2])) {
             userHandler = arguments[2];
             handler = createDelegate(arguments[1], wrapHandler(userHandler));
         }
@@ -160,12 +156,14 @@
         this.createEventListenersProp();
         if (arguments.length === 0) {
             var self = this;
-            FT.iterate(this.eventListeners, function (handlers, eventName) {
+            utils.iterate(this.eventListeners, function (handlers, eventName) {
                 removeEventListeners.apply(self, [handlers, eventName]);
             });
-        } else if (arguments.length === 1 && FT.isString(eventName)) {
+        }
+        if (arguments.length === 1 && utils.isString(eventName)) {
             removeEventListeners.apply(this, [this.eventListeners[eventName], eventName]);
-        } else if (arguments.length === 2 && FT.isString(eventName) && FT.isFunction(userHandler)) {
+        }
+        if (arguments.length === 2 && utils.isString(eventName) && utils.isFunction(userHandler)) {
             removeEventListeners.apply(this, [this.eventListeners[eventName], eventName, userHandler]);
         }
         return this;
@@ -184,7 +182,7 @@
     };
 
     Element.prototype.setStyle = function (styleProp, value) {
-        this.style[styleProp] = (!FT.isDefined(value) || value === null) ? null : value;
+        this.style[styleProp] = (!utils.isDefined(value) || value === null) ? null : value;
         return this;
     };
 
@@ -197,7 +195,7 @@
     };
 
     // Extending Element with custom methods
-    //FT.apply(Element, extensionMethods);
+    //utils.apply(Element, extensionMethods);
 
     function toArray(obj) {
         return [].map.call(obj, function (element) {
@@ -207,19 +205,28 @@
 
     var _$ = (function () {
         return function (selector, startFrom) {
-            if (!FT.isString(selector)) {
-                throw new TypeError('selector must be a string');
+            if (!utils.isString(selector) || !selector.length) {
+                throw new TypeError('selector must be a non-empty string');
             }
-            var nodeList = (_$.isElement(startFrom) ? startFrom : document).querySelectorAll(selector);
-
+            try {
+                var nodeList = ((_$.isElement(startFrom) || _$.isDocumentElement(startFrom)) ? startFrom : document).querySelectorAll(selector);
+            } catch (e) {
+                console.log(selector);
+                throw e;
+            }
+            nodeList = toArray(nodeList); //TODO: I want to return one element if selected by ID
+            //nodeList = nodeList.concat(searchThroughImportedContents(selector, startFrom));
             //return (selector.split(' ').length === 1 && /^#{1}[a-zA-Z0-9_\-\.\[\]\"\=\']+$/.test(selector)) ? toArray(nodeList)[0] : toArray(nodeList);
-            return toArray(nodeList);
+            return nodeList;
         };
     }());
 
     _$.isElement = function (element) {
-        "use strict";
         return Element.prototype.isPrototypeOf(element);
+    };
+
+    _$.isDocumentElement = function (element) {
+        return Boolean(element && element.documentElement);
     };
 
     /**
@@ -230,10 +237,9 @@
 
     // TODO: describe
     _$.registerCustomEvent = function (eventName, processingFn) {
-        "use strict";
         eventRegistry[eventName] = processingFn;
     };
 
-    scope._$ = _$;
+    module.exports = _$;
 
-}(window));
+}());

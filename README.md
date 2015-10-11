@@ -2,6 +2,9 @@
 <img src="https://raw.github.com/koliada/FireTasks/gh-pages/images/logo.png" alt="logo">
 </p>
 
+**[v0.8 draft documentation]**
+=========================
+
 Fire Tasks
 ============
 
@@ -18,7 +21,7 @@ Features
 Although Fire Tasks is in an early beta and does not have many useful features,
 it is functional and surely can bring you relief if you tend to use Google Tasks on other platforms.
 
-Version 0.7.1 provides:
+Version 0.9 provides:
 
 - Authentication with the Google Tasks API
 - Retrieving task lists and tasks
@@ -27,7 +30,7 @@ Version 0.7.1 provides:
 - Marking tasks as completed/uncompleted from list
 - Reordering tasks by dragging
 - Package tasks processing: indenting, unindenting, moving to another list and mass deletion
-- Offline work (with limitations on creation, unstable)
+- Offline work (unstable)
 - Alphabetical sorting of tasks
 - Exporting task list to text file
 - Firefox OS-native UI
@@ -38,9 +41,47 @@ Installing and using
 --------------------
 
 Fire Tasks is available on [Firefox Marketplace](https://marketplace.firefox.com/app/fire-tasks/).
-You can use Fire Tasks online by visiting
-[koliada.github.io/FireTasks](http://koliada.github.io/FireTasks).
-While using Fire Tasks on Firefox OS you will be proposed to install the app to you phone.
+You can use old version of Fire Tasks (0.7.1) online by visiting
+[koliada.github.io/FireTasks](http://koliada.github.io/FireTasks).<br>
+Or you can build an installable `.zip` yourself, see [Build and Develop](#build-and-develop).
+
+
+Build and Develop
+-----------------
+
+Prerequisites: `npm` installed.
+To start working on Fire Tasks, clone the repo:
+```
+git clone https://github.com/koliada/FireTasks.git
+cd FireTasks
+```
+and use npm magic:
+```
+npm install
+```
+You'll also need `gulp` installed globally:
+```
+npm install gulp --global
+```
+All set up!
+To start a development server add a new record to the `hosts` file:
+```
+127.0.0.1   dev.firetasks.com
+```
+and then run:
+```
+gulp dev
+```
+Now you should be able to see Fire Tasks at [http://dev.firetasks.com:8000/app.html](http://dev.firetasks.com:8000/app.html).
+It is important to have exactly the same hostname and port, otherwise Google oAuth won't authenticate you.<br>
+To build a debug version of Fire Tasks to be run in Browser without starting web server and the stuff:
+```
+npm run build-debug //not working
+```
+To build an installable `.zip`
+```
+npm run build //will build browserify bundle
+```
 
 
 Known issues
@@ -118,6 +159,15 @@ Either you can write code or help translate Fire Tasks to your language, feel fr
 Changelog
 ----------
 <pre>
+Version 0.9.0
+- New engine - application was completely rewritten
+- Multiple accounts support implemented (experimental)
+- Completely offline mode implemented
+-Fire Tasks is now built as a packaged application and therefore work as a web application is not guaranteed
+
+Version 0.8.0
+- Internal build. Attempt to add offline tasks creation on the old engine.
+
 Version 0.7.1
 - Special background dialog that opens when authentication is needed implemented
 - Critical bug concerning task indention/unindention in offline mode fixed

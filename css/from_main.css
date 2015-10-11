@@ -95,7 +95,7 @@ form[role="dialog"][data-type="edit"].edit {
 section[role="region"]:not(#drawer) {
 	transition: none;
 	left: 0;
-	z-index: 0;
+	/*z-index: 0;*/
 	padding-left: 0;
 }
 section[data-type="sidebar"] + section[role="region"] > header:first-child > button,

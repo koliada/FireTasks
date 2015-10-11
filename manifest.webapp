@@ -1,27 +1,40 @@
 {
-	"version": "0.8",
-	"size": "3299631",
-	"name": "Fire Tasks",
-	"description": "A Google Tasks Client",
-	"launch_path": "/FireTasks/app.html#",
-	"icons": {
-		"32": "/FireTasks/images/icons/icon-32.png",
-		"60": "/FireTasks/images/icons/icon-60.png",
-		"64": "/FireTasks/images/icons/icon-64.png",
-		"90": "/FireTasks/images/icons/icon-90.png",
-		"120": "/FireTasks/images/icons/icon-120.png",
-		"128": "/FireTasks/images/icons/icon-128.png",
-		"256": "/FireTasks/images/icons/icon-256.png"
-	},
-	"installs_allowed_from": ["*"],
-	"developer": {
-		"name": "Alexei Koliada",
-		"url": "http://alex-koliada.com"
-	},
-	"permissions": {
-		"desktop-notification":{}
-	},
-	"appcache_path": "/FireTasks/manifest.appcache",
-
-	"default_locale": "en"
+  "version": "0.8.0",
+  "name": "Fire Tasks",
+  "description": "A Google Tasks Client",
+  "launch_path": "/app.html",
+  "type": "privileged",
+  "icons": {
+    "32": "images/icons/icon-32.png",
+    "60": "images/icons/icon-60.png",
+    "64": "images/icons/icon-64.png",
+    "90": "images/icons/icon-90.png",
+    "120": "images/icons/icon-120.png",
+    "128": "images/icons/icon-128.png",
+    "256": "images/icons/icon-256.png"
+  },
+  "redirects": [
+    {
+      "from": "https://oauth.gaiamobile.org/authenticated/",
+      "to": "/redirect.html"
+    }
+  ],
+  "installs_allowed_from": [
+    "*"
+  ],
+  "permissions": {
+    "storage": {
+      "description": "Required for storing settings and offline data"
+    },
+    "systemXHR": {
+      "description": "Required for working with Google Tasks API"
+    },
+    "bluetooth": {}
+  },
+  "developer": {
+    "name": "Alexei Koliada",
+    "url": "http://alex-koliada.com"
+  },
+  "appcache_path": "/manifest.appcache",
+  "default_locale": "en"
 }

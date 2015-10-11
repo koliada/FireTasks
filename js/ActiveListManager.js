@@ -1,11 +1,9 @@
-/*
- * Alexei Koliada 2015.
- * This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
- * http://creativecommons.org/licenses/by-sa/4.0/deed.en_US
- */
-
 var ActiveListManager = (function () {
     "use strict";
+
+    var localforage = require('localforage'),
+        AccountsCollection = require('./collections/AccountsCollection'),
+        constants = require('./constants');
 
     /**
      * Stores active list
@@ -30,7 +28,7 @@ var ActiveListManager = (function () {
         _activeList = list;
         _activeList.selected(true);
         _activeList.view.renderTasks();
-        ViewManager.getActiveListElement().innerHTML = _activeList.getName();
+        constants.ACTIVE_LIST_TITLE_ELEMENT.innerHTML = _activeList.getName();
         console.timeEnd('updateActiveList');
         return _activeList;
     }
@@ -43,7 +41,7 @@ var ActiveListManager = (function () {
     function setActiveList(list) {
         return new Promise(function (resolve, reject) {
             localforage.setItem(_STORAGE_KEY, list.toStorage(true)).then(function (list) {
-                resolve(_updateActiveList(FT.findList(list)));
+                resolve(_updateActiveList(AccountsCollection.findList(list)));
             }).catch(function (e) {
                 reject(e);
             })
@@ -53,9 +51,9 @@ var ActiveListManager = (function () {
     function _getLastActiveList() {
         return new Promise(function (resolve, reject) {
             localforage.getItem(_STORAGE_KEY).then(function (list) {
-                list = FT.findList(list);
+                list = AccountsCollection.findList(list);
                 if (!list) {
-                    setActiveList(FT.getFirstList()).then(resolve, reject);
+                    setActiveList(AccountsCollection.getFirstList()).then(resolve, reject);
                 } else {
                     resolve(_updateActiveList(list));
                 }
@@ -70,15 +68,16 @@ var ActiveListManager = (function () {
 
     function _checkDestroyedList(list) {
         if (list === _activeList) {
-            setActiveList(_findNearestList(list));
+            return setActiveList(_findNearestList(list));
         }
+        return Promise.resolve();
     }
 
     function _init() {
         return _getLastActiveList();
     }
 
-    return {
+    module.exports = {
         init: _init,
 
         /**
@@ -88,9 +87,9 @@ var ActiveListManager = (function () {
          */
         list: function (list) {
             if (list) {
-                if (!List.prototype.isPrototypeOf(list)) {
-                    throw new TypeError('ActiveListManager: given argument is not a List instance');
-                }
+                //if (!List.prototype.isPrototypeOf(list)) {
+                //    throw new TypeError('ActiveListManager: given argument is not a List instance');
+                //}
                 return setActiveList(list);
             } else {
                 return Promise.resolve(_activeList);

@@ -1,0 +1,65 @@
+<!--
+  ~ Alexei Koliada 2015.
+  ~ This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
+  ~ http://creativecommons.org/licenses/by-sa/4.0/deed.en_US
+  -->
+
+<section id="settings-layout" class="settings-layout" data-position="back">
+    <section role="region">
+        <header class="fixed">
+            <a id="btn-settings-back" href="#" class="prevent-default"><span class="icon icon-back">back</span></a>
+            <h1>Settings</h1>
+        </header>
+        <article class="content scrollable header">
+            <section data-type="list">
+            </section>
+        </article>
+    </section>
+</section>
+
+<script id="setting-container-template" type="text/x-mustache-template">
+    <header>{{text}}</header>
+    <ol class="setting-item" data-setting-id={{itemId}}>
+        {{#items}}
+        {{{childrenRenderer}}}
+        {{/items}}
+    </ol>
+</script>
+
+<script id="setting-button-template" type="text/x-mustache-template">
+    <li>
+        <a {{^href}}href="#"{{/href}}{{#href}}href="{{href}}"{{/href}} data-setting-id={{itemId}} class="setting-item{{^href}} prevent-default{{/href}}">
+            <p>{{text}}</p>
+            {{#description}}<p>{{description}}</p>{{/description}}
+        </a>
+    </li>
+</script>
+
+<script id="setting-boolean-template" type="text/x-mustache-template">
+    <li>
+        <a href="#" class="prevent-default">
+            <label class="pack-switch">
+                <input class="setting-item" data-setting-id={{itemId}} type="checkbox" {{#value}} checked="checked"{{/value}}>
+                <span></span>
+            </label>
+            <p>{{text}}</p>
+            {{#description}}<p>{{description}}</p>{{/description}}
+        </a>
+    </li>
+</script>
+
+<script id="setting-select-template" type="text/x-mustache-template">
+    <li class="select">
+        <label for="setting-{{itemId}}">
+            <span>{{text}}</span>
+            {{#description}}<span>{{description}}</span>{{/description}}
+            <span class="button icon icon-dialog">
+                <select data-setting-id={{itemId}} class="setting-item" id="setting-{{itemId}}">
+                    {{#options}}
+                    <option value="{{value}}"{{#selected}} selected="selected"{{/selected}}>{{text}}</option>
+                    {{/options}}
+                </select>
+            </span>
+        </label>
+    </li>
+</script>

@@ -1,619 +1,637 @@
 @import "mixins.less";
+
 //@import url(./style_unstable/value_selector.css);
 
-@color-light-blue: rgba(0,213,255,0.3);
+@color-light-blue: rgba(0, 213, 255, 0.3);
 
 .keyframe-spin();
 
-#browser-wrapper  {
-	height: 100%;
-	width: 100%;
+#browser-wrapper {
+  height: 100%;
+  width: 100%;
 }
 
 #browser {
-	width: 100%;
-	/* -5rem for the header */
-	/*height: calc(100% - 4rem);*/
-	height: 100%;
+  width: 100%;
+  /* -5rem for the header */
+  /*height: calc(100% - 4rem);*/
+  height: 100%;
 }
 
 li, a, span, button, div {
-	outline: none;
-	-moz-tap-highlight-color: transparent;
-	-moz-user-focus: ignore;
+  outline: none;
+  -moz-tap-highlight-color: transparent;
+  -moz-user-focus: ignore;
 }
 
 body {
-	.user-select(none);
-
-	section#index {
-		section[data-type="sidebar"] {
-			/* Avoids appearing of scroll bar over tasks list */
-			z-index: 90;
-			header {
-				/* top toolbar */
-				menu[type="toolbar"] {
-					button {
-						cursor: pointer;
-
-						/*&:hover {
-							background-color: rgba(0, 0, 0, 0.25)!important;
-						}*/
-
-						&.icon.icon-add {
-							background-size: inherit;
-							background: url(../style/headers/images/icons/add.png) 80% 50% no-repeat;
-							margin: 0;
-							padding: 0;
-							width: 8rem;
-						}
-					}
-				}
-			}
-
-			/* bottom toolbar */
-			div[role="toolbar"] {
-				#btn-sync-lists {
-					&.rotate:before {
-						.animation(spin, 1400ms, infinite, linear);
-					}
-				}
-			}
-
-			nav {
-				/* Attempt to fix Chrome scroll bar visibility */
-				&::-webkit-scrollbar {
-					width: 0;
-				}
-
-				ul {
-					li.list-item {
-
-						cursor: pointer;
-
-						&.list-selected a {
-							background-color: rgba(0,0,0, 0.85);
-						}
-
-						a {
-							/* deprecated */
-							//pointer-events: none;
-							&.longpress-ready {
-								background-color: rgb(7, 131, 82);
-								.transition(background-color, 0.2s);
-							}
-						}
-					}
-				}
-
-				/* Adds additional space so that last list item is not covered by bottom toolbar */
-				&:after {
-					content: '';
-					display: block;
-					height: 4.0rem;
-				}
-			}
-
-			@media (min-width: 1280px) {
-				width: 20%;
-			}
-		}
-
-		section#drawer {
-			header {
-
-				h2 {
-					position: absolute;
-					margin-top: 5rem;
-					width: calc(~'100% - 6rem');
-					margin-bottom: 0;
-					z-index: 5;
-					background-color: #e7e7e7;
-					color: #4D4D4D;
-					border: none;
-				}
-
-				#btn-sync-tasks {
-					.action-icon.email-sync {
-						font-size: 0;
-
-						&:before {
-							top: 1rem;
-							left: 1rem;
-						}
-					}
-				}
-
-				a {
-					@media (min-width: 1280px) {
-						display: none;
-					}
-				}
-			}
-
-			article {
-
-				&.scrollable.header {
-					border-top-width: 8.4rem;
-					padding-bottom: 0;
-
-					/* Fix for Chrome's scrollbars */
-					overflow-x: hidden;
-					overflow-y: auto;
-				}
-
-				div[data-type="list"] {
-					height: 100%;
-
-					& > ol {
-						padding-bottom: 4rem;
-					}
-
-					ol {
-						position: relative; // needed for sortable
-						height: auto;
-
-						&.edit-mode {
-							/*div.clickable {
-								padding-right: 0;
-								width: calc(~'100% - 4.4rem');
-							}*/
-							label.task-handle {
-								.transform(translateX(4rem));
-							}
-						}
-
-						li {
-							height: auto;
-							width: 100%;
-							border: none;
-
-							a:after {
-								content: ' ';
-								position: absolute;
-								width: 100%;
-								border-bottom: solid .1rem #e7e7e7;
-								left: 0;
-								right: 0;
-							}
-
-							&.ui-sortable-helper {
-
-								& a:hover:after, & a:active:after {
-									background-color: transparent;
-								}
-								background-color: @color-light-blue;
-
-								-webkit-transition: left 0.2s linear, width 0.2s linear;
-								-moz-transition: left 0.2s linear, width 0.2s linear;
-								-o-transition: left 0.2s linear, width 0.2s linear;
-								transition: left 0.2s linear, width 0.2s linear;
-							}
-
-							&.completed p {
-								text-decoration: line-through;
-							}
-
-							&.selected > a {
-								background-color: @color-light-blue;
-							}
-
-							a {
-								margin-left: 0;
-								margin-right: 0;
-								min-height: 6rem;
-								height: auto;
-								overflow: hidden;
-
-								&:hover:after, &:active:after {
-									background-color: transparent;
-								}
-
-								&:active {
-									background-color: rgba(0,213,255,0.3);
-								}
-
-								label.pack-checkbox {
-									position: absolute;
-									margin: auto;
-									top: 0;
-									bottom: 0;
-									float: left;
-									height: 6rem;
-									width: 3rem;
-
-									//&.danger {
-									//	display: none;
-									//}
-								}
-
-								div.clickable {
-									padding-left: 4rem;
-									padding-right: 4rem;
-									min-height: 5.8rem;
-									width: calc(~'100% - 8rem');
-									.transition(background-color, 0.2s);
-									/*-webkit-transition: background-color 0.2s ease-out, width 0.2s ease-out;
-									-moz-transition: background-color 0.2s ease-out, width 0.2s ease-out;
-									-o-transition: background-color 0.2s ease-out, width 0.2s ease-out;
-									transition: background-color 0.2s ease-out, width 0.2s ease-out;*/
-
-									p {
-										white-space: normal;
-										&.item-notes {
-											font-size: 1.4rem;
-											white-space: nowrap;
-										}
-
-										.item-children-num {
-											font-weight: bold;
-										}
-
-										&:only-child {
-											display: table;
-											height: 5.6rem;
-											padding: 0 0 0.4rem 0;
-											span {
-												line-height: 2.2rem;
-												padding-top: 0.6rem;
-												display: table-cell;
-												vertical-align: middle;
-												word-break: break-word;
-											}
-										}
-									}
-
-									&.longpress-ready {
-										background-color: rgb(7, 131, 82);
-									}
-
-									&.not-sortable {
-										width: auto;
-										padding-right: 0;
-									}
-								}
-
-								label.task-handle {
-									position: absolute;
-									width: 4rem;
-									height: 6rem;
-									top: 0;
-									right: -0.6rem;
-									bottom: 0;
-									margin: auto;
-									.transition(all, 0.2s);
-
-									.action-icon {
-										vertical-align: middle;
-										display: inline-block;
-
-										&:before {
-											width: 2.8rem;
-											height: 3.2rem;
-											border-left: 1px solid #dcdcdc;
-										}
-									}
-								}
-							}
-
-							&.dummy {
-								height: 4rem;
-							}
-
-							ol {
-								margin-left: 2rem;
-							}
-						}
-					}
-				}
-			}
-
-			@media (min-width: 1280px) {
-				width: 80%;
-				-moz-transform: translateX(25%);
-				-webkit-transform: translateX(25%);
-			}
-		}
-
-		#edit-mode {
-			[role="toolbar"] {
-				position: absolute;
-				pointer-events: all;
-			}
-
-			@media (min-width: 1280px) {
-				width: 80%;
-				-moz-transform: translateX(25%);
-				-webkit-transform: translateX(25%);
-			}
-		}
-	}
-
-	section#list-form {
-		article {
-			overflow-x: hidden;
-			overflow-y: auto;
-		}
-	}
-
-	section#task-form {
-		article {
-			overflow-x: hidden;
-			overflow-y: auto;
-
-			header h2 {
-				margin-top: 1rem;
-			}
-
-			p.has-margin {
-				margin-top: 1.9rem;
-			}
-
-			a {
-				margin-left: 0;
-				text-decoration: none;
-				outline: none;
-
-				.pack-checkbox {
-					float: left;
-					width: 5rem;
-					height: 6rem;
-					margin-left: -1.4rem;
-				}
-
-				p {
-					white-space: nowrap;
-					overflow: hidden;
-					text-overflow: ellipsis;
-					border: none;
-					display: block;
-					font-size: 1.8rem;
-					line-height: 4rem;
-					color: #000;
-					padding: 1rem 0;
-					text-decoration: none;
-				}
-			}
-
-			#btn-task-form-delete {
-				display: none;
-			}
-		}
-	}
-
-	section#settings {
-		article {
-			overflow-x: hidden;
-			overflow-y: auto;
-
-			label.pack-switch {
-				float: right;
-				height: 6rem;
-				width: 6rem;
-			}
-
-			ol {
-				li {
-					&.select, label {
-						height: 10rem;
-
-
-
-						span:not(.button) {
-							&:first-of-type {
-								font-size: 1.8rem;
-								line-height: 2.2rem;
-								color: #000;
-								padding: 1rem 0 0;
-							}
-
-							margin: 0 1.5rem;
-							white-space: nowrap;
-							overflow: hidden;
-							text-overflow: ellipsis;
-							border: none;
-							display: block;
-							color: #5b5b5b;
-							font-size: 1.5rem;
-							line-height: 2rem;
-							font-weight: normal;
-						}
-
-						span.button.icon.icon-dialog {
-							width: calc(~'100% - 3rem');
-							margin: 0 1.5rem;
-						}
-					}
-				}
-			}
-		}
-	}
-
-	section#about {
-		article {
-			overflow-x: hidden;
-			overflow-y: auto;
-
-			header {
-				h1 {
-					margin: 0;
-				}
-				h2 {
-					margin-top: 1rem;
-				}
-			}
-
-			p {
-				font-size: 1.4rem;
-			}
-
-			ul {
-				li {
-					font-size: 1.4rem;
-					margin-left: 1.4rem;
-					list-style: disc;
-				}
-			}
-		}
-	}
-
-	section#confirm {
-
-		a {
-			color: rgb(248, 80, 80);
-			font-weight: bold;
-		}
-
-		ul.unrecoverable-error-dialog {
-			li {
-				list-style-type: disc;
-			}
-		}
-
-		span.claim {
-			font-size: inherit;
-			color: inherit;
-			display: inline;
-			text-decoration: underline;
-		}
-	}
-
-	section#setup {
-		span[role="status"] {
-			float: right;
-		}
-		span.description {
-			font-size: 1.8rem;
-		}
-		progress {
-			float: left;
-		}
-	}
-
-	section#instructional-overlay {
-		cursor: pointer;
-		background: rgba(51, 51, 51, 0.8) url(../style/action_menu/images/ui/pattern.png) repeat left top;
-		overflow: hidden;
-
-		canvas.show-tasks-actions {
-			.transition(all, 0.25s, ease);
-			.transform(translateX(-50%));
-		}
-	}
-
-	section#list-actions-mask.fade-in {
-		z-index: 119;
-		background: transparent;
-	}
-
-	/* ANIMATIONS */
-	section#drawer.no-animation,
-	[data-type="edit"].no-animation,
-	label.pack-switch.no-animation input ~ span:after,
-	section#drawer.no-animation .task-handle {
-		.transition-none() !important;
-
-//		-webkit-transition-duration: 0s;
-//		-moz-transition-duration: 0s;
-//		-o-transition-duration: 0s;
-//		transition-duration: 0s;
-//		transition-property-duration: 0s;
-	}
-	[data-position="back"].no-animation {
-		animation: fadeIn 0s forwards;
-		-webkit-animation: fadeIn 0s forwards;
-	}
-
-	/* Tablet UI for full-width screens */
-	@media (min-width: 1280px) {
-
-		section:not(#settings):not(#about):not(#donate) {
-			section[role="region"] {
-				width: 80%;
-				-moz-transform: translateX(25%);
-				-webkit-transform: translateX(25%);
-			}
-		}
-
-		section#confirm, section#list-actions, section#list-form, section#task-form {
-			background-color: rgba(66, 66, 66, 0.8);
-		}
-	}
-
-	/* Who and why forbids this? Fixing. */
-	button[type="reset"] {
-		pointer-events: inherit !important;
-	}
-
-	section[role="status"] {
-		z-index: 1000;
-	}
-
-	/* TODO: Deprecated */
-	/* Experimental */
-	/* TODO: Need separator? */
-	section[data-type="sidebar"] > header:first-child .icon.icon-options {
-		background-image: url(../style/headers/images/icons/options.png);
-		background-size: inherit;
-	}
-
-	.menu.icon-options {
-		background-image: url(../style/headers/images/icons/options.png);
-		background-size: inherit;
-	}
-
-	/* Select */
-	span.button.icon.icon-dialog {
-		overflow: hidden;
-	}
-	select {
-		width: calc(~"100% - -1.8rem") !important; // workaround for compressor removes the spaces if using '+' operator
-		background: transparent;
-		border: none;
-		-webkit-appearance: none;
-		-moz-appearance: none;
-		appearance: none;
-		/* Hacks */
-		text-indent: 0.01px;
-		text-overflow: ellipsis;
-
-		top: 0;
-		left: 0;
-		padding: 1rem 0 0 1rem;
-		position: absolute;
-		height: 100%;
-		line-height: 1.8rem;
-		//width: calc(100% + 1rem) !important;
-		//padding: 0.8rem 1rem 0;
-		font-size: 1.7rem;
-		font-weight: 500;
-	}
-	select::-ms-expand {
-		display: none;
-	}
-
-	form, fieldset, input {
-		border: 0;
-		background-color: transparent;
-		padding: 0;
-		margin: 0;
-	}
-
-	input, textarea {
-		width: 100%;
-	}
-
-	input[type="date"] {
-		font-size: 1.7rem;
-		font-weight: 500;
-	}
-
-	a {
-		cursor: pointer;
-	}
+  .user-select(none);
+
+  section#index {
+    section[data-type="sidebar"] {
+      /* Avoids appearing of scroll bar over tasks list */
+      z-index: 90;
+      header {
+        /* top toolbar */
+        menu[type="toolbar"] {
+          button {
+            cursor: pointer;
+
+            /*&:hover {
+                background-color: rgba(0, 0, 0, 0.25)!important;
+            }*/
+
+            &.icon.icon-add {
+              background-size: inherit;
+              background: url(../style/headers/images/icons/add.png) 80% 50% no-repeat;
+              margin: 0;
+              padding: 0;
+              width: 8rem;
+            }
+          }
+        }
+      }
+
+      /* bottom toolbar */
+      div[role="toolbar"] {
+        #btn-sync-lists {
+          &.rotate:before {
+            .animation(spin, 1400ms, infinite, linear);
+          }
+        }
+      }
+
+      nav {
+        /* Attempt to fix Chrome scroll bar visibility */
+        &::-webkit-scrollbar {
+          width: 0;
+        }
+
+        ul {
+          li.list-item {
+
+            cursor: pointer;
+
+            &.list-selected a {
+              background-color: rgba(0, 0, 0, 0.85);
+            }
+
+            a {
+              /* deprecated */
+              //pointer-events: none;
+              &.longpress-ready {
+                background-color: rgb(7, 131, 82);
+                .transition(background-color, 0.2s);
+              }
+            }
+          }
+        }
+
+        /* Adds additional space so that last list item is not covered by bottom toolbar */
+        &:after {
+          content: '';
+          display: block;
+          height: 4.0rem;
+        }
+      }
+
+      @media (min-width: 1280px) {
+        width: 20%;
+      }
+    }
+
+    section#drawer {
+
+      &.visible {
+        -moz-transform: translateX(80%);
+        -webkit-transform: translateX(80%);
+      }
+
+      header {
+
+        h2 {
+          position: absolute;
+          margin-top: 5rem;
+          width: calc(~'100% - 6rem');
+          margin-bottom: 0;
+          z-index: 5;
+          background-color: #e7e7e7;
+          color: #4D4D4D;
+          border: none;
+        }
+
+        #btn-sync-tasks {
+          .action-icon.email-sync {
+            font-size: 0;
+
+            &:before {
+              top: 1rem;
+              left: 1rem;
+            }
+          }
+        }
+
+        a {
+          @media (min-width: 1280px) {
+            display: none;
+          }
+        }
+      }
+
+      article {
+
+        &.scrollable.header {
+          border-top-width: 8.4rem;
+          padding-bottom: 0;
+
+          /* Fix for Chrome's scrollbars */
+          overflow-x: hidden;
+          overflow-y: auto;
+        }
+
+        div[data-type="list"] {
+          height: 100%;
+
+          & > ol {
+            padding-bottom: 4rem;
+          }
+
+          ol {
+            position: relative; // needed for sortable
+            height: auto;
+
+            &.edit-mode {
+              /*div.clickable {
+                  padding-right: 0;
+                  width: calc(~'100% - 4.4rem');
+              }*/
+              label.task-handle {
+                .transform(translateX(4rem));
+              }
+            }
+
+            li {
+              height: auto;
+              width: 100%;
+              border: none;
+
+              a:after {
+                content: ' ';
+                position: absolute;
+                width: 100%;
+                border-bottom: solid .1rem #e7e7e7;
+                left: 0;
+                right: 0;
+              }
+
+              &.ui-sortable-helper {
+
+                & a:hover:after, & a:active:after {
+                  background-color: transparent;
+                }
+                background-color: @color-light-blue;
+
+                -webkit-transition: left 0.2s linear, width 0.2s linear;
+                -moz-transition: left 0.2s linear, width 0.2s linear;
+                -o-transition: left 0.2s linear, width 0.2s linear;
+                transition: left 0.2s linear, width 0.2s linear;
+              }
+
+              &.completed p {
+                text-decoration: line-through;
+              }
+
+              &.selected > a {
+                background-color: @color-light-blue;
+              }
+
+              a {
+                margin-left: 0;
+                margin-right: 0;
+                min-height: 6rem;
+                height: auto;
+                overflow: hidden;
+
+                &:hover:after, &:active:after {
+                  background-color: transparent;
+                }
+
+                &:active {
+                  background-color: rgba(0, 213, 255, 0.3);
+                }
+
+                label.pack-checkbox {
+                  position: absolute;
+                  margin: auto;
+                  top: 0;
+                  bottom: 0;
+                  float: left;
+                  height: 6rem;
+                  width: 3rem;
+
+                  //&.danger {
+                  //	display: none;
+                  //}
+
+                  & > span:after {
+                    margin-left: -1.1rem;
+                  }
+                }
+
+                div.clickable {
+                  padding-left: 4rem;
+                  padding-right: 4rem;
+                  min-height: 5.8rem;
+                  width: calc(~'100% - 8rem');
+                  .transition(background-color, 0.2s);
+                  /*-webkit-transition: background-color 0.2s ease-out, width 0.2s ease-out;
+                  -moz-transition: background-color 0.2s ease-out, width 0.2s ease-out;
+                  -o-transition: background-color 0.2s ease-out, width 0.2s ease-out;
+                  transition: background-color 0.2s ease-out, width 0.2s ease-out;*/
+
+                  p {
+                    white-space: normal;
+                    &.item-notes {
+                      font-size: 1.4rem;
+                      white-space: nowrap;
+                    }
+
+                    .item-children-num {
+                      font-weight: bold;
+                    }
+
+                    &:only-child {
+                      display: table;
+                      height: 5.6rem;
+                      padding: 0 0 0.4rem 0;
+                      span {
+                        line-height: 2.2rem;
+                        padding-top: 0.6rem;
+                        display: table-cell;
+                        vertical-align: middle;
+                        word-break: break-word;
+                      }
+                    }
+                  }
+
+                  &.longpress-ready {
+                    background-color: rgb(7, 131, 82);
+                  }
+
+                  &.not-sortable {
+                    width: auto;
+                    padding-right: 0;
+                  }
+                }
+
+                label.task-handle {
+                  position: absolute;
+                  width: 4rem;
+                  height: 6rem;
+                  top: 0;
+                  right: -0.6rem;
+                  bottom: 0;
+                  margin: auto;
+                  .transition(all, 0.2s);
+
+                  .action-icon {
+                    vertical-align: middle;
+                    display: inline-block;
+
+                    &:before {
+                      width: 2.8rem;
+                      height: 3.2rem;
+                      border-left: 1px solid #dcdcdc;
+                    }
+                  }
+                }
+              }
+
+              &.dummy {
+                height: 4rem;
+              }
+
+              ol {
+                margin-left: 2rem;
+              }
+            }
+
+            .sortable-placeholder {
+              background-color: lighten(@color-light-blue, 20%);
+            }
+          }
+        }
+      }
+
+      @media (min-width: 1280px) {
+        width: 80%;
+        -moz-transform: translateX(25%);
+        -webkit-transform: translateX(25%);
+      }
+    }
+
+    #edit-mode {
+      [role="toolbar"] {
+        position: absolute;
+        pointer-events: all;
+      }
+
+      @media (min-width: 1280px) {
+        width: 80%;
+        -moz-transform: translateX(25%);
+        -webkit-transform: translateX(25%);
+      }
+    }
+  }
+
+  section#list-form {
+    article {
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+  }
+
+  section#task-form {
+    article {
+      overflow-x: hidden;
+      overflow-y: auto;
+
+      header h2 {
+        margin-top: 1rem;
+      }
+
+      p.has-margin {
+        margin-top: 1.9rem;
+      }
+
+      a {
+        margin-left: 0;
+        text-decoration: none;
+        outline: none;
+
+        .pack-checkbox {
+          float: left;
+          width: 5rem;
+          height: 6rem;
+          margin-left: -1.4rem;
+        }
+
+        p {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          border: none;
+          display: block;
+          font-size: 1.8rem;
+          line-height: 4rem;
+          color: #000;
+          padding: 1rem 0;
+          text-decoration: none;
+        }
+      }
+
+      #btn-task-form-delete {
+        display: none;
+      }
+    }
+  }
+
+  section.settings-layout {
+    article {
+      overflow-x: hidden;
+      overflow-y: auto;
+
+      label.pack-switch {
+        float: right;
+        height: 6rem;
+        width: 6rem;
+      }
+
+      ol {
+        li {
+          &.select, label {
+            height: 10rem;
+
+            span:not(.button) {
+              &:first-of-type {
+                font-size: 1.8rem;
+                line-height: 2.2rem;
+                color: #000;
+                padding: 1rem 0 0;
+              }
+
+              margin: 0 1.5rem;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              border: none;
+              display: block;
+              color: #5b5b5b;
+              font-size: 1.5rem;
+              line-height: 2rem;
+              font-weight: normal;
+            }
+
+            span.button.icon.icon-dialog {
+              width: calc(~'100% - 3rem');
+              margin: 0 1.5rem;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  section#about-layout {
+    article {
+      overflow-x: hidden;
+      overflow-y: auto;
+
+      header {
+        h1 {
+          margin: 0;
+        }
+        h2 {
+          margin-top: 1rem;
+        }
+      }
+
+      p {
+        font-size: 1.4rem;
+      }
+
+      ul {
+        li {
+          font-size: 1.4rem;
+          margin-left: 1.4rem;
+          list-style: disc;
+        }
+      }
+    }
+  }
+
+  section#confirm {
+
+    a {
+      color: rgb(248, 80, 80);
+      font-weight: bold;
+    }
+
+    ul.unrecoverable-error-dialog {
+      li {
+        list-style-type: disc;
+      }
+    }
+
+    span.claim {
+      font-size: inherit;
+      color: inherit;
+      display: inline;
+      text-decoration: underline;
+    }
+  }
+
+  section#setup {
+    span[role="status"] {
+      float: right;
+    }
+    span.description {
+      font-size: 1.8rem;
+    }
+    progress {
+      position: relative; //important for chrome animation workaround
+      float: left;
+    }
+  }
+
+  section#instructional-overlay {
+    cursor: pointer;
+    background: rgba(51, 51, 51, 0.8) url(../style/action_menu/images/ui/pattern.png) repeat left top;
+    overflow: hidden;
+
+    canvas.show-tasks-actions {
+      .transition(all, 0.25s, ease);
+      .transform(translateX(-50%));
+    }
+  }
+
+  section#list-actions-mask.fade-in {
+    z-index: 119;
+    background: transparent;
+  }
+
+  /* ANIMATIONS */
+  section#drawer.no-animation,
+  [data-type="edit"].no-animation,
+  label.pack-switch.no-animation input ~ span:after,
+  section#drawer.no-animation .task-handle {
+    .transition-none() !important;
+
+    //		-webkit-transition-duration: 0s;
+    //		-moz-transition-duration: 0s;
+    //		-o-transition-duration: 0s;
+    //		transition-duration: 0s;
+    //		transition-property-duration: 0s;
+  }
+  [data-position="back"].no-animation {
+    animation: fadeIn 0s forwards;
+    -webkit-animation: fadeIn 0s forwards;
+  }
+
+  /* Tablet UI for full-width screens */
+  @media (min-width: 1280px) {
+
+    section:not(.settings-layout):not(#about):not(#donate) {
+      section[role="region"] {
+        width: 80%;
+        -moz-transform: translateX(25%);
+        -webkit-transform: translateX(25%);
+      }
+    }
+
+    section#confirm, section#list-actions, section#list-form, section#task-form {
+      background-color: rgba(66, 66, 66, 0.8);
+    }
+  }
+
+  /* Who and why forbids this? Fixing. */
+  button[type="reset"] {
+    pointer-events: inherit !important;
+  }
+
+  section[role="status"] {
+    z-index: 1000;
+  }
+
+  /* TODO: Deprecated */
+  /* Experimental */
+  /* TODO: Need separator? */
+  section[data-type="sidebar"] > header:first-child .icon.icon-options {
+    background-image: url(../style/headers/images/icons/options.png);
+    background-size: inherit;
+  }
+
+  .menu.icon-options {
+    background-image: url(../style/headers/images/icons/options.png);
+    background-size: inherit;
+  }
+
+  /* Select */
+  span.button.icon.icon-dialog {
+    overflow: hidden;
+  }
+  select {
+    width: calc(~"100% - -1.8rem") !important; // workaround for compressor removes the spaces if using '+' operator
+    background: transparent;
+    border: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    /* Hacks */
+    text-indent: 0.01px;
+    text-overflow: ellipsis;
+
+    top: 0;
+    left: 0;
+    padding: 1rem 0 0 1rem;
+    position: absolute;
+    height: 100%;
+    line-height: 1.8rem;
+    //width: calc(100% + 1rem) !important;
+    //padding: 0.8rem 1rem 0;
+    font-size: 1.7rem;
+    font-weight: 500;
+  }
+  select::-ms-expand {
+    display: none;
+  }
+
+  form, fieldset, input {
+    border: 0;
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+  }
+
+  input, textarea {
+    width: 100%;
+  }
+
+  input[type="date"] {
+    font-size: 1.7rem;
+    font-weight: 500;
+  }
+
+  a {
+    cursor: pointer;
+  }
+
+  //[role="dialog"] span[data-icon="tick"] {
+  //  background-image: url(../icons/styles/tick.png);
+  //}
 }
 
 html {
-	-ms-touch-action: manipulation;
-	touch-action: manipulation;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
 }

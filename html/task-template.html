@@ -1,0 +1,36 @@
+<!--
+  ~ Alexei Koliada 2015.
+  ~ This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
+  ~ http://creativecommons.org/licenses/by-sa/4.0/deed.en_US
+  -->
+
+<script id="task-template" type="text/x-mustache-template">
+    <li class="task-item {{#isCompleted}}completed{{/isCompleted}} {{#selected}}selected{{/selected}}">
+        <a data-id="{{{getId}}}" draggable="false" oncontextmenu="return(false);">
+            <label class="pack-checkbox danger" {{^inEditMode}}style="display: none;"{{/inEditMode}}>
+            <input class="for-edit-mode" type="checkbox" {{#selected}}checked{{/selected}}>
+            <span></span>
+            </label>
+            <label class="pack-checkbox" {{#inEditMode}}style="display: none;"{{/inEditMode}}">
+            <input class="for-completion" type="checkbox" {{#isCompleted}}checked{{/isCompleted}}>
+            <span></span>
+            </label>
+
+            <div class="clickable">
+                <p class="item-title">
+                    <span>{{{getName}}}</span>
+                </p>
+                {{#hasNotes}}
+                <p class="item-notes">{{{getNotes}}}</p>
+                {{/hasNotes}}
+            </div>
+            {{#isSortable}}
+            <label class="task-handle">
+                <span class="action-icon menu"></span>
+            </label>
+            {{/isSortable}}
+        </a>
+        <ol>
+        </ol>
+    </li>
+</script>

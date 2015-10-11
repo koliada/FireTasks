@@ -1,0 +1,90 @@
+{
+  "version": "0.9.0",
+  "releaseDate": "2015-10-12",
+  "isBeta": true,
+  "changeLog": {
+    "Version 0.9.0": [
+      "New engine - application was completely rewritten",
+      "Multiple accounts support implemented (experimental)",
+      "Completely offline mode implemented",
+      "Fire Tasks is now built as a packaged application and therefore work as a web application is not guaranteed"
+    ],
+    "Version 0.8.0": [
+      "Internal build. Attempt to add offline tasks creation on the old engine."
+    ],
+    "Version 0.7.1": [
+      "Special background dialog that opens when authentication is needed implemented",
+      "Critical bug concerning task indention/unindention in offline mode fixed",
+      "Internal changes & small bug fixes"
+    ],
+    "Version 0.7.0": [
+      "Task list alphabetical sort",
+      "Task list exporting (plus setting to ignore completed tasks)",
+      "Internal changes & bug fixes"
+    ],
+    "Version 0.6.0": [
+      "More intelligent synchronization & offline mode fixes",
+      "Only one synchronization method left - complete update",
+      "Force update function removed (it cannot work on Firefox OS anyway)",
+      "Internal changes & bug fixes"
+    ],
+    "Version 0.5.6": [
+      "Tap & hold on task to enter Edit Mode"
+    ],
+    "Version 0.5.5": [
+      "Task content is now completely visible",
+      "Sync on launch and list opening now enabled by default"
+    ],
+    "Version 0.5.4": [
+      "Same features that 0.5.1 provides",
+      "Critical bugs fixed (infinite loop on sync error; sync error on quick indent/unindent buttons clicking)"
+    ],
+    "Version 0.5.3": [
+      "Same features that 0.5.1 provides",
+      "Source files minified",
+      "Analytics code added"
+    ],
+    "Version 0.5.2": [
+      "Same features that 0.5.1 provides",
+      "Better version updating",
+      "Setting for force update"
+    ],
+    "Version 0.5.1": [
+      "List actions on tap&hold; vibrate on long press (can be disabled in settings)",
+      "Minor sorting update",
+      "Refactoring continues",
+      "Many fixes and improvements"
+    ],
+    "Version 0.5": [
+      "Huge refactoring continued",
+      "Offline storage implemented, immediate UI responsiveness",
+      "Great amount of fixes and improvements"
+    ],
+    "Version 0.4 (internal)": [
+      "Huge refactoring started",
+      "Storing tasks locally for more fluid UI"
+    ],
+    "Version 0.3.1": [
+      "Tablet UI"
+    ],
+    "Version 0.3": [
+      "Constant tree view mode",
+      "Rearranging tasks in tree view",
+      "Mass processing tasks in 'Edit Mode'",
+      "'Refresh List' button"
+    ],
+    "Version 0.2.3": [
+      "Reordering tasks in plain view mode"
+    ],
+    "Version 0.2.2": [
+      "Automatic updates"
+    ],
+    "Version 0.2": [
+      "Tree view (unstable)"
+    ],
+    "Version 0.1": [
+      "First public version",
+      "Actually I don't exactly remember what features were here"
+    ]
+  }
+}

@@ -1,39 +1,27 @@
-/*
- * Alexei Koliada 2015.
- * This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
- * http://creativecommons.org/licenses/by-sa/4.0/deed.en_US
- */
-
-var ViewManager = (function () {
+(function () {
     "use strict";
 
-    var _dom = {
-        sidebar: _$('[data-type="sidebar"]')[0],
-        lists: _$('#lists')[0],
-        btnNewList: _$('#btn-new-list')[0],
-        btnSync: $('#btn-sync-lists')[0],
-
-        drawer: _$('#drawer')[0],
-        appTitle: _$('#drawer > header > h1')[0],
-        tasks: _$('#tasks ol')[0],
-        activeListTitle: _$('#active-list-title')[0],
-
-        btnNewTask: _$('#btn-new-task')[0],
-
-        accountTemplate: _$('#account-template')[0],
-        listTemplate: _$('#list-template')[0],
-        taskTemplate: _$('#task-template')[0]
-    };
+    var AccountsCollection = require('./collections/AccountsCollection'),
+        SynchronizationManager = require('./SynchronizationManager'),
+        SettingsManager = require('./SettingsManager'),
+        ActiveListManager = require('./ActiveListManager'),
+        ListFormDialog = require('./dialogs/ListFormDialog'),
+        TaskFormDialog = require('./dialogs/TaskFormDialog'),
+        TaskListActionsDialog = require('./dialogs/TaskListActionsDialog'),
+        EditMode = require('./EditMode'),
+        utils = require('./utils'),
+        constants = require('./constants');
 
     /**
      * Item (List/Task) element click handler
      * @param {Event} ev Event
-     * @param {Element} itemEl 'li' element expected
+     * @param {Element} itemEl 'a' element expected
      * @private
      */
     function _onItemClick(ev, itemEl) {
-        if (itemEl.view && itemEl.view.onClick) {
-            itemEl.view.onClick(ev, itemEl);
+        var view = itemEl.parentNode.view;
+        if (view && view.onClick) {
+            view.onClick(ev, itemEl);
         } else {
             throw new Error('Could not find bound view or click handler');
         }
@@ -49,21 +37,10 @@ var ViewManager = (function () {
 
     function _onTaskContextMenu(ev, taskEl) {
         if (taskEl.view && taskEl.view.instance) {
-            FT.vibrate();
-            EditMode.activate(taskEl.view.instance);
+            utils.vibrate()
+                .then(EditMode.activate.bind(EditMode, taskEl.view.instance));
         } else {
             throw new Error('Could not enter edit mode since no task instance was found');
-        }
-    }
-
-    /**
-     * @deprecated
-     */
-    function _onListLongPress(ev, listEl) {
-        if (listEl.view && listEl.view.onLongPress) {
-            listEl.view.onLongPress();
-        } else {
-            throw new Error('Could not find bound view or long press handler');
         }
     }
 
@@ -75,50 +52,103 @@ var ViewManager = (function () {
         new TaskFormDialog().show();
     }
 
-    function _onAppTitleClick() {
-        ViewManager.getTasksContainer().scrollToTop();
+    function _onOpenSettings() {
+        SettingsManager.showLayout();
     }
 
-    function onSyncClick() {
+    function _onAppTitleClick() {
+        constants.TASKS_LIST_ELEMENT.scrollToTop();
+    }
+
+    function _onSyncClick() {
         console.time('Complete reload and synchronization');
-        FT.accounts.refresh().then(function () {
-            //return SynchronizationManager.synchronize(); // TODO: no sense since storage is overridden
-            return Promise.resolve();
-        }).then(ActiveListManager.init).then(function () {
-            console.timeEnd('Complete reload and synchronization');
-        }).catch(function () {
-            throw new Error('Synchronization failed');
+        AccountsCollection.getAccounts().refresh()
+            .then(function () {
+                //return SynchronizationManager.synchronize(); // TODO: no sense since storage is overridden
+                return Promise.resolve();
+            })
+            .then(ActiveListManager.init)
+            .then(function () {
+                console.timeEnd('Complete reload and synchronization');
+            })
+            .catch(function (e) {
+                throw new Error('Synchronization failed', e);
+            });
+    }
+
+    function _onTaskListActionsClick() {
+        var dialog = new TaskListActionsDialog();
+        //TODO: remove inline require
+        require('./ActiveListManager').list().then(function (list) {
+            dialog.onSortTasks = function () {
+                list.tasks.showSortDialog();
+            };
+            dialog.onShareTasks = function () {
+                list.tasks.share();
+            };
+            dialog.show();
         });
     }
 
+    // TODO: Get rid of jQuery
+    /**
+     * Handles DOM element sorting
+     * Fires when user drops sortable task
+     * @param {Object} el jQuery element
+     */
+    function onTaskSorted(el) {
+        var instance = el.view.instance,
+            parent = el.view.getParentViaDom(),
+            previous = el.view.getPreviousViaDom();
+        parent = parent && parent.instance;
+        previous = previous && previous.instance;
+        return instance.move(parent, previous);
+    }
+
+    // TODO: check relevance
     // not relevant
+    // The main purpose of this observer was to notify descendants that they are rendered
     function _onTaskListMutate(mutations) {
+
+        //TODO: make this flag external when native sortable implementation is done
+        if (constants.TASKS_LIST_ELEMENT._isSorted) {
+            return;
+        }
+
         mutations.forEach(function (mutation) {
             if (mutation.type === 'childList' && mutation.removedNodes.length) {
                 mutation.removedNodes.forEach(function (node) {
-                    node.view.onRemoved();
+                    node.view && node.view.onRemoved();
                 });
-            } else if (mutation.type === 'childList' && mutation.addedNodes.length) {
+            }
+            if (mutation.type === 'childList' && mutation.addedNodes.length) {
                 mutation.addedNodes.forEach(function (node) {
-                    node.view.onAdded();
+                    node.view && node.view.onAdded();
                 });
             }
         });
     }
 
+    function _patchNodes() {
+        constants.TASKS_LIST_ELEMENT.scrollToTop = function () {
+            this.parentNode.parentNode.scrollTop = 0;
+        };
+    }
+
     function _initEvents() {
-        _dom.btnNewList.on('click', _onNewListClick);
-        _dom.btnNewTask.on('click', _onNewTaskClick);
-        _dom.appTitle.on('click', _onAppTitleClick);
-        _dom.btnSync.on('click', onSyncClick);
-        _dom.lists.on('click', '.' + ListView.classes.listItem, _onItemClick);
-        _dom.tasks.on('click', '.' + TaskView.classes.taskItem, _onItemClick);
-        _dom.lists.on('contextmenu', '.' + ListView.classes.listItem, _onListContextMenu);
-        _dom.tasks.on('contextmenu', '.' + TaskView.classes.taskItem, _onTaskContextMenu);
-        //_dom.lists.on('longpress', '.' + _classes.listItem, _onListLongPress);
+        constants.BTN_NEW_LIST_ELEMENT.on('click', _onNewListClick);
+        constants.BTN_NEW_TASK_ELEMENT.on('click', _onNewTaskClick);
+        constants.BTN_OPEN_SETTINGS_ELEMENT.on('click', _onOpenSettings);
+        constants.BTN_SYNC_ELEMENT.on('click', _onSyncClick);
+        constants.APP_TITLE_ELEMENT.on('click', _onAppTitleClick);
+        constants.BTN_TASK_LIST_ACTIONS_ELEMENT.on('click', _onTaskListActionsClick);
+        constants.LISTS_LIST_ELEMENT.on('click', '.' + constants.LIST_ITEM_CLASS + ' > a', _onItemClick);
+        constants.TASKS_LIST_ELEMENT.on('click', '.' + constants.TASK_ITEM_CLASS + ' > a', _onItemClick);
+        constants.LISTS_LIST_ELEMENT.on('contextmenu', '.' + constants.LIST_ITEM_CLASS, _onListContextMenu);
+        constants.TASKS_LIST_ELEMENT.on('contextmenu', '.' + constants.TASK_ITEM_CLASS, _onTaskContextMenu);
 
         //noinspection JSCheckFunctionSignatures
-        new MutationObserver(_onTaskListMutate).observe(_dom.tasks, {
+        new MutationObserver(_onTaskListMutate).observe(constants.TASKS_LIST_ELEMENT, {
             childList: true,
             attributes: false,
             characterData: false,
@@ -128,47 +158,74 @@ var ViewManager = (function () {
         });
     }
 
-    function _patchNodes() {
-        _dom.tasks.scrollToTop = function () {
-            this.parentNode.parentNode.scrollTop = 0;
-        };
+    //TODO: get rid of jQuery
+    function _initSortable() {
+        $(constants.TASKS_LIST_ELEMENT).sortable({
+            connectWith: $(constants.TASKS_LIST_ELEMENT),
+            items: ".task-item",
+            handle: ".task-handle",
+            axis: "y",
+            placeholder: "sortable-placeholder",
+            scrollSensitivity: 70,
+            cursor: "move",
+            update: function (event, ui) {
+
+                constants.TASKS_LIST_ELEMENT._isSorted = false;
+                onTaskSorted(ui.item[0])
+                    .then(function () {
+                        SynchronizationManager.synchronize();
+                    });
+                //FT.setAutoFetch();
+            },
+            start: function (event, ui) {
+
+                constants.TASKS_LIST_ELEMENT._isSorted = true;
+                /* Disable Edit Mode */
+                //EditMode.disable();
+                //FT.stopAutoFetch();
+
+                /* Collapse children nodes */
+                var children = $(ui.item[0]).find('li');
+                if (children.length > 0) {
+                    $(ui.item[0]).find('.item-title').first().prepend('<span class="item-children-num">(+' + children.length + ' more)&nbsp;</span>');
+                    children.hide();
+                    $(this).sortable("refreshPositions");
+                    $(ui.item[0]).css('height', 'auto');
+                }
+
+                /* Adjust placeholder height */
+                $('.sortable-placeholder').css('height', parseInt(window.getComputedStyle(ui.item[0], null)['height']));
+            },
+            change: function (event, ui) {
+
+                /*
+                 Shift moved item to the level of the target placeholder
+                 Adjusts item's width
+                 */
+                $(ui.item[0]).css('width', $(ui.placeholder[0]).css('width'));
+                $(ui.item[0]).offset({left: $(ui.placeholder[0]).offset().left});
+            },
+            stop: function (event, ui) {
+
+                /* Expand children nodes */
+                var children = $(ui.item[0]).find('li');
+                children.show();
+                $(ui.item[0]).find('.item-children-num').remove();
+                $(ui.item[0]).css('height', 'auto');
+                $(this).sortable("refreshPositions");
+            }
+        });
     }
 
     function _init() {
         _patchNodes();
         _initEvents();
+        _initSortable();
     }
 
-    return {
+    module.exports = {
         init: _init,
-
-        getSidebar: function () {
-            return _dom.sidebar;
-        },
-
-        getListsContainer: function () {
-            return _dom.lists;
-        },
-
-        getTasksContainer: function () {
-            return _dom.tasks;
-        },
-
-        getAccountTemplate: function () {
-            return _dom.accountTemplate;
-        },
-
-        getListTemplate: function () {
-            return _dom.listTemplate.innerHTML;
-        },
-
-        getTaskTemplate: function () {
-            return _dom.taskTemplate.innerHTML;
-        },
-
-        getActiveListElement: function () {
-            return _dom.activeListTitle;
-        }
+        onSyncClick: _onSyncClick
     };
 
 }());

@@ -131,10 +131,10 @@ label input[type="checkbox"][data-type="switch"].uninit + span {
 }
 
 /* Drawer */
-section#drawer:target {
+/*section#drawer:target {
   -moz-transform: translateX(80%);
   -webkit-transform: translateX(80%);
-}
+}*/
 
 #drawer {
   height: 100%;
@@ -193,9 +193,21 @@ progress[value]::-webkit-progress-value {
   background: #01c5ed;
 }
 
-progress[value].pack-activity::-webkit-progress-bar {
+/*progress[value].pack-activity::-webkit-progress-bar {
   background-image: url(style/progress_activity/images/ui/activity.png);
   -webkit-animation: 0.5s move infinite steps(15);
+}*/
+
+/* Chrome workaround */
+progress[value].pack-activity::after {
+  content: "";
+  width: 100%;
+  height: 100%;
+  display: block;
+  top: 0;
+  position: absolute;
+  background-image: url(style/progress_activity/images/ui/activity.png);
+  animation: 0.5s move infinite steps(15);
 }
 
 progress[value].pack-activity.light::-webkit-progress-bar {

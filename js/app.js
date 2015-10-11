@@ -1,18 +1,7 @@
-/*
- * Alexei Koliada 2014.
- * This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
- * http://creativecommons.org/licenses/by-sa/4.0/deed.en_US
- */
-
-/**
- * Main application object
- */
-FT.apply(FT, (function ($) {
-
+(function () {
     'use strict';
 
-    var version = $('#app-version').find('span.app-version').text(),
-        devMode = false,
+    var devMode = false,
         manifestUrl = devMode ? 'http://dev.alex-koliada.com/FireTasks/manifest.webapp' : 'http://koliada.github.io/FireTasks/manifest.webapp',
         actions = {
             'MAIN_QUEUE': 'mainQueue'
@@ -49,12 +38,12 @@ FT.apply(FT, (function ($) {
         });
 
         window.addEventListener('online', function (e) {
-            Logger.info('Connection is ONLINE');
+            logger.info('Connection is ONLINE');
             updateConnectionStatus(true);
             EV.fire('connection-online');
         }, false);
         window.addEventListener('offline', function (e) {
-            Logger.info('Connection is OFFLINE');
+            logger.info('Connection is OFFLINE');
             updateConnectionStatus(false);
             EV.fire('connection-offline');
         }, false);
@@ -74,15 +63,26 @@ FT.apply(FT, (function ($) {
         });
 
         /* Full-width Checkbox Switching */
-        $('section[data-type="list"], form').find('a').click(function () {
+        $('section[data-type="list"], form').on('click', 'a', function () {
             var input = $(this).find('input[type="checkbox"]');
-            FT.switchCheckbox(input);
+            utils.switchCheckbox(input);
         });
 
         /* For tablet UI - disables edit mode when sidebar is touched */
         $('section[data-type="sidebar"]').click(function () {
             EditMode.deactivate();
         });
+    }
+
+    //TODO: get rid of
+    function initjQuery() {
+        global.$ = global.jQuery = require('./lib/jquery-2.1.0.min');
+        require('./lib/jquery-ui-1.10.3.custom.min');
+        require('./lib/jquery.ui.touch-punch');
+    }
+
+    function initGO2() {
+        require('./lib/google-oauth2');
     }
 
     /**
@@ -101,7 +101,7 @@ FT.apply(FT, (function ($) {
     function setupStartupSynchronization() {
         // Firstly check if we're online. If not, wait for 'connection-online' event.
         if (!FT.isOnline()) {
-            Logger.info("onStart refresh won't start immediately because internet connection is offline. Waiting for connection restore");
+            logger.info("onStart refresh won't start immediately because internet connection is offline. Waiting for connection restore");
             var evId = EV.listen('connection-online', function () {
                 setupStartupSynchronization();
                 EV.stopListen(evId);
@@ -111,14 +111,14 @@ FT.apply(FT, (function ($) {
 
         // Secondly, check if there are uncompleted tasks. If it's confirmed, launch queue and wait it finishes.
         if (Sync.getStoredTasks(actions.MAIN_QUEUE).length > 0 && !Auth.hasQueuedTasks()) { // Auth.hasQueuedTasks is not actually necessary
-            Logger.info("onStart refresh won't start immediately because synchronization module detected uncompleted tasks. Waiting for tasks to complete");
+            logger.info("onStart refresh won't start immediately because synchronization module detected uncompleted tasks. Waiting for tasks to complete");
             FT.startSyncQueue();
             return;
         }
 
         // Thirdly, check if 'syncOnStart' setting is set to true. If yes, continue.
         if (!Settings.get('syncOnStart')) {
-            Logger.info("onStart refresh won't start because of the setting");
+            logger.info("onStart refresh won't start because of the setting");
             return;
         }
 
@@ -173,38 +173,12 @@ FT.apply(FT, (function ($) {
         window.applicationCache.addEventListener('error', function () {
             utils.status.show('A cache error occurred');
         });
+    }
 
-        /*if (navigator.mozApps) {
-         var req = navigator.mozApps.getInstalled();
-         req.onsuccess = function () {
-         var ver = req.result[0].manifest.version;
-         $.ajax({
-         url: FT.getManifestUrl(),
-         responseType: 'json',
-         cache: false
-         }).done(function (manifest) {
-         if (FT.getVersionInteger(ver) < FT.getVersionInteger(manifest.version)) {
-         if (confirm('A new version of Fire Tasks was found. Install now?')) {
-         FT.install();
-         }
-         callback && callback(true);
-         } else {
-         onNoUpdate();
-         }
-         }).fail(onError);
-         };
-         req.onerror = onError;
-         }
-
-         function onNoUpdate() {
-         utils.status.show('No new version available');callback &&
-         callback && callback(false);
-         }
-
-         function onError() {
-         utils.status.show('An error occurred');
-         callback && callback(false);
-         }*/
+    function setVersionLabels() {
+        if (utils.version.isBeta) {
+            constants.APP_TITLE_ELEMENT.find('em')[0].innerHTML = '&nbsp;beta'
+        }
     }
 
     /**
@@ -221,9 +195,13 @@ FT.apply(FT, (function ($) {
     }
 
     function patchOptions() {
-        FT.options.scope = 'https://www.googleapis.com/auth/tasks https://www.googleapis.com/auth/userinfo.email';
+        options.scope = 'https://www.googleapis.com/auth/tasks https://www.googleapis.com/auth/userinfo.email';
         //FT.options.redirect_uri = this.options.redirect_uris[0];
-        FT.options.redirect_uri = document.location.protocol + '//' + document.location.host + document.location.pathname.replace('app.html', 'redirect.html');
+        if (utils.isFFOS) {
+            options.redirect_uri = 'https://oauth.gaiamobile.org/authenticated/';
+        } else {
+            options.redirect_uri = document.location.protocol + '//' + document.location.host + document.location.pathname.replace('app.html', 'redirect.html');
+        }
     }
 
     function initStorage() {
@@ -258,16 +236,17 @@ FT.apply(FT, (function ($) {
 
     /* Chrome only */
     function showLogo() {
-        if (window.chrome) {
-            var text = "Fire tasks beta",
-                fontFamily = "font-family: Arial", fontSize = "font-size: 9px; padding: 26px 0; line-height: 60px",
-                url = window.location.href.replace('app.html', '').replace('#', '').replace('?', ''),
-                imageUrl = url + "/images/icons/icon-64.png",
-                backgroundImage = "background-image: url('" + imageUrl + "')",
-                color = "color: transparent",
-                css = [fontFamily, fontSize, backgroundImage, color].join("; ");
-            console.log("%c" + text, css);
-        }
+        // Not working in the newest Chrome for some reason
+        //if (window.chrome) {
+        //    var text = "Fire tasks beta",
+        //        fontFamily = "font-family: Arial", fontSize = "font-size: 9px; padding: 26px 0; line-height: 60px",
+        //        url = window.location.href.replace('app.html', '').replace('#', '').replace('?', ''),
+        //        imageUrl = url + "images/icons/icon-64.png",
+        //        backgroundImage = "background-image: url('" + imageUrl + "')",
+        //        color = "color: transparent",
+        //        css = [fontFamily, fontSize, backgroundImage, color].join("; ");
+        //    console.log("%c" + text, css);
+        //}
         console.info('Thank you for your interest in Fire Tasks! For any details please refer to https://github.com/koliada/FireTasks');
     }
 
@@ -402,8 +381,20 @@ FT.apply(FT, (function ($) {
         FT.setAnimations();
     }
 
+    /**
+     * Toggles sidebar
+     * @param [value] True to open
+     */
+    function toggleSidebar(value) {
+        if (value && location.hash.indexOf('drawer') === -1) {
+            location.hash = 'drawer';
+        } else if (!value) {
+            location.hash = '';
+        }
+    }
 
-    return {
+
+    var o = {
 
         getVersion: function () {
             return version;
@@ -434,114 +425,6 @@ FT.apply(FT, (function ($) {
             }
         },
 
-        /* JSON data from Google Cloud Console */
-        options: {
-            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-            "token_uri": "https://accounts.google.com/o/oauth2/token",
-            "client_email": "478318582842-6rkd630981kdibb868512f5cll4eg1tj@developer.gserviceaccount.com",
-            "redirect_uris": ["http://koliada.github.io/FireTasks/app.html"],
-            "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/478318582842-6rkd630981kdibb868512f5cll4eg1tj@developer.gserviceaccount.com",
-            "client_id": "478318582842-6rkd630981kdibb868512f5cll4eg1tj.apps.googleusercontent.com",
-            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs"
-        },
-
-        init: function () {
-            console.time('Application initialization');
-
-            updateConnectionStatus();
-            showLogo();
-            updateVersion();
-            showWhatsNew();
-            Logger.level('INFO');
-            patchOptions();
-            initStorage();
-            setListeners();
-            //initSync();
-
-            //FT.setAnimations();
-            FT.toggleSidebar();
-
-            //Auth.init();
-            //List.init();
-            //Task.init();
-            EditMode.init();
-            Settings.init();
-
-            //List.loadData();
-
-            ViewManager.init();
-
-            this.accounts = new AccountsCollection(this);
-            this.accounts.storage.getAccounts().then(function (data) {
-                if (data.length === 0) {
-                    Logger.warn('No accounts! Go to Settings and add new account.');
-                    FT.toggleSettings(true);
-                    return Promise.reject('');
-                } else {
-                    try {
-                        console.time('activeListSet');
-                        var promises = [];
-                        FT.accounts.data.forEach(function (account) {
-                            promises.push(account.lists.initFromStorage());
-                        });
-                        return Promise.all(promises);
-                    } catch (e) {
-                        Logger.error(e);
-                    }
-                }
-            }).then(function (result) {
-                // delayed rendering
-                FT.accounts.render();
-
-                return ActiveListManager.init(); // lists must be rendered at this point
-            }).then(function (list) {
-
-                console.timeEnd('activeListSet');
-                //ListsView.markListActive(list, true);
-
-                //console.time('render.tasksOfList');
-                //TasksView.render.tasksOfList(list);
-                //console.timeEnd('render.tasksOfList');
-
-
-                //FT.viewModel = {
-                //	tasks: ko.observableArray([])
-                //};
-                //ko.applyBindings(FT.viewModel);
-
-                console.timeEnd('Application initialization');
-
-            }).catch(function (error) {
-                if (Error.prototype.isPrototypeOf(error)) {
-                    Logger.error(error);
-                    throw error;
-                }
-            });
-        },
-
-        //noAccounts: ko.computed(function () {
-        //	return FT.accounts && FT.accounts.data().length === 0;
-        //}),
-
-        findList: function (list) {
-            var result = null;
-            if (!list) {
-                return result;
-            }
-            FT.accounts.data.some(function (account) {
-                var foundList = account.lists.getById(list.id);
-                if (foundList) {
-                    result = foundList;
-                    return true;
-                }
-            });
-            return result;
-        },
-
-        getFirstList: function () {
-            return this.accounts.data[0].lists.data[0];
-        },
-
         /* Interval in seconds */
         setAutoFetch: function (delay) {
 
@@ -549,7 +432,7 @@ FT.apply(FT, (function ($) {
 
             if (delay === 0) {
                 FT.stopAutoFetch();
-                Logger.info("Automatic local data refresh won't start because of the settings");
+                logger.info("Automatic local data refresh won't start because of the settings");
                 return;
             }
 
@@ -558,18 +441,18 @@ FT.apply(FT, (function ($) {
             }
 
             if (delay < 60) {
-                Logger.warn('Delay value should be equal to or greater than 60 (measured in seconds)');
+                logger.warn('Delay value should be equal to or greater than 60 (measured in seconds)');
                 return;
             }
 
             // make private
-            Logger.info('Auto fetch started, timeout ' + delay + ' seconds');
+            logger.info('Auto fetch started, timeout ' + delay + ' seconds');
             refreshInterval = setInterval(function () {
                 if (!FT.isOnline()) {
-                    Logger.info('Automatic reload skipped because of offline mode');
+                    logger.info('Automatic reload skipped because of offline mode');
                     return;
                 }
-                Logger.info('Automatic reload initiated');
+                logger.info('Automatic reload initiated');
                 List.getList();
             }, delay * 1000);
         },
@@ -578,14 +461,14 @@ FT.apply(FT, (function ($) {
             if (refreshInterval) {
                 clearInterval(refreshInterval);
                 refreshInterval = null;
-                Logger.info('Auto fetch disabled');
+                logger.info('Auto fetch disabled');
                 return true;
             }
             return false;
         },
 
         preventStartupSync: function () {
-            Logger.info('Startup sync prevented');
+            logger.info('Startup sync prevented');
             syncCalled = true;
         },
 
@@ -710,7 +593,7 @@ FT.apply(FT, (function ($) {
         loadAll: function (callback) {
             var processed = 0,
                 timeStart = (new Date()).getTime();
-            Logger.info('loadAll(): synchronization started');
+            logger.info('loadAll(): synchronization started');
             FT.stopAutoFetch();
             Auth.dataCalculation.start();
             Task.view.toggleProgress(true);
@@ -724,7 +607,7 @@ FT.apply(FT, (function ($) {
                                     List.view.toggleProgress(false);
                                     Task.view.toggleProgress(false);
                                     List.storage.set(lists, function () {
-                                        Logger.info('loadAll(): synchronization completed, time: ' + ((new Date()).getTime() - timeStart).toString() + ' ms, data transferred: ' + Auth.dataCalculation.getValue() + ' bytes');
+                                        logger.info('loadAll(): synchronization completed, time: ' + ((new Date()).getTime() - timeStart).toString() + ' ms, data transferred: ' + Auth.dataCalculation.getValue() + ' bytes');
                                         //Task.view.getSortModeManager().isMyOrder() && Task.view.getListEl().sortable('destroy');
                                         var list = List.getLastActive();
                                         delete list.tasks; // triggers refresh from storage
@@ -816,33 +699,6 @@ FT.apply(FT, (function ($) {
             });
         },
 
-        switchCheckbox: function (input) {
-            var checked = input.prop('checked');
-            input.prop('checked', (checked === false));
-            input.change();	// to fire onchange listeners
-        },
-
-        isFFOS: ("mozApps" in navigator && navigator.userAgent.search("Mobile") != -1),
-
-        isMozActivityAvailable: typeof MozActivity !== 'undefined',
-
-        showInDevelopmentTooltip: function (timeout) {
-            timeout = timeout || 1000;
-            utils.status.show('This feature is in development', timeout);
-        },
-
-        /**
-         * Toggles sidebar
-         * @param [value] True to open
-         */
-        toggleSidebar: function (value) {
-            if (value && location.hash.indexOf('drawer') === -1) {
-                location.hash = 'drawer';
-            } else if (!value) {
-                location.hash = '';
-            }
-        },
-
         toggleSettings: function (value) {
             if (value) {
                 Settings.showLayout();
@@ -863,13 +719,13 @@ FT.apply(FT, (function ($) {
                 $('[data-position="back"]').addClass('no-animation');
                 $('[data-type="edit"]').addClass('no-animation');
                 $('label.pack-switch').addClass('no-animation');
-                Logger.info('setAnimations(): animations suppressing enabled');
+                logger.info('setAnimations(): animations suppressing enabled');
             } else {
                 document.getElementById('drawer').classList.remove('no-animation');
                 $('[data-position="back"]').removeClass('no-animation');
                 $('[data-type="edit"]').removeClass('no-animation');
                 $('label.pack-switch').removeClass('no-animation');
-                Logger.info('setAnimations(): animations suppressing disabled');
+                logger.info('setAnimations(): animations suppressing disabled');
             }
         },
 
@@ -912,57 +768,101 @@ FT.apply(FT, (function ($) {
 
         addNewAccount: function () {
             return this.accounts.add();
-        },
-
-        vibrate: function () {
-            if (window.navigator.vibrate && Settings.get('vibrateOnLongPress')) {
-                window.navigator.vibrate(80);
-            }
         }
     };
 
-}(jQuery)));
+    var status = require('./lib/status').status,
+        localforage = require('localforage'),
+        EV = require('./lib/event-processor').EV,
+        AccountsCollection = require('./collections/AccountsCollection'), //should be loaded ASAP
+        _$ = require('./DomHelper'),
+        constants = require('./constants'),
+        utils = require('./utils'),
+        logger = utils.logger,
+        options = require('./options'),
+        ViewManager = require('./ViewManager'),
+        SettingsManager = require('./SettingsManager'),
+        TaskListSortModeManager = require('./TaskListSortModeManager'),
+        ActiveListManager = require('./ActiveListManager'),
+        EditMode = require('./EditMode');
 
+    /**
+     * Main application object
+     */
+    var app = Object.create(null);
 
-//FT.noUI = $('#firetasks').length === 0;
+    app.init = function () {
+        // Firefox OS-specific status popup, for some reason it should be initialized
+        status.init();
 
+        console.time('Application initialization');
 
-/**
- * Application entry point
- */
-(function () {
+        initjQuery();
+        initGO2();
+        updateConnectionStatus();
+        showLogo();
+        updateVersion();
+        setVersionLabels();
+        showWhatsNew();
+        logger.level('INFO');
+        patchOptions();
+        initStorage();
+        setListeners();
+        //initSync();
 
-    // It's testem port, do not launch app
-    if (location.port === '7357') {
-        return;
-    }
+        //FT.setAnimations();
+        toggleSidebar();
+        EditMode.init();
+        ViewManager.init();
 
-    // If not on app.html (main entry point), try to install/redirect
-    if (location.pathname.indexOf('app.html') === -1) {
-        FT.install();
-        return;
-    }
+        //TODO: move
+        _$('#btn-open-sidebar')[0].on('click', function (ev, el) {
+            ev.preventDefault();
+            _$('#drawer')[0].classList.toggle('visible');
+        });
 
-    // Firefox OS-specific status popup, for some reason it should be initialized
-    utils.status.init();
+        //$('#btn-close-sidebar').on('click', function(ev, el) {
+        //    ev.preventDefault();
+        //    _$('#drawer')[0].classList.remove('visible');
+        //});
 
-    //_$.registerCustomEvent('longpress', function (el, handler) {
-    //    "use strict";
-    //    Longpress.bindLongPressHandler(el, 400, handler);
-    //});
+        console.time('AccountsCollection.getAccounts()');
+        var accounts = AccountsCollection.getAccounts();
+        console.timeEnd('AccountsCollection.getAccounts()');
+        accounts.populateCache()
+            .then(SettingsManager.init)
+            .then(TaskListSortModeManager.init)
+            .then(function () {
+                if (accounts.getLength() === 0) {
+                    logger.warn('No accounts! Go to Settings and add new account.');
+                    SettingsManager.showLayout();
+                    return Promise.reject('No accounts! Go to Settings and add new account.');
+                } else {
+                    try {
+                        var promises = [];
+                        accounts.each(function (account) {
+                            promises.push(account.lists.initFromStorage());
+                        });
+                        return Promise.all(promises);
+                    } catch (e) {
+                        logger.error(e);
+                    }
+                }
+            })
+            .then(function () {
+                // delayed rendering
+                accounts.render();
+                return ActiveListManager.init(); // lists must be rendered at this point
+            }).then(function () {
+                console.timeEnd('Application initialization');
+            }).catch(function (error) {
+                if (Error.prototype.isPrototypeOf(error)) {
+                    logger.error(error);
+                    throw error;
+                }
+            });
+    };
 
-    // Let's rock!
-    FT.init();
+    module.exports = app;
+
 }());
-
-
-/**
- * Google Analytics
- */
-//(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-//	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-//	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-//})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-//
-//ga('create', 'UA-18750158-8', 'koliada.github.io');
-//ga('send', 'pageview');
