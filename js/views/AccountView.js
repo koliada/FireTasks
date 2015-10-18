@@ -24,11 +24,15 @@
             selfFragment = this.createFragment();
 
         this.instance.lists.each(function (list) {
-            fragment.appendChild(list.view.createFragment());
+            if (!list.isDeleted()) {
+                fragment.appendChild(list.view.createFragment());
+            }
         });
         this.getListsContainer().appendChild(fragment);
 
         constants.LISTS_LIST_ELEMENT.appendChild(selfFragment);
+        this.rendered = true; // this flag is extremely critical
+        return this;
     };
 
     module.exports = AccountView;

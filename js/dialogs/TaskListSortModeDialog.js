@@ -1,61 +1,40 @@
 (function () {
     "use strict";
 
-    var _$ = require('../DomHelper'),
-        TaskListSortModeManager = require('../TaskListSortModeManager');
+    var ActionsDialogSingleton = require('./ActionsDialogSingleton'),
+        TaskListSortModeManager = require('../TaskListSortModeManager'),
+        _list;
 
-    var TaskListSortModeDialog = function () {
-        this._dom = Object.create(null);
-        this._dom.dialog = _$('#tasks-sort-mode')[0];
-        this._dom.menu = this._dom.dialog.find('menu')[0];
-        this._dom.btnSortTasksMyOrder = _$('#btn-sort-tasks-my-order')[0];
-        this._dom.btnSortTasksAlphabetical = _$('#btn-sort-tasks-alphabetical')[0];
-        this._dom.btnSortTasksDueDate = _$('#btn-sort-tasks-due-date')[0];
-        this.visible = false;
-        this._onButtonClickRef = this._onButtonClick.bind(this);
-        this._initEvents();
+    function onItemSelected (mode) {
+        TaskListSortModeManager.set(mode).then(function () {
+            _list.view.renderTasks();
+        }.bind(this));
+    }
+
+    //TODO: use radio group
+    module.exports = {
+        show: function (list) {
+            _list = list;
+            ActionsDialogSingleton.show('Set sort mode', [
+                {
+                    id: 'showDeleted',
+                    text: 'My order',
+                    handler: onItemSelected.bind(null, TaskListSortModeManager.getSortModes().myOrder)
+                },
+                {
+                    id: 'sortTasks',
+                    text: 'Alphabetical (experimental)',
+                    handler: onItemSelected.bind(null, TaskListSortModeManager.getSortModes().alphabetical)
+                },
+                {
+                    id: 'exportTasks',
+                    text: 'Due date',
+                    handler: onItemSelected.bind(null, TaskListSortModeManager.getSortModes().dueDate),
+                    disabled: true
+                }
+            ]);
+        },
+        hide: ActionsDialogSingleton.hide
     };
-
-    TaskListSortModeDialog.prototype._initEvents = function () {
-        this._dom.menu.on('click', 'button', this._onButtonClickRef);
-    };
-
-    TaskListSortModeDialog.prototype.onItemSelected = function (mode) {
-        //Not overridden
-    };
-
-    TaskListSortModeDialog.prototype._onButtonClick = function (ev) {
-        this.hide();
-        switch (ev.target.id) {
-            case this._dom.btnSortTasksMyOrder.id:
-                this.onItemSelected(TaskListSortModeManager.getSortModes().myOrder);
-                break;
-            case this._dom.btnSortTasksAlphabetical.id:
-                this.onItemSelected(TaskListSortModeManager.getSortModes().alphabetical);
-                break;
-            case this._dom.btnSortTasksDueDate.id:
-                this.onItemSelected(TaskListSortModeManager.getSortModes().dueDate);
-                break;
-        }
-    };
-
-    TaskListSortModeDialog.prototype.show = function () {
-        if (!this.visible) {
-            this._dom.dialog.fadeIn();
-            this.visible = true;
-        }
-        return this;
-    };
-
-    TaskListSortModeDialog.prototype.hide = function () {
-        if (this.visible) {
-            this._dom.dialog.fadeOut();
-            this.visible = false;
-            this._dom.menu.off('click', this._onButtonClickRef);
-        }
-        return this;
-    };
-
-    module.exports = TaskListSortModeDialog;
 
 }());

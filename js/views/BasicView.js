@@ -82,24 +82,18 @@
             throw new Error('element is not created by the implementation');
         }
         this.getParentEl().appendChild(this.documentFragment);
+        return this;
     };
 
     BasicView.prototype.destroy = function () {
+        if (!this.rendered) {
+            return;
+        }
         this.domElements.forEach(function (el) {
             el.parentNode.removeChild(el);
         });
         this.rendered = false;
-    };
-
-    /**
-     * Process template as JS string
-     * @deprecated
-     * @returns {Object}
-     */
-    BasicView.prototype.compile = function () {
-        var $this = this.instance;
-
-        return eval(this.template);
+        return this;
     };
 
     module.exports = BasicView;

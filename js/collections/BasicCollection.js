@@ -49,12 +49,15 @@
     };
 
     BasicCollection.prototype.remove = function (entity) {
+        var index = null;
         if (utils.isFunction(entity.getIndex)) {
-            entity = entity.getIndex();
+            index = entity.getIndex();
         }
         if (utils.isNumber(entity)) {
-            this.data.splice(entity, 1);
+            index = entity;
+            entity = this.getAt(index);
         }
+        this.data.splice(index, 1);
         if (entity.collection === this) {
             entity.collection = null;
         }

@@ -1,7 +1,7 @@
 {
-  "version": "0.8.0",
   "name": "Fire Tasks",
   "description": "A Google Tasks Client",
+  "version": "0.9.0",
   "launch_path": "/app.html",
   "type": "privileged",
   "icons": {
@@ -28,13 +28,11 @@
     },
     "systemXHR": {
       "description": "Required for working with Google Tasks API"
-    },
-    "bluetooth": {}
+    }
   },
   "developer": {
     "name": "Alexei Koliada",
     "url": "http://alex-koliada.com"
   },
-  "appcache_path": "/manifest.appcache",
   "default_locale": "en"
 }

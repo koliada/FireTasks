@@ -175,19 +175,19 @@ var utils = {
     },
 
     /**
-     * @param {Array} promises
+     * @param {Function[]} fns
      * @returns {Promise<Array>}
      */
-    waterfall: function (promises) {
+    waterfall: function (fns) {
         return new Promise(function (resolve, reject) {
             var results = [];
 
             function iterator() {
-                var promise = promises.shift();
+                var promise = fns.shift();
                 if (!promise) {
                     resolve(results);
                 }
-                promise.then(function (data) {
+                promise().then(function (data) {
                     results.push(data);
                     return iterator();
                 }).catch(reject);
@@ -199,7 +199,7 @@ var utils = {
 
     showInDevelopmentTooltip: function (timeout) {
         timeout = timeout || 1000;
-        require('./lib/status').status.show('This feature is in development', timeout);
+        this.status.show('This feature is in development', timeout);
     },
 
     vibrate: function () {
@@ -223,7 +223,9 @@ var utils = {
 
     isFFOS: ("mozApps" in navigator && navigator.userAgent.search("Mobile") != -1),
 
-    version: JSON.parse(require('fs').readFileSync('version.json'))
+    version: JSON.parse(require('fs').readFileSync('version.json')),
+
+    status: require('./lib/status').status
 };
 
 module.exports = utils;

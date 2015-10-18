@@ -4,6 +4,7 @@
     var utils = require('../utils'),
         Logger = utils.logger,
         BasicCollection = require('./BasicCollection'),
+        BasicStorage = require('../storage/BasicStorage'),
         AccountsStorage = require('../storage/AccountsStorage'),
         AccountSetupDialog = require('../dialogs/AccountSetupDialog'),
         Proxy = require('../Proxy'),
@@ -97,15 +98,15 @@
                                 .catch(Logger.error);
                         }
                     } else {
-                        Logger.error('userinfo failed');
-                        reject('userinfo failed');
+                        console.error('Getting user info has failed - I don\'t see an ID');
+                        reject('Getting user info has failed - I don\'t see an ID');
                     }
-                }.bind(this)).catch(function (e) {
-                    utils.status.show('Something went wrong :(\nRetrying...', 2000);
-                    Logger.error('Login failed');
-                    GO2.logout();
-                    GO2.login(false, true);
-                });
+                }.bind(this))
+                    .catch(function (error) {
+                        console.error('User adding has failed', error);
+                        AccountSetupDialog.hide();
+                        reject(error);
+                    });
             }.bind(this);
             login();
         }.bind(this));
@@ -123,10 +124,14 @@
      */
     AccountsCollection.prototype.refresh = function () {
         return utils.waterfall(this.data.map(function (account) {
-            return account.refresh();
+            return function () {
+                console.log('Account data refresh started:', account.getName());
+                return account.refresh().then(function () {
+                    console.log('Account data refresh completed:', account.getName());
+                });
+            };
         })).then(function () {
             collection.render();
-            return Promise.resolve();
         });
     };
 

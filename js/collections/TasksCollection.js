@@ -5,6 +5,7 @@
         SynchronizationManager = require('../SynchronizationManager'),
         TaskListSortModeManager = require('../TaskListSortModeManager'),
         TaskListSortModeDialog = require('../dialogs/TaskListSortModeDialog'),
+        ConnectivityManager = require('../ConnectivityManager'),
         Proxy = require('../Proxy'),
         Task = require('../entities/Task'),
         utils = require('../utils'),
@@ -24,7 +25,7 @@
         this.proxy = (this.parent) ? this.parent.collection.proxy : new Proxy(this.account, {
             load: {
                 method: 'GET',
-                url: 'https://www.googleapis.com/tasks/v1/lists/' + this.list.getId() + '/tasks'
+                url: 'https://www.googleapis.com/tasks/v1/lists/' + this.list.getId() + '/tasks?showDeleted={0}'
             },
             add: {
                 method: 'POST',
@@ -98,15 +99,14 @@
     };
 
     TasksCollection.prototype.load = function (progressCb) {
-        return this.proxy.request('load')
-            .then(function (data) {
-                var items = data.items || [];
-                items = this._makeTree({q: items});
-                this.data = this._fromArray(items);
-                //return this.list.save();
-                if (utils.isFunction(progressCb)) progressCb(data);
-                return Promise.resolve();
-            }.bind(this));
+        return this.proxy.request('load', ['false']).then(function (data) {
+            var items = data.items || [];
+            items = this._makeTree({q: items});
+            this.data = this._fromArray(items);
+            //return this.list.save();
+            if (utils.isFunction(progressCb)) progressCb(data);
+            return Promise.resolve();
+        }.bind(this));
     };
 
     TasksCollection.prototype.toStorage = function () {
@@ -247,13 +247,21 @@
     };
 
     TasksCollection.prototype.showSortDialog = function () {
-        var dialog = new TaskListSortModeDialog();
-        dialog.onItemSelected = function (sortMode) {
-            TaskListSortModeManager.set(sortMode).then(function () {
-                this.list.view.renderTasks();
-            }.bind(this));
-        }.bind(this);
-        dialog.show();
+        TaskListSortModeDialog.show(this.list);
+    };
+
+    TasksCollection.prototype.showDeleted = function () {
+        if (!ConnectivityManager.isOnline()) {
+            utils.status.show('This action requires network connection');
+        }
+        this.proxy.request('load', ['true']).then(function (data) {
+            var items = data.items || [];
+            items = items.filter(function (task) {
+                return task.deleted;
+            });
+            this.data = this._fromArray(items);
+            this.list.view.renderTasks(true);
+        }.bind(this));
     };
 
     TasksCollection.prototype._toPlainArray = function () {

@@ -16,6 +16,7 @@
     "chai": "^1.10.0",
     "chai-as-promised": "^4.1.1",
     "deferred": "^0.7.1",
+    "es6-promise": "^3.0.2",
     "grunt": "^0.4.5",
     "grunt-contrib-less": "^0.12.0",
     "gulp": "^3.9.0",
@@ -25,6 +26,7 @@
     "gulp-uglify": "^1.4.1",
     "gulp-util": "^3.0.6",
     "gulp-webserver": "^0.9.1",
+    "gulp-zip": "^3.0.2",
     "intern": "^3.0.0",
     "jquery": "^2.1.1",
     "mocha": "^2.0.1",
@@ -38,9 +40,11 @@
   },
   "scripts": {
     "test": "mocha",
-    "build": "gulp build",
-    "watch": "gulp watch",
-    "dev": "gulp dev"
+    "build": "node node_modules/gulp/bin/gulp build",
+    "watch": "node node_modules/gulp/bin/gulp watch",
+    "dev": "node node_modules/gulp/bin/gulp dev",
+    "package": "node node_modules/gulp/bin/gulp package",
+    "release": "node node_modules/gulp/bin/gulp release"
   },
   "repository": {
     "type": "git",

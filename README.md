@@ -2,7 +2,7 @@
 <img src="https://raw.github.com/koliada/FireTasks/gh-pages/images/logo.png" alt="logo">
 </p>
 
-**[v0.8 draft documentation]**
+**[v0.9 draft documentation]**
 =========================
 
 Fire Tasks
@@ -70,17 +70,17 @@ To start a development server add a new record to the `hosts` file:
 ```
 and then run:
 ```
-gulp dev
+npm run dev
 ```
 Now you should be able to see Fire Tasks at [http://dev.firetasks.com:8000/app.html](http://dev.firetasks.com:8000/app.html).
 It is important to have exactly the same hostname and port, otherwise Google oAuth won't authenticate you.<br>
 To build a debug version of Fire Tasks to be run in Browser without starting web server and the stuff:
 ```
-npm run build-debug //not working
+npm run build
 ```
 To build an installable `.zip`
 ```
-npm run build //will build browserify bundle
+npm run package
 ```
 
 

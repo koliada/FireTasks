@@ -20,11 +20,10 @@
     };
 
     SettingsStorage.prototype.get = function (settingName) {
-        return new Promise(function (resolve, reject) {
-            this.engine.getItem(settingName).then(function (settings) {
-                resolve(settings || Object.create(null));
-            }).catch(reject);
-        }.bind(this));
+        return this.engine.getItem(settingName)
+            .then(function (settings) {
+                return settings || Object.create(null);
+            });
     };
     SettingsStorage.prototype.remove = function (settingName) {
         return this.engine.removeItem(settingName);

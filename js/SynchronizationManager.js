@@ -2,6 +2,9 @@
     "use strict";
 
     var AccountsCollection = require('./collections/AccountsCollection'),
+        EntitiesRegistry = require('./entities/EntitiesRegistry'),
+        ConnectivityManager = require('./ConnectivityManager'),
+        Proxy = require('./Proxy'),
         utils = require('./utils');
 
     var _queues = [],
@@ -37,7 +40,15 @@
                 } else {
                     resolve(_makeRequest(data));
                 }
-            }).catch(reject);
+            }).catch(function (error) {
+                if (Proxy.RequestError.prototype.isPrototypeOf(error)) {
+                    reqData.handleError(error, function () {
+                        resolve(_makeRequest(data));
+                    });
+                } else {
+                    reject(error);
+                }
+            });
         });
     }
 
@@ -75,8 +86,12 @@
                                 task.urlParams[0] = newId;
                             }
                         });
-                        // TODO: tasks tasks update
                         _tasks.tasks.toCreate.forEach(function (task) {
+                            if (task.urlParams[0] === tempId) {
+                                task.urlParams[0] = newId;
+                            }
+                        });
+                        _tasks.tasks.toUpdate.forEach(function (task) {
                             if (task.urlParams[0] === tempId) {
                                 task.urlParams[0] = newId;
                             }
@@ -91,7 +106,6 @@
                         _tasks.lists.toUpdate = _tasks.lists.toUpdate.filter(function (task) {
                             return task.urlParams[0] !== listId;
                         });
-                        // TODO: tasks tasks update
                         _tasks.tasks.toCreate = _tasks.tasks.toCreate.filter(function (task) {
                             return task.urlParams[0] !== listId;
                         });
@@ -140,27 +154,38 @@
                     entity.doPostSyncActions(_actions.UPDATE, null).then(callback);
                 }
             },
+            //TODO: we can show some fancy output here
+            _handleError = function (entity, error, cb) {
+                switch (error.code) {
+                    case Proxy.ERROR_CODES.NOT_FOUND:
+                        entity.onNotFound()
+                            .then(_postRequestActions.deleteList.bind(null, (EntitiesRegistry.isEntityType('list') ? entity : entity.collection.list), null, cb));
+                        break;
+                    default:
+                        cb();
+                }
+            },
             _createTask = function (entity, syncAction) {
                 var conf = entity.getSyncConfig(syncAction),
-                    List = require('./entities/List'),
-                    Task = require('./entities/Task'); //TODO
+                    isOfListType = EntitiesRegistry.isEntityType('list', entity);
+                conf.handleError = _handleError.bind(null, entity);
                 switch (syncAction) {
                     case _actions.DELETE:
-                        conf.postRequestAction = _postRequestActions[List.prototype.isPrototypeOf(entity) ? 'deleteList' : 'deleteTask'].bind(null, entity);
-                        _tasks[List.prototype.isPrototypeOf(entity) ? 'lists' : 'tasks'].toDelete.push(conf);
+                        conf.postRequestAction = _postRequestActions[isOfListType ? 'deleteList' : 'deleteTask'].bind(null, entity);
+                        _tasks[isOfListType ? 'lists' : 'tasks'].toDelete.push(conf);
                         break;
                     case _actions.POST:
-                        conf.postRequestAction = _postRequestActions[List.prototype.isPrototypeOf(entity) ? 'addList' : 'addTask'].bind(null, entity);
-                        _tasks[List.prototype.isPrototypeOf(entity) ? 'lists' : 'tasks'].toCreate.push(conf);
+                        conf.postRequestAction = _postRequestActions[isOfListType ? 'addList' : 'addTask'].bind(null, entity);
+                        _tasks[isOfListType ? 'lists' : 'tasks'].toCreate.push(conf);
                         break;
                     case _actions.UPDATE:
-                        conf.postRequestAction = _postRequestActions[List.prototype.isPrototypeOf(entity) ? 'updateList' : 'updateTask'].bind(null, entity);
-                        _tasks[List.prototype.isPrototypeOf(entity) ? 'lists' : 'tasks'].toUpdate.push(conf);
+                        conf.postRequestAction = _postRequestActions[isOfListType ? 'updateList' : 'updateTask'].bind(null, entity);
+                        _tasks[isOfListType ? 'lists' : 'tasks'].toUpdate.push(conf);
                         break;
                     case _actions.MOVE:
                         //TODO: no MOVE for lists
-                        conf.postRequestAction = _postRequestActions[List.prototype.isPrototypeOf(entity) ? 'updateList' : 'updateTask'].bind(null, entity);
-                        _tasks[List.prototype.isPrototypeOf(entity) ? 'lists' : 'tasks'].toMove.push(conf);
+                        conf.postRequestAction = _postRequestActions[isOfListType ? 'updateList' : 'updateTask'].bind(null, entity);
+                        _tasks[isOfListType ? 'lists' : 'tasks'].toMove.push(conf);
                         break;
                 }
             },
@@ -170,19 +195,17 @@
              */
             processCollection = function (collection) {
                 try {
-                    var syncAction,
-                        List = require('./entities/List'),
-                        Task = require('./entities/Task'); //TODO
+                    var syncAction;
                     collection.each(function (entity) {
                         syncAction = entity.get("_syncAction");
                         if (syncAction) {
                             _createTask(entity, syncAction);
                             //console.debug("SynchronizationManager: task created", entity, syncAction);
                         }
-                        if (List.prototype.isPrototypeOf(entity)) {
+                        if (EntitiesRegistry.isEntityType('list', entity)) {
                             processCollection(entity.tasks);
                         }
-                        if (Task.prototype.isPrototypeOf(entity)) {
+                        if (EntitiesRegistry.isEntityType('task', entity)) {
                             processCollection(entity.children);
                         }
                     });
@@ -214,6 +237,9 @@
                 })
                 .then(function () {
                     return _makeRequest(_tasks.tasks.toUpdate.reverse());
+                })
+                .catch(function (error) {
+                    console.debug('Synchronization encountered an error and was aborted', error);
                 });
         };
     };
@@ -230,14 +256,24 @@
     }
 
     function _synchronize() {
+        if (!ConnectivityManager.isOnline()) {
+            console.debug('SynchronizationManager.synchronize: won\'t start because application is offline');
+            return Promise.reject('SynchronizationManager.synchronize: won\'t start because application is offline');
+        }
         collectData();
-        return Promise.all(_queues.map(function (queue) {
-            return queue.run();
-        })).catch(function (e) {
-            console.error('SynchronizationManager.synchronize:', e);
-            throw e;
-        });
+        return Promise.all(_queues.map(function (queue) {return queue.run();}))
+            .then(function () {
+                console.debug('SynchronizationManager.synchronize: completed');
+            })
+            .catch(function (e) {
+                console.error('SynchronizationManager.synchronize:', e);
+                throw e;
+            });
     }
+
+    ConnectivityManager.onOnline = function () {
+        return _synchronize();
+    };
 
     module.exports = {
         synchronize: _synchronize,

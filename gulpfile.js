@@ -9,6 +9,7 @@ var buffer = require('vinyl-buffer');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
 var gutil = require('gulp-util');
+var zip = require('gulp-zip');
 
 var webserver = require('gulp-webserver');
 
@@ -20,6 +21,11 @@ function bundle() {
     });
     //b = watchify(b);
     b.transform('brfs');
+
+    //TODO: fires twice
+    b.on('bundle', function () {
+        gutil.log('Bundle compiled');
+    });
 
     return b.bundle()
         .pipe(source('./bundle.js'))
@@ -44,7 +50,7 @@ gulp.task('watch', function () {
     //});
 });
 
-gulp.task('dev', ['watch'], function () {
+gulp.task('server', function () {
     return gulp.src('.')
         .pipe(webserver({
             livereload: false,
@@ -53,3 +59,18 @@ gulp.task('dev', ['watch'], function () {
             directoryListing: false
         }));
 });
+
+gulp.task('package', function () {
+    gulp.src(['build/bundle.js', 'build/bundle.js.map', 'css/*.css', 'fonts/**/*', 'icons/**/*', 'images/**/*', 'style/**/*', 'style_unstable/**/*', '!js', './*.html', './*.css', './*.json', './manifest.webapp', 'WHATSNEW', './*.appcache'], {base: '.'})
+        .pipe(zip('package.zip', {compress: true}))
+        .pipe(gulp.dest('.'));
+});
+
+gulp.task('out', ['build'], function () {
+    gulp.src(['build/bundle.js', 'build/bundle.js.map', 'css/*.css', 'fonts/**/*', 'icons/**/*', 'images/**/*', 'style/**/*', 'style_unstable/**/*', 'js/**/*', './*.html', './*.css', './*.json', './manifest.webapp', 'WHATSNEW', './*.appcache'], {base: '.'})
+        .pipe(gulp.dest('./build/package'));
+});
+
+gulp.task('dev', ['server', 'watch']);
+
+gulp.task('release', ['package']);

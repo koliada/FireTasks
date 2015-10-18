@@ -60,33 +60,31 @@
         constants.TASKS_LIST_ELEMENT.scrollToTop();
     }
 
+    function _setSyncBtnAnimation(enable) {
+        constants.BTN_SYNC_ELEMENT.classList[enable ? 'add' : 'remove']('rotate');
+    }
+
     function _onSyncClick() {
+        _setSyncBtnAnimation(true);
         console.time('Complete reload and synchronization');
-        AccountsCollection.getAccounts().refresh()
+        return SynchronizationManager.synchronize()
             .then(function () {
-                //return SynchronizationManager.synchronize(); // TODO: no sense since storage is overridden
-                return Promise.resolve();
+                return AccountsCollection.getAccounts().refresh();
             })
             .then(ActiveListManager.init)
             .then(function () {
                 console.timeEnd('Complete reload and synchronization');
+                _setSyncBtnAnimation(false);
             })
             .catch(function (e) {
+                _setSyncBtnAnimation(false);
                 throw new Error('Synchronization failed', e);
             });
     }
 
     function _onTaskListActionsClick() {
-        var dialog = new TaskListActionsDialog();
-        //TODO: remove inline require
-        require('./ActiveListManager').list().then(function (list) {
-            dialog.onSortTasks = function () {
-                list.tasks.showSortDialog();
-            };
-            dialog.onShareTasks = function () {
-                list.tasks.share();
-            };
-            dialog.show();
+        ActiveListManager.list().then(function (list) {
+            TaskListActionsDialog.show(list);
         });
     }
 

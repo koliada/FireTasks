@@ -169,10 +169,9 @@
     <ul></ul>
 </script>
 <script id="list-template" type="text/x-mustache-template">
-    <li class="list-item {{#selected}}list-selected{{/selected}}" {{#isDeleted}}style="display: none;{{/isDeleted}}">
+    <li class="list-item {{#selected}}list-selected{{/selected}}">
         <a draggable="false" oncontextmenu="return(false);"
-           data-id="{{{getId}}}"
-           data-account-id="account.getId">{{{getName}}}</a>
+           data-id="{{{getId}}}">{{{getName}}}</a>
     </li>
 </script>
 <script id="task-template" type="text/x-mustache-template">
@@ -456,14 +455,10 @@
         </menu>
     </form>
 </section>
-<section id="list-actions" data-position="back" class="fullscreen">
+<section id="actions" data-position="back" class="fullscreen">
     <form role="dialog" data-type="action">
-        <header>Task List</header>
-        <menu>
-            <button id="btn-rename-list" class="prevent-default">Rename task list</button>
-            <button id="btn-delete-list" class="prevent-default">Delete task list</button>
-            <button class="prevent-default">Cancel</button>
-        </menu>
+        <header>Actions List</header>
+        <menu></menu>
     </form>
 </section>
 <section id="tasks-move-to" data-position="back" class="fullscreen">
@@ -484,28 +479,6 @@
         </section>
         <menu>
             <button id="btn-start-import" class="full prevent-default" disabled="disabled">Cancel</button>
-        </menu>
-    </form>
-</section>
-<section id="tasks-actions" data-position="back" class="fullscreen">
-    <form role="dialog" data-type="action">
-        <header>Tasks Actions</header>
-        <menu>
-            <button id="btn-sort-tasks" class="prevent-default">Sort mode</button>
-            <button id="btn-share-tasks" class="prevent-default" disabled="disabled">Export task list</button>
-            <button class="prevent-default">Cancel</button>
-        </menu>
-    </form>
-</section>
-<section id="tasks-sort-mode" data-position="back" class="fullscreen">
-    <!-- TODO: use radio group -->
-    <form role="dialog" data-type="action">
-        <header>Set sort mode</header>
-        <menu>
-            <button id="btn-sort-tasks-my-order" class="prevent-default">My order</button>
-            <button id="btn-sort-tasks-alphabetical" class="prevent-default">Alphabetical (experimental)</button>
-            <button id="btn-sort-tasks-due-date" class="prevent-default" disabled="disabled">Due date</button>
-            <button class="prevent-default">Cancel</button>
         </menu>
     </form>
 </section>

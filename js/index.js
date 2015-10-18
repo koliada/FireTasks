@@ -1,8 +1,8 @@
 (function () {
     "use strict";
 
-    var app = require('./app'),
-        ga = require('./google-analytics');
+    var app = require('./app');
+    //require('./google-analytics');
 
     // It's testem port, do not launch app
     if (location.port === '7357') {

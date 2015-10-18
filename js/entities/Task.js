@@ -2,6 +2,7 @@
     "use strict";
 
     var BasicEntity = require('./BasicEntity'),
+        EntitiesRegistry = require('./EntitiesRegistry'),
         TaskView = require('../views/TaskView'),
         SynchronizationManager = require('../SynchronizationManager'),
         TaskListSortModeManager = require('../TaskListSortModeManager'),
@@ -21,12 +22,12 @@
             delete taskData.notes;
         }
 
-        this.super.apply(this, arguments);
+        this.superclass.apply(this, arguments);
 
         this.collection = tasksCollection;
         this.account = this.collection.account;
         this.view = new TaskView(this/*, this.collection.parent ? this.collection.parent.view.getChildrenContainer() : ViewManager.getTasksContainer()*/);
-        this.children = new tasksCollection.constructor(this.collection.list, [], this);
+        this.children = new tasksCollection.constructor(this.getList(), [], this);
         this.inEditMode = false;
         this.snapshot = null;
 
@@ -46,8 +47,6 @@
                 return _selected;
             };
         }(this));
-
-        return this;
     };
 
     utils.inherits(Task, BasicEntity);
@@ -65,21 +64,21 @@
                         status: instance.get('status'),
                         notes: instance.getNotes()
                     },
-                    urlParams: [instance.collection.list.getId(), instance.get('parent') || null, instance.get('previous') || null]
+                    urlParams: [instance.getList().getId(), instance.get('parent') || null, instance.get('previous') || null]
                 };
                 break;
             case SynchronizationManager.actions.DELETE:
                 return {
                     proxy: instance.collection.proxy,
                     method: "remove",
-                    urlParams: [instance.collection.list.getId(), instance.getId()]
+                    urlParams: [instance.getList().getId(), instance.getId()]
                 };
                 break;
             case SynchronizationManager.actions.UPDATE:
                 return {
                     proxy: instance.collection.proxy,
                     method: "update",
-                    urlParams: [instance.collection.list.getId(), instance.getId()],
+                    urlParams: [instance.getList().getId(), instance.getId()],
                     data: instance._toRequest()
                 };
                 break;
@@ -87,7 +86,7 @@
                 return {
                     proxy: instance.collection.proxy,
                     method: "move",
-                    urlParams: [instance.collection.list.getId(), instance.getId(), instance.get('parent') || null, instance.get('previous') || null]
+                    urlParams: [instance.getList().getId(), instance.getId(), instance.get('parent') || null, instance.get('previous') || null]
                 };
                 break;
         }
@@ -108,14 +107,24 @@
                     .then(instance.view.update.bind(instance.view));
                 break;
             case SynchronizationManager.actions.DELETE:
+                var list = this.getList();
                 instance.collection.remove(instance);
-                return instance.save();
+                return list.save();
                 break;
-            case SynchronizationManager.actions.UPDATE: //TODO
+            case SynchronizationManager.actions.UPDATE:
                 instance.set('_syncAction', undefined);
                 return instance.save();
                 break;
         }
+    };
+
+    // 404 on task requests means that list does not exist
+    Task.prototype.onNotFound = function () {
+        return this.getList().onNotFound();
+    };
+
+    Task.prototype.getList = function () {
+        return this.collection.list;
     };
 
     Task.prototype.hasNotes = function () {
@@ -253,7 +262,7 @@
     };
 
     Task.prototype.save = function () {
-        return this.collection.list.save();
+        return this.getList().save();
     };
 
     Task.prototype._fromForm = function (data) {
@@ -303,23 +312,22 @@
             return this.moveToList(data.list);
         }
 
-        var self = this,
-            dataKeys = Object.keys(data),
+        var dataKeys = Object.keys(data),
             isMarkCompletedTask = dataKeys.length === 1 && dataKeys[0] === 'completed';
 
         data._syncAction = SynchronizationManager.actions.UPDATE;
         this._fromForm(data);
 
-        return new Promise(function (resolve, reject) {
-            self.save().then(function () {
-                if (isMarkCompletedTask) {
-                    self.view.markCompleted();
-                } else {
-                    self.view.update();
-                }
-                return SynchronizationManager.synchronize();
-            }).then(resolve).catch(reject);
-        });
+        return this.save().then(function () {
+            if (isMarkCompletedTask) {
+                this.view.markCompleted();
+            } else if (TaskListSortModeManager.isAlphabetical()) {
+                this.collection.list.view.renderTasks();
+            } else {
+                this.view.update();
+            }
+            return SynchronizationManager.synchronize();
+        }.bind(this));
     };
 
     Task.prototype.remove = function (doNotSave) {
@@ -420,6 +428,8 @@
 
         return Promise.resolve();
     };
+
+    EntitiesRegistry.registerEntityType('task', Task);
 
     module.exports = Task;
 

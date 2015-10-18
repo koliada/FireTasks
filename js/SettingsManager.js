@@ -7,6 +7,7 @@
         AccountSettingsDialog = require('./dialogs/AccountSettingsDialog'),
         AboutDialog = require('./dialogs/AboutDialog'),
         ActiveListManager = require('./ActiveListManager'),
+        ConnectivityManager = require('./ConnectivityManager'),
         utils = require('./utils'),
         _$ = require('./DomHelper');
 
@@ -171,6 +172,10 @@
     ];
 
     function _onAddAccount() {
+        if (!ConnectivityManager.isOnline()) {
+            utils.status.show('You are offline so it is impossible to add an account');
+            return;
+        }
         return AccountsCollection.getAccounts().add().then(function (account) {
             if (account.added()) {
                 return _populateCache()

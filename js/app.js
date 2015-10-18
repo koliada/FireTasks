@@ -6,10 +6,6 @@
         actions = {
             'MAIN_QUEUE': 'mainQueue'
         },
-        entityTypes = {
-            LIST: 'list',
-            TASK: 'task'
-        },
         syncCalled = false,
         isOnline = true,
         refreshInterval = null,
@@ -18,10 +14,6 @@
             LIST_CREATED: 'list-created',
             TASK_CREATED: 'task-created'
         },
-    //syncCallbacks = {
-    //	'list-created': List.listCreatedCallback,
-    //	'task-created': Task.taskCreatedCallback
-    //},
         unrecoverableErrorOccurred,
         accounts;
 
@@ -36,17 +28,6 @@
             checkInstructionalOverlay();
             setupStartupSynchronization();
         });
-
-        window.addEventListener('online', function (e) {
-            logger.info('Connection is ONLINE');
-            updateConnectionStatus(true);
-            EV.fire('connection-online');
-        }, false);
-        window.addEventListener('offline', function (e) {
-            logger.info('Connection is OFFLINE');
-            updateConnectionStatus(false);
-            EV.fire('connection-offline');
-        }, false);
 
         $(document).on('click', '.prevent-default', function (ev) {
             ev.preventDefault();
@@ -83,6 +64,10 @@
 
     function initGO2() {
         require('./lib/google-oauth2');
+    }
+
+    function initPromise() {
+        require('es6-promise').polyfill();
     }
 
     /**
@@ -509,120 +494,6 @@
             Sync.resume(actions.MAIN_QUEUE);
         },
 
-        // TODO: move labels outside and simplify. Damn, just refactor this shit.
-        // there’s nothing so permanent as temporary
-        /**
-         * Handles setup sequence
-         */
-        runSetup: function () {
-            var setupForm = $('#setup'),
-                lblDescription = setupForm.find('span.description').first(),
-                lblDescriptionOldValue = lblDescription.html(),
-                progress = setupForm.find('progress').first(),
-                status = setupForm.find('span[role="status"] span'),
-                btnStart = $('#btn-start-import'),
-                btnStartOldValue = btnStart.html();
-
-            function onFinish(lists) {
-                List.storage.set(lists, function () {
-                    lblDescription.html('Successful!');
-                    FT.toggleSidebar(true);
-                    btnStart.html('Go to app').prop('disabled', false).off().on('click', function () {
-                        List.loadData();
-                        setupForm.removeClass('fade-in').addClass('fade-out');
-                        showInstructionalOverlay();
-                        lblDescription.html(lblDescriptionOldValue);
-                        progress.val(0);
-                        status.html('0');
-                        btnStart.html(btnStartOldValue);
-                    });
-                });
-            }
-
-            FT.toggleSidebar();
-
-            FT.preventStartupSync();
-            FT.stopAutoFetch();
-
-            setupForm.removeClass('fade-out').addClass('fade-in');
-
-            // Start button
-            btnStart.prop('disabled', false);
-            btnStart.off().on('click', function () {
-                btnStart.prop('disabled', true);
-                progress.addClass('pack-activity');
-                lblDescription.html('loading lists...');
-
-                // Fetching lists
-                List.getList(function (lists) {
-                    progress.removeClass('pack-activity');
-
-                    if (lists.length > 0) {
-                        var delim = 100 / lists.length,
-                            curStatus = 0;
-                        lblDescription.html('loading tasks...');
-
-                        // Fetching tasks for each list
-                        for (var i = 0; i < lists.length; i++) {
-                            (function (i) {
-                                Task.getList(lists[i], function (list, tasks) {
-                                    lists[i].tasks = tasks;
-                                    curStatus += delim;
-                                    progress.val(curStatus);
-                                    status.html(curStatus.toFixed(0));
-                                    if (curStatus >= 100) {
-                                        onFinish(lists);
-                                    }
-                                }, false);
-                            }(i));
-                        }
-                    }
-                });
-            });
-        },
-
-        hideSetup: function () {
-            $('#setup').removeClass('fade-in').addClass('fade-out');
-        },
-
-        /**
-         * Loads all data from the server
-         * Refreshes views at the end
-         * @param {Function} [callback] Callback to be called after all data is fetched
-         */
-        loadAll: function (callback) {
-            var processed = 0,
-                timeStart = (new Date()).getTime();
-            logger.info('loadAll(): synchronization started');
-            FT.stopAutoFetch();
-            Auth.dataCalculation.start();
-            Task.view.toggleProgress(true);
-            List.getList(function (lists) {
-                if (lists.length > 0) {
-                    for (var i = 0; i < lists.length; i++) {
-                        (function (i) {
-                            Task.getList(lists[i], function (list, tasks) {
-                                lists[i].tasks = tasks;
-                                if (processed++ === lists.length - 1) {
-                                    List.view.toggleProgress(false);
-                                    Task.view.toggleProgress(false);
-                                    List.storage.set(lists, function () {
-                                        logger.info('loadAll(): synchronization completed, time: ' + ((new Date()).getTime() - timeStart).toString() + ' ms, data transferred: ' + Auth.dataCalculation.getValue() + ' bytes');
-                                        //Task.view.getSortModeManager().isMyOrder() && Task.view.getListEl().sortable('destroy');
-                                        var list = List.getLastActive();
-                                        delete list.tasks; // triggers refresh from storage
-                                        EV.fire('list-selected', list); // updates last active
-                                        EV.fire('lists-loaded', lists); // triggers lists view re-render and tasks load
-                                        callback && callback(lists);
-                                    });
-                                }
-                            }, false);
-                        }(i));
-                    }
-                }
-            });
-        },
-
         /**
          * Fires on ERROR CODE 404
          * Tells entities to remove corresponding item
@@ -784,7 +655,8 @@
         SettingsManager = require('./SettingsManager'),
         TaskListSortModeManager = require('./TaskListSortModeManager'),
         ActiveListManager = require('./ActiveListManager'),
-        EditMode = require('./EditMode');
+        EditMode = require('./EditMode'),
+        ConnectivityManager = require('./ConnectivityManager');
 
     /**
      * Main application object
@@ -799,7 +671,8 @@
 
         initjQuery();
         initGO2();
-        updateConnectionStatus();
+        initPromise();
+        //updateConnectionStatus();
         showLogo();
         updateVersion();
         setVersionLabels();
@@ -807,6 +680,7 @@
         logger.level('INFO');
         patchOptions();
         initStorage();
+        ConnectivityManager.init();
         setListeners();
         //initSync();
 

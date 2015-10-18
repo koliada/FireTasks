@@ -15,9 +15,7 @@
     var BasicEntity = function (collection, data) {
         this.collection = collection;
         this.data = data || {};
-        this.deleted = this.get("_syncAction") === SynchronizationManager.actions.DELETE;
-
-        return this;
+        this.deleted = this.get('_syncAction') === SynchronizationManager.actions.DELETE || this.get('deleted') === true;
     };
 
     /**

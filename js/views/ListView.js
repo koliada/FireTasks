@@ -16,6 +16,7 @@
 
     ListView.prototype.setActive = function (active) {
         this.domElements[0].classList[active ? 'add' : 'remove'](constants.ACTIVE_LIST_ITEM_CLASS);
+        return this;
     };
 
     ListView.prototype.onClick = function () {
@@ -45,14 +46,16 @@
     };
 
     //TODO: List view is not the obvious place for this
-    ListView.prototype.renderTasks = function () {
+    ListView.prototype.renderTasks = function (showDeleted) {
         console.time('renderTasks');
         constants.TASKS_LIST_ELEMENT.innerHTML = '';
         constants.TASKS_LIST_ELEMENT.scrollToTop();
 
         var fragment = document.createDocumentFragment();
         this.instance.tasks.getSorted().each(function (task) {
-            fragment.appendChild(task.view.prepareTaskFragment());
+            if (showDeleted ? task.isDeleted() : !task.isDeleted()) {
+                fragment.appendChild(task.view.prepareTaskFragment());
+            }
         });
         constants.TASKS_LIST_ELEMENT.appendChild(fragment);
         console.timeEnd('renderTasks');
@@ -63,7 +66,6 @@
         this.destroy();
         this.renderTemplate();
         this.render();
-
         return this;
     };
 
