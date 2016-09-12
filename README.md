@@ -2,6 +2,8 @@
 <img src="https://raw.github.com/koliada/FireTasks/gh-pages/images/logo.png" alt="logo">
 </p>
 
+_Discontinue notice:_ Due to Mozilla's decision to give up [Firefox OS for mobile phones](https://discourse.mozilla-community.org/t/firefox-os-connected-devices-announcement/6864), this project is not going to be developed anymore. During 2015 I was redoing the app from scratch in [0.8-dev](https://github.com/koliada/FireTasks/tree/0.8-dev) branch and it was pretty close to finish. Feel free to check it out and contribute.
+
 Fire Tasks
 ============
 
